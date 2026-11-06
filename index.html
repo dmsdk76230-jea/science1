@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>중1 과학 디지털 탐구실 & 반별 학급 마당</title>
+  <!-- Google Fonts & Tailwind CSS CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase 실시간 데이터베이스 SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <!-- 기본 백업 데이터 파일 -->
+  <script src="data.js"></script>
+  <style>
+    body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+  <!-- ==========================================
+       학생 내 실명 등록 모달 (실시간 DB 저장)
+  =========================================== -->
+  <div id="studentProfileModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl">
+      <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+        👤
+      </div>
+      <h3 class="text-lg font-black text-slate-900 text-center">내 실명 등록하기</h3>
+      <p class="text-xs text-slate-500 text-center mt-1 mb-5">반, 번호, 이름을 등록하면 선생님 화면과 친구들 화면에 실시간으로 등록됩니다!</p>
+
+      <form onsubmit="saveStudentProfile(event)" class="space-y-3.5 text-xs font-semibold">
+        <div>
+          <label class="block text-slate-600 mb-1">우리 반 선택</label>
+          <select id="myClassInput" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold">
+            <option value="class1">1학년 1반</option>
+            <option value="class2">1학년 2반</option>
+            <option value="class3">1학년 3반</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">내 출석 번호</label>
+          <input type="number" id="myNumInput" min="1" max="35" required placeholder="예: 7" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">내 이름 (실명)</label>
+          <input type="text" id="myNameInput" required placeholder="예: 홍길동" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3">
+          <button type="button" onclick="closeStudentProfileModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">취소</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow">실시간 등록 완료</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 상단 네비게이션 헤더 -->
+  <header class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 sm:px-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xl shadow-inner">
+            🔬
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base sm:text-lg font-bold tracking-tight">중1 과학 디지털 탐구실</h1>
+              <span id="syncBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] font-bold">● 실시간 연결됨</span>
+            </div>
+            <p class="text-[11px] text-slate-300">인터랙티브 탐구 & 반별 실시간 학급 마당</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="openStudentProfileModal()" id="myProfileBadge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 text-xs font-bold border border-blue-400/30 transition-all">
+            <span>👤 내 이름 등록하기</span>
+          </button>
+          <nav class="flex items-center gap-1.5 text-xs font-semibold">
+            <a href="#simulations" class="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-blue-600 text-white transition-all whitespace-nowrap">📚 탐구실</a>
+            <a href="#class-section" class="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold transition-all whitespace-nowrap shadow-sm">🏫 우리 반 마당</a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- 메인 본문 -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8 sm:px-6 space-y-16">
+
+    <!-- 학생 환영 배너 -->
+    <div id="welcomeBanner" class="hidden bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-4 text-white shadow-md flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">👋</span>
+        <div>
+          <h2 class="text-sm font-bold" id="welcomeText">반가워요!</h2>
+          <p class="text-xs text-blue-100">오늘도 즐겁게 과학을 탐구해 봅시다. 아래에서 우리 반 현황을 확인하세요!</p>
+        </div>
+      </div>
+      <button onclick="openStudentProfileModal()" class="text-xs px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white font-semibold">
+        이름 수정
+      </button>
+    </div>
+
+    <!-- ==========================================
+         PART 1. 단원별 탐구 학습실 (시뮬레이션, 학습지, 외부링크)
+    =========================================== -->
+    <section id="simulations" class="space-y-6">
+      <div class="border-b border-slate-200 pb-3">
+        <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+          <span>📚 단원별 탐구 학습실</span>
+        </h2>
+        <p class="text-xs text-slate-500 mt-0.5">시뮬레이션을 직접 조작하고, 학습지 PDF 및 참고 영상 자료를 확인하세요.</p>
+      </div>
+      <div id="unitsContainer" class="space-y-8"></div>
+    </section>
+
+
+    <!-- ==========================================
+         PART 2. 반별 전용 학급 마당 (도장 + 제출 + 수행평가)
+    =========================================== -->
+    <section id="class-section" class="scroll-mt-20 space-y-6">
+      <!-- 반 선택 대형 탭 -->
+      <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold mb-1 border border-indigo-200">
+            <span>🏫 우리 반 전용 마당</span>
+          </div>
+          <h3 class="text-lg font-black text-slate-900">1학년 반별 탐구 & 과제 현황실</h3>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 bg-slate-100 p-1.5 rounded-2xl" id="classTabs">
+          <button onclick="selectClass('class1')" id="tabBtn-class1" class="py-2.5 px-4 rounded-xl font-black text-xs transition-all bg-white text-indigo-600 shadow-sm">
+            1학년 1반
+          </button>
+          <button onclick="selectClass('class2')" id="tabBtn-class2" class="py-2.5 px-4 rounded-xl font-black text-xs transition-all text-slate-600 hover:text-slate-900">
+            1학년 2반
+          </button>
+          <button onclick="selectClass('class3')" id="tabBtn-class3" class="py-2.5 px-4 rounded-xl font-black text-xs transition-all text-slate-600 hover:text-slate-900">
+            1학년 3반
+          </button>
+        </div>
+      </div>
+
+      <!-- 선택된 반의 통합 현황 컨테이너 -->
+      <div id="classDashboardContainer" class="space-y-6">
+        <!-- 1. 우리 반 도장 카드 -->
+        <div id="classStampCard" class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-white/20 text-amber-100" id="currentClassName">1학년 1반</span>
+              <span id="rankBadge" class="text-xs font-black px-2 py-0.5 rounded-full bg-amber-300 text-slate-900 hidden">👑 1등 반</span>
+            </div>
+            <h4 class="text-2xl font-black tracking-tight" id="classMottoText">"열정 가득 1반! 🔥"</h4>
+            <p class="text-xs text-amber-100 mt-1">성실한 수업 참여와 탐구 활동으로 모은 우리 반의 소중한 도장입니다.</p>
+          </div>
+          <div class="relative z-10 bg-white/20 backdrop-blur-md rounded-2xl p-4 sm:p-5 text-center flex-shrink-0 min-w-[140px] border border-white/20">
+            <span class="text-xs font-bold text-amber-100 block">현재 획득 도장</span>
+            <div class="flex items-baseline justify-center gap-1 my-1">
+              <span class="text-4xl font-black" id="classStampCount">0</span>
+              <span class="text-xs font-bold text-amber-200">개</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. 우리 반 도장판 제출 현황 -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h4 class="font-black text-slate-900 text-base flex items-center gap-2">
+                <span>📋 도장판 제출 현황판</span>
+              </h4>
+              <p class="text-xs text-slate-500 mt-0.5">회차별(1~5회) 도장판 제출 여부를 확인하세요.</p>
+            </div>
+
+            <!-- 1회~5회차 탭 -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+              <button onclick="selectRound(1)" id="roundBtn-1" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-sm">1회차</button>
+              <button onclick="selectRound(2)" id="roundBtn-2" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">2회차</button>
+              <button onclick="selectRound(3)" id="roundBtn-3" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">3회차</button>
+              <button onclick="selectRound(4)" id="roundBtn-4" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">4회차</button>
+              <button onclick="selectRound(5)" id="roundBtn-5" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">5회차</button>
+            </div>
+          </div>
+
+          <!-- 제출률 프로그레스 바 -->
+          <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
+              <span id="submissionStatsText">제출 현황 계산 중...</span>
+              <span class="text-emerald-600 font-semibold">성실한 제출 칭찬합니다 👍</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+              <div id="submissionProgressBar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- 학생 카드 그리드 -->
+          <div id="studentsGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2.5"></div>
+        </div>
+
+        <!-- 3. 우리 반 수행평가 일정 & D-Day 알리미 -->
+        <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-6 text-white shadow-xl space-y-4">
+          <div class="border-b border-white/10 pb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-rose-500/20 text-rose-300 rounded-full text-[11px] font-bold mb-1 border border-rose-500/30">
+              <span>📅 우리 반 D-Day</span>
+            </div>
+            <h4 class="text-base font-extrabold text-white">우리 반 수행평가 일정 알리미</h4>
+          </div>
+          <div id="classAssessmentList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 하단 푸터 -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-20">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="font-semibold text-slate-700">중학교 1학년 과학 디지털 학습실 & 반별 학급 마당</p>
+      <a href="admin.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors font-medium text-[11px]">
+        <span>⚙️ 선생님 전용 관리실</span>
+      </a>
+    </div>
+  </footer>
+
+
+  <!-- 자바스크립트 로직 -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDG8ohuujmhvB76PF5IDQ7oBaHhfQg9Sas",
+      authDomain: "myscience-512dc.firebaseapp.com",
+      projectId: "myscience-512dc",
+      storageBucket: "myscience-512dc.firebasestorage.app",
+      messagingSenderId: "937703615607",
+      appId: "1:937703615607:web:e93b5c2c52dccb772a2a72",
+      measurementId: "G-KGLKMC1V3Q",
+      databaseURL: "https://myscience-512dc-default-rtdb.firebaseio.com"
+    };
+
+    let appData = DASHBOARD_DATA;
+    let firebaseDb = null;
+
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      firebaseDb = firebase.database();
+
+      firebaseDb.ref('science_dashboard').on('value', snapshot => {
+        const val = snapshot.val();
+        if (val) {
+          appData = val;
+          renderAll();
+        }
+      });
+    } catch (e) {
+      console.warn('Firebase error', e);
+      document.getElementById('syncBadge').innerText = '● 로컬 모드';
+      document.getElementById('syncBadge').className = 'px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-300 border border-slate-400/30 text-[10px] font-bold';
+    }
+
+    let myProfile = { class: '', num: '', name: '' };
+    try {
+      const savedProf = localStorage.getItem('STUDENT_MY_PROFILE');
+      if (savedProf) myProfile = JSON.parse(savedProf);
+    } catch (e) {}
+
+    let currentSelectedClass = myProfile.class || 'class1';
+    let currentSelectedRound = 1;
+
+    function updateProfileUI() {
+      if (myProfile.name && myProfile.num && myProfile.class) {
+        const classNames = { class1: '1반', class2: '2반', class3: '3반' };
+        document.getElementById('myProfileBadge').innerHTML = `<span>👤 ${classNames[myProfile.class]} ${myProfile.num}번 ${myProfile.name}</span>`;
+        document.getElementById('welcomeText').innerText = `반가워요, ${classNames[myProfile.class]} ${myProfile.num}번 ${myProfile.name} 학생! 🌟`;
+        document.getElementById('welcomeBanner').classList.remove('hidden');
+      }
+    }
+
+    function openStudentProfileModal() {
+      if (myProfile.class) document.getElementById('myClassInput').value = myProfile.class;
+      if (myProfile.num) document.getElementById('myNumInput').value = myProfile.num;
+      if (myProfile.name) document.getElementById('myNameInput').value = myProfile.name;
+      document.getElementById('studentProfileModal').classList.remove('hidden');
+    }
+
+    function closeStudentProfileModal() {
+      document.getElementById('studentProfileModal').classList.add('hidden');
+    }
+
+    function saveStudentProfile(e) {
+      e.preventDefault();
+      const sClass = document.getElementById('myClassInput').value;
+      const sNum = parseInt(document.getElementById('myNumInput').value);
+      const sName = document.getElementById('myNameInput').value.trim();
+
+      myProfile = { class: sClass, num: sNum, name: sName };
+      localStorage.setItem('STUDENT_MY_PROFILE', JSON.stringify(myProfile));
+
+      if (appData.students && appData.students[sClass]) {
+        const idx = appData.students[sClass].findIndex(s => s.num === sNum);
+        if (idx !== -1) {
+          appData.students[sClass][idx].name = sName;
+          if (firebaseDb) {
+            firebaseDb.ref(`science_dashboard/students/${sClass}/${idx}/name`).set(sName);
+          }
+        }
+      }
+
+      closeStudentProfileModal();
+      updateProfileUI();
+      selectClass(sClass);
+      alert(`${sName} 학생, 실시간 등록이 완료되었습니다! 👍`);
+    }
+
+    function safeUrl(path) {
+      if (!path) return '#';
+      return encodeURI(path);
+    }
+
+    function getDDay(targetDateStr) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const target = new Date(targetDateStr);
+      target.setHours(0, 0, 0, 0);
+      const diffTime = target - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 0) return { text: "D-Day (오늘 마감!)", badge: "bg-rose-600 text-white animate-pulse" };
+      if (diffDays > 0) return { text: `D-${diffDays}`, badge: "bg-amber-400 text-slate-900" };
+      return { text: "마감 완료", badge: "bg-slate-600 text-slate-300" };
+    }
+
+    // 단원 자료 렌더링 (시뮬레이션 + 학습지 + 외부링크)
+    function renderUnits() {
+      const container = document.getElementById('unitsContainer');
+      container.innerHTML = appData.units.map(unit => {
+        // 1. 시뮬레이션
+        const simHtml = unit.simulations && unit.simulations.length > 0 ? `
+          <div class="mb-4">
+            <span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 inline-block mb-2.5">🎮 디지털 시뮬레이션</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              ${unit.simulations.map(sim => `
+                <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm hover:border-amber-400 transition-all flex flex-col justify-between">
+                  <div>
+                    <h5 class="font-bold text-slate-900 text-sm mb-1">${sim.title}</h5>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-3">${sim.desc}</p>
+                  </div>
+                  <a href="${safeUrl(sim.file)}" target="_blank" class="inline-flex items-center justify-center gap-1.5 w-full py-2 px-3 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 text-white text-xs font-bold shadow-sm transition-all">
+                    <span>시뮬레이션 실행하기</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                  </a>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : '';
+
+        // 2. 학습지
+        const docHtml = unit.worksheets && unit.worksheets.length > 0 ? `
+          <div class="mb-3">
+            <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200 inline-block mb-2.5">📄 차시별 학습지</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+              ${unit.worksheets.map(doc => `
+                <a href="${safeUrl(doc.file)}" target="_blank" class="group flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 transition-all shadow-sm">
+                  <div class="flex items-center gap-2 min-w-0 pr-2">
+                    <span class="text-slate-400 group-hover:text-emerald-600 text-xs">📄</span>
+                    <span class="text-xs font-semibold text-slate-700 group-hover:text-emerald-900 truncate">${doc.title}</span>
+                  </div>
+                  <span class="text-[11px] font-bold text-slate-400 group-hover:text-emerald-600 flex-shrink-0">열기 →</span>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        ` : '';
+
+        // 3. 외부 링크 (유튜브 영상 등)
+        const linkHtml = unit.links && unit.links.length > 0 ? `
+          <div class="pt-2 border-t border-slate-200">
+            <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 inline-block mb-2">🔗 추천 영상 & 외부 자료</span>
+            <div class="flex flex-wrap gap-2">
+              ${unit.links.map(l => `
+                <a href="${l.url}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold shadow-sm transition-colors">
+                  <span>🌐 ${l.title}</span>
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+              `).join('')}
+            </div>
+          </div>
+        ` : '';
+
+        const comingSoonHtml = unit.isComingSoon ? `
+          <div class="py-6 text-center bg-white/70 rounded-xl border border-dashed border-slate-300">
+            <span class="text-lg">🚀</span>
+            <h5 class="text-xs font-bold text-slate-700 mt-1">자료 준비 중입니다</h5>
+          </div>
+        ` : '';
+
+        return `
+          <div class="bg-slate-50/90 rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center gap-2.5 pb-3 mb-3 border-b border-slate-200">
+              <span class="text-xl p-1.5 rounded-lg bg-white shadow-sm border border-slate-200">${unit.icon}</span>
+              <div>
+                <h4 class="font-black text-sm text-slate-900">${unit.unitNum}. ${unit.title}</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">${unit.desc}</p>
+              </div>
+            </div>
+            ${simHtml}
+            ${docHtml}
+            ${linkHtml}
+            ${comingSoonHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectClass(classKey) {
+      currentSelectedClass = classKey;
+      ['class1', 'class2', 'class3'].forEach(k => {
+        const btn = document.getElementById(`tabBtn-${k}`);
+        if (k === classKey) {
+          btn.className = "py-2.5 px-4 rounded-xl font-black text-xs transition-all bg-white text-indigo-600 shadow-sm";
+        } else {
+          btn.className = "py-2.5 px-4 rounded-xl font-black text-xs transition-all text-slate-600 hover:text-slate-900";
+        }
+      });
+      renderClassDashboard();
+    }
+
+    function selectRound(r) {
+      currentSelectedRound = r;
+      [1, 2, 3, 4, 5].forEach(num => {
+        const btn = document.getElementById(`roundBtn-${num}`);
+        if (num === r) {
+          btn.className = "px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-sm";
+        } else {
+          btn.className = "px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs";
+        }
+      });
+      renderSubmissions();
+    }
+
+    function renderClassDashboard() {
+      const classInfo = appData.stamps[currentSelectedClass];
+      const classNames = { class1: '1학년 1반', class2: '1학년 2반', class3: '1학년 3반' };
+
+      document.getElementById('currentClassName').innerText = classNames[currentSelectedClass];
+      document.getElementById('classMottoText').innerText = `"${classInfo.motto || '함께 힘내자!'}"`;
+      document.getElementById('classStampCount').innerText = classInfo.count;
+
+      const maxCount = Math.max(...Object.values(appData.stamps).map(v => v.count));
+      const isLeader = classInfo.count === maxCount && classInfo.count > 0;
+      if (isLeader) {
+        document.getElementById('rankBadge').classList.remove('hidden');
+      } else {
+        document.getElementById('rankBadge').classList.add('hidden');
+      }
+
+      renderSubmissions();
+      renderClassAssessments();
+    }
+
+    function renderSubmissions() {
+      const list = appData.students[currentSelectedClass] || [];
+      const grid = document.getElementById('studentsGrid');
+      const statsText = document.getElementById('submissionStatsText');
+      const progressBar = document.getElementById('submissionProgressBar');
+      const classNames = { class1: '1반', class2: '2반', class3: '3반' };
+
+      const submittedCount = list.filter(s => s.rounds && s.rounds[currentSelectedRound]).length;
+      const totalCount = list.length;
+      const percent = totalCount > 0 ? Math.round((submittedCount / totalCount) * 100) : 0;
+
+      statsText.innerText = `${classNames[currentSelectedClass]} [${currentSelectedRound}회차] 제출: ${submittedCount} / ${totalCount}명 (${percent}%)`;
+      progressBar.style.width = `${percent}%`;
+
+      grid.innerHTML = list.map(student => {
+        const isDone = student.rounds && student.rounds[currentSelectedRound];
+        const isMe = (myProfile.class === currentSelectedClass && myProfile.num === student.num);
+        const displayName = (isMe && myProfile.name) ? myProfile.name : student.name;
+
+        return `
+          <div class="p-2.5 rounded-xl border flex flex-col justify-between text-xs transition-all ${isMe ? 'ring-2 ring-blue-500 bg-blue-50/60 shadow-md' : ''} ${isDone ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 border-slate-200 text-slate-400'}">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-black text-[12px] ${isMe ? 'text-blue-700' : 'text-slate-800'}">${student.num}번</span>
+              ${isMe ? '<span class="text-[9px] bg-blue-500 text-white px-1.5 py-0.2 rounded font-black">나</span>' : ''}
+            </div>
+            <div class="truncate text-[11px] font-medium text-slate-600 mb-1.5">
+              ${displayName}
+            </div>
+            <span class="text-[10px] self-start px-1.5 py-0.5 rounded font-bold ${isDone ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'}">
+              ${isDone ? '✅ 제출완료' : '⏳ 미제출'}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderClassAssessments() {
+      const container = document.getElementById('classAssessmentList');
+      const curNumStr = currentSelectedClass.replace('class', '');
+
+      const list = appData.assessments.filter(item => {
+        return item.target.includes('전체') || item.target.includes(`${curNumStr}반`);
+      });
+
+      if (list.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 col-span-2 py-4 text-center">예정된 수행평가 일정이 없습니다.</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map(item => {
+        const dday = getDDay(item.dueDate);
+        return `
+          <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">${item.unit}</span>
+                <span class="text-xs font-black px-2 py-0.5 rounded-lg ${dday.badge}">${dday.text}</span>
+              </div>
+              <h5 class="text-sm font-bold text-white mb-1.5">${item.title}</h5>
+              <p class="text-xs text-slate-300 bg-black/20 p-2.5 rounded-xl border border-white/5 mb-3">
+                💡 ${item.notice}
+              </p>
+            </div>
+            <div class="pt-2 border-t border-white/10 text-[11px] text-slate-400 flex items-center justify-between">
+              <span>대상: ${item.target}</span>
+              <span class="text-slate-200 font-semibold">마감: ${item.dueDate}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAll() {
+      renderUnits();
+      renderClassDashboard();
+      updateProfileUI();
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>

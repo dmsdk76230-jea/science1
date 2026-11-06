@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>비열 비교 대항전 (학생용)</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            touch-action: none;
+        }
+        h1 { color: #1e293b; margin-bottom: 5px; font-size: 22px; text-align: center; }
+        .description {
+            color: #64748b;
+            margin-bottom: 12px;
+            text-align: center;
+            line-height: 1.4;
+            font-size: 13px;
+        }
+
+        .container-box {
+            width: 100%;
+            max-width: 750px;
+            background: #ffffff;
+            border: 3px solid #3b82f6;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 15px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .team-banner {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .team-banner h3 { margin: 0 0 4px 0; color: #1e40af; font-size: 16px; }
+        .team-banner p { margin: 0; font-size: 12px; color: #334155; }
+        
+        .random-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+        .random-btn:hover { background: #d97706; }
+        .random-btn:disabled {
+            background: #94a3b8 !important;
+            cursor: not-allowed !important;
+            box-shadow: none !important;
+        }
+
+        .game-view-container {
+            position: relative;
+            width: 100%;
+            height: 440px;
+            background: #ffffff;
+            overflow: visible;
+        }
+
+        .tanks-container {
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        .tank-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tank {
+            position: relative;
+            border: 3px solid #333;
+            border-top: none;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 0 0 6px 6px;
+            overflow: visible;
+            transition: width 0.3s;
+        }
+        .water {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            transition: height 0.05s linear;
+        }
+        .tank-info {
+            margin-top: 6px;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .target-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            border-top: 2px dashed #2563eb;
+            z-index: 10;
+        }
+        .target-label {
+            position: absolute;
+            left: -65px;
+            color: #2563eb;
+            font-weight: bold;
+            font-size: 11px;
+            transform: translateY(-50%);
+            z-index: 11;
+            background: #fff;
+            border: 1px solid #2563eb;
+            padding: 1px 5px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        #coolCup {
+            position: absolute;
+            background: #f1c40f;
+            border: 3px solid #d4ac0d;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #7d6608;
+            user-select: none;
+            z-index: 20;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transform-origin: top center;
+            transition: transform 0.1s;
+        }
+        #coolCup.scooping { transform: rotate(35deg) scale(0.95); }
+        #coolCup:active { cursor: grabbing; }
+
+        #coolStreamContainer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 15;
+            overflow: hidden;
+        }
+        .water-drop {
+            position: absolute;
+            width: 5px;
+            height: 10px;
+            background: #3498db;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: riseDrop 0.3s linear forwards;
+        }
+        @keyframes riseDrop {
+            0% { transform: translateY(0) scaleX(1); opacity: 0.9; }
+            80% { opacity: 0.9; }
+            100% { transform: translateY(var(--rise-distance)) scaleX(0.6); opacity: 0; }
+        }
+
+        .stats {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #444;
+            min-height: 25px;
+            text-align: center;
+        }
+
+        #waitingOverlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 90;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #waitingOverlay h2 { font-size: 24px; color: #38bdf8; margin: 0 0 10px 0; }
+        #waitingOverlay p { font-size: 14px; margin: 0; color: #cbd5e1; line-height: 1.5; }
+
+        #winnerOverlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.78);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #winnerOverlay h2 { font-size: 32px; color: #facc15; margin: 0 0 10px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        #winnerOverlay p { font-size: 16px; margin: 0 0 20px 0; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <h1>🏁 비열 비교 대항전</h1>
+    <div class="description">
+        선생님의 신호에 맞춰 국자로 빠르게 열을 퍼내어 10℃를 먼저 달성하는 모둠이 승리합니다!
+    </div>
+
+    <div class="container-box">
+        <div class="team-banner" id="teamBanner">
+            <h3 id="myTeamTitle">🎲 모둠 배정 대기 중</h3>
+            <p id="myTeamDesc">아래 <strong>[랜덤 선택]</strong> 버튼을 눌러 우리 모둠을 배정받으세요!</p>
+            <button class="random-btn" id="randomTeamBtn" onclick="assignRandomTeamAndCup()">🎲 랜덤 선택 (모둠 & 국자 배정)</button>
+        </div>
+
+        <div class="game-view-container" id="coolingContainer">
+            <div id="waitingOverlay">
+                <h2 id="waitingTitle">⏳ 선생님의 시작 신호를 기다리는 중...</h2>
+                <p id="waitingDesc">모둠을 먼저 배정받고 기다려주세요!</p>
+            </div>
+
+            <div id="winnerOverlay">
+                <h2 id="winnerText">🏆 WINNER: O모둠</h2>
+                <p id="winnerSubText">멋지게 수조를 먼저 식혔습니다!</p>
+            </div>
+
+            <div class="tanks-container">
+                <div class="tank-wrapper">
+                    <div class="tank" id="coolTank" style="width: 45px; height: 300px;">
+                        <div class="target-line" id="coolingTargetLine">
+                            <span class="target-label">목표(10℃)</span>
+                        </div>
+                        <div class="water" id="coolWater" style="height: 300px; background: #95a5a6;"></div>
+                    </div>
+                    <div class="tank-info">
+                        <span id="tankTitleLabel">1차: 구리 수조 (비열 0.09)</span><br>
+                        온도: <span id="coolTemp">5000</span>℃ | 퍼낸 횟수: <span id="coolCount">0</span>회
+                    </div>
+                </div>
+            </div>
+
+            <div id="coolStreamContainer"></div>
+            <div id="coolCup" style="top: 20px; left: 40px; width: 45px; height: 38px; font-size: 11px;">국자</div>
+        </div>
+
+        <div class="stats" id="coolingMessage">먼저 [랜덤 선택] 버튼을 눌러 모둠을 배정받아 주세요!</div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyACEdIJRoiA69Jkfr2bBz4JIpP6takjCcs",
+            authDomain: "specific-heat.firebaseapp.com",
+            projectId: "specific-heat",
+            storageBucket: "specific-heat.firebasestorage.app",
+            messagingSenderId: "486212694034",
+            appId: "1:486212694034:web:f6e10f2c8340512ca868cb",
+            measurementId: "G-TE8BNENGB5"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const coolCup = document.getElementById('coolCup');
+        const coolContainer = document.getElementById('coolingContainer');
+        const coolWater = document.getElementById('coolWater');
+        const coolTankEl = document.getElementById('coolTank');
+        const coolTempEl = document.getElementById('coolTemp');
+        const coolCountEl = document.getElementById('coolCount');
+        const coolMessage = document.getElementById('coolingMessage');
+        const tankTitleLabel = document.getElementById('tankTitleLabel');
+        const waitingOverlay = document.getElementById('waitingOverlay');
+        const waitingTitle = document.getElementById('waitingTitle');
+        const waitingDesc = document.getElementById('waitingDesc');
+        const winnerOverlay = document.getElementById('winnerOverlay');
+        const winnerText = document.getElementById('winnerText');
+        const randomTeamBtn = document.getElementById('randomTeamBtn');
+        const coolingTargetLine = document.getElementById('coolingTargetLine');
+        
+        let assignedTeam = null;
+        let assignedCupSize = 3;     
+        const initialMaxTemp = 5000;
+        const coolingTargetTemp = 10;
+        const coolMaxHeight = 300; 
+        let unsubscribeTeam = null;
+        let unsubscribeControl = null;
+        let isGameStarted = false;
+        let isGameOver = false;
+
+        let localTemp = initialMaxTemp;
+        let localCount = 0;
+        let pendingDrop = 0;
+        let pendingClicks = 0;
+        let batchTimer = null;
+        let winReported = false;
+
+        let currentRound = 1;
+        const roundData = {
+            1: { name: "1차: 구리 (비열 0.09)", width: 45, color: "#95a5a6", coolingRate: 75 },
+            2: { name: "2차: 철 (비열 0.11)", width: 60, color: "#d35400", coolingRate: 50 },
+            3: { name: "3차: 식용유 (비열 0.40)", width: 120, color: "#e67e22", coolingRate: 20 },
+            4: { name: "4차: 물 (비열 1.0)", width: 240, color: "#3498db", coolingRate: 8 }
+        };
+
+        const initialCoolCoolX = 40, initialCoolCoolY = 20;
+        let isCoolingDragging = false, coolOffsetX = 0, coolOffsetY = 0;
+
+        coolingTargetLine.style.bottom = Math.max(3, (coolingTargetTemp / initialMaxTemp) * coolMaxHeight) + 'px';
+
+        monitorGameControl();
+
+        function assignRandomTeamAndCup() {
+            if (assignedTeam !== null) return;
+
+            assignedTeam = Math.floor(Math.random() * 7) + 1;
+            assignedCupSize = Math.floor(Math.random() * 5) + 1; 
+
+            randomTeamBtn.disabled = true;
+            randomTeamBtn.textContent = `🔒 배정 완료 (${assignedTeam}모둠 / Lv.${assignedCupSize})`;
+
+            let dynamicWidth = 40 + (assignedCupSize * 4);
+            let dynamicHeight = 35 + (assignedCupSize * 3);
+            let dynamicFontSize = 10 + assignedCupSize;
+
+            coolCup.style.width = dynamicWidth + 'px';
+            coolCup.style.height = dynamicHeight + 'px';
+            coolCup.style.fontSize = dynamicFontSize + 'px';
+            coolCup.textContent = `Lv.${assignedCupSize} 국자`;
+
+            let bannerTitle = document.getElementById('myTeamTitle');
+            let bannerDesc = document.getElementById('myTeamDesc');
+
+            let roundInfo = roundData[currentRound];
+            bannerTitle.innerHTML = `🎉 배정 완료: <strong>[ ${assignedTeam}모둠 ]</strong> (${roundInfo.name})`;
+            bannerDesc.innerHTML = `배정된 국자 파워: 레벨 <strong>${assignedCupSize}</strong> (범위: 1~5레벨) | 목표: 10℃까지 식히기!`;
+
+            const teamDocRef = db.collection("teams").doc(`team_${assignedTeam}`);
+            teamDocRef.get().then((doc) => {
+                if (!doc.exists) {
+                    teamDocRef.set({ temp: initialMaxTemp, count: 0 });
+                }
+            });
+
+            if (unsubscribeTeam) unsubscribeTeam();
+            unsubscribeTeam = teamDocRef.onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    const serverTemp = data.temp !== undefined ? data.temp : initialMaxTemp;
+                    const serverCount = data.count || 0;
+
+                    if (serverTemp < localTemp) {
+                        localTemp = serverTemp;
+                        localCount = Math.max(localCount, serverCount);
+                        updateCoolingUI(localTemp, localCount);
+                    } else if (pendingDrop === 0 && localTemp === initialMaxTemp) {
+                        localTemp = serverTemp;
+                        localCount = serverCount;
+                        updateCoolingUI(localTemp, localCount);
+                    }
+
+                    if (serverTemp <= coolingTargetTemp && !isGameOver) {
+                        triggerLocalWin();
+                    }
+                }
+            });
+
+            if (isGameStarted) {
+                coolMessage.textContent = `🔥 [${assignedTeam}모둠] 게임 시작! 국자로 열을 퍼내어 10℃를 만드세요!`;
+            } else {
+                coolMessage.textContent = `[${assignedTeam}모둠] 배정 완료! 선생님의 시작 신호를 기다려주세요.`;
+            }
+            returnCoolCoolHome();
+        }
+
+        function monitorGameControl() {
+            const controlRef = db.collection("control").doc("gameState");
+            controlRef.get().then((doc) => {
+                if (!doc.exists) {
+                    controlRef.set({ started: false, winner: null, round: 1 });
+                }
+            });
+
+            if (unsubscribeControl) unsubscribeControl();
+            unsubscribeControl = controlRef.onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    isGameStarted = data.started;
+                    
+                    if (data.round && data.round !== currentRound) {
+                        currentRound = data.round;
+                        let info = roundData[currentRound];
+                        coolTankEl.style.width = info.width + 'px';
+                        coolWater.style.background = info.color;
+                        tankTitleLabel.textContent = info.name + " 수조";
+                    }
+
+                    if (!data.started && !data.winner) {
+                        localTemp = initialMaxTemp;
+                        localCount = 0;
+                        pendingDrop = 0;
+                        pendingClicks = 0;
+                        winReported = false;
+                        isGameOver = false;
+                        updateCoolingUI(localTemp, localCount);
+                        winnerOverlay.style.display = 'none';
+                        assignedTeam = null;
+                        randomTeamBtn.disabled = false;
+                        randomTeamBtn.textContent = "🎲 랜덤 선택 (모둠 & 국자 배정)";
+                        document.getElementById('myTeamTitle').textContent = "🎲 모둠 배정 대기 중";
+                        let info = roundData[currentRound];
+                        document.getElementById('myTeamDesc').innerHTML = `아래 <strong>[랜덤 선택]</strong> 버튼을 눌러 우리 모둠을 배정받으세요! (${info.name} - 국자 Lv.1~5)`;
+                        coolCup.style.width = "50px";
+                        coolCup.style.height = "40px";
+                        coolCup.style.fontSize = "11px";
+                        coolCup.textContent = "국자";
+                    }
+
+                    if (data.winner) {
+                        isGameOver = true;
+                        winnerText.textContent = `🏆 WINNER: ${data.winner} 승리!`;
+                        winnerOverlay.style.display = 'flex';
+                        waitingOverlay.style.display = 'none';
+                        coolMessage.textContent = `🏁 게임 종료! ${data.winner}이(가) 승리하였습니다!`;
+                    } else if (data.started) {
+                        waitingOverlay.style.display = 'none';
+                        if (assignedTeam) {
+                            coolMessage.textContent = `🔥 [${assignedTeam}모둠] 게임 시작! 국자로 열을 퍼내어 10℃를 만드세요!`;
+                        } else {
+                            coolMessage.textContent = `🔥 게임 시작! 먼저 [랜덤 선택]으로 모둠을 배정받으세요!`;
+                        }
+                    } else {
+                        waitingOverlay.style.display = 'flex';
+                        let info = roundData[currentRound];
+                        waitingTitle.textContent = `⏳ 선생님의 시작 신호를 기다리는 중... (${info.name})`;
+                        waitingDesc.textContent = `모둠 배정 후 잠시만 기다려주세요! (국자 범위: Lv.1~5, 목표: 10℃)`;
+                        if (assignedTeam) {
+                            coolMessage.textContent = `[${assignedTeam}모둠] 배정 완료! 선생님의 시작 신호를 기다려주세요.`;
+                        } else {
+                            coolMessage.textContent = `먼저 [랜덤 선택] 버튼을 눌러 모둠을 배정받아 주세요!`;
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCoolingUI(temp, count) {
+            coolTempEl.textContent = Math.round(temp);
+            coolCountEl.textContent = count;
+            
+            let heightPercent = (temp / initialMaxTemp) * coolMaxHeight;
+            if (heightPercent < 0) heightPercent = 0;
+            if (heightPercent > coolMaxHeight) heightPercent = coolMaxHeight;
+            coolWater.style.height = heightPercent + 'px';
+        }
+
+        function getClientCoords(e) {
+            if (e.touches && e.touches.length > 0) return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+            return { clientX: e.clientX, clientY: e.clientY };
+        }
+
+        coolCup.addEventListener('mousedown', startCoolingDrag);
+        document.addEventListener('mousemove', coolingDrag);
+        document.addEventListener('mouseup', endCoolingDrag);
+        coolCup.addEventListener('touchstart', startCoolingDrag, { passive: false });
+        document.addEventListener('touchmove', coolingDrag, { passive: false });
+        document.addEventListener('touchend', endCoolingDrag);
+
+        function startCoolingDrag(e) {
+            if (!isGameStarted || isGameOver) {
+                if (!isGameStarted) alert('아직 선생님의 시작 신호가 울리지 않았습니다!');
+                return;
+            }
+            if (assignedTeam === null) {
+                alert('먼저 [랜덤 선택] 버튼을 눌러 모둠을 배정받아 주세요!');
+                return;
+            }
+            isCoolingDragging = true;
+            const coords = getClientCoords(e);
+            const rect = coolCup.getBoundingClientRect();
+            coolOffsetX = coords.clientX - rect.left;
+            coolOffsetY = coords.clientY - rect.top;
+            coolCup.style.cursor = 'grabbing';
+            if (e.type === 'touchstart') e.preventDefault();
+        }
+
+        function coolingDrag(e) {
+            if (!isCoolingDragging || !isGameStarted || isGameOver) return;
+            const coords = getClientCoords(e);
+            const containerRect = coolContainer.getBoundingClientRect();
+            let x = coords.clientX - containerRect.left - coolOffsetX;
+            let y = coords.clientY - containerRect.top - coolOffsetY;
+            x = Math.max(0, Math.min(x, containerRect.width - coolCup.offsetWidth));
+            y = Math.max(0, Math.min(y, containerRect.height - coolCup.offsetHeight));
+            coolCup.style.left = x + 'px';
+            coolCup.style.top = y + 'px';
+            if (e.type === 'touchmove') e.preventDefault();
+        }
+
+        function endCoolingDrag(e) {
+            if (!isCoolingDragging) return;
+            isCoolingDragging = false;
+            coolCup.style.cursor = 'grab';
+
+            if (!isGameStarted || isGameOver) return;
+
+            const cupRect = coolCup.getBoundingClientRect();
+            const tankRect = coolTankEl.getBoundingClientRect();
+            const cupCenterX = cupRect.left + cupRect.width / 2;
+            const cupBottomY = cupRect.bottom;
+
+            if (cupCenterX >= tankRect.left && cupCenterX <= tankRect.right && cupBottomY <= tankRect.bottom + 25) {
+                scoopHeat(tankRect);
+            } else {
+                returnCoolCoolHome();
+            }
+        }
+
+        function scoopHeat(tankRect) {
+            if (!isGameStarted || isGameOver) return;
+            coolCup.classList.add('scooping');
+
+            const containerRect = coolContainer.getBoundingClientRect();
+            const cupRect = coolCup.getBoundingClientRect();
+            const startX = (cupRect.left + cupRect.width / 2) - containerRect.left;
+            const startY = cupRect.top - containerRect.top;
+            const endY = tankRect.top - containerRect.top + 40;
+            const riseDistance = endY - startY;
+
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const drop = document.createElement('div');
+                    drop.className = 'water-drop';
+                    drop.style.left = (startX + (Math.random() * 10 - 5)) + 'px';
+                    drop.style.top = (tankRect.top - containerRect.top) + 'px';
+                    drop.style.setProperty('--rise-distance', riseDistance + 'px');
+                    document.getElementById('coolStreamContainer').appendChild(drop);
+                    setTimeout(() => drop.remove(), 300);
+                }, i * 40);
+            }
+
+            let dropAmount = assignedCupSize * roundData[currentRound].coolingRate;
+
+            if (localTemp > coolingTargetTemp) {
+                localTemp = Math.max(coolingTargetTemp, localTemp - dropAmount);
+                localCount += 1;
+                updateCoolingUI(localTemp, localCount);
+            }
+
+            queueServerCooling(dropAmount);
+
+            if (localTemp <= coolingTargetTemp && !winReported) {
+                winReported = true;
+                triggerLocalWin();
+            }
+
+            setTimeout(() => {
+                coolCup.classList.remove('scooping');
+                returnCoolCoolHome();
+            }, 200);
+        }
+
+        function queueServerCooling(dropAmount) {
+            if (assignedTeam === null) return;
+            pendingDrop += dropAmount;
+            pendingClicks += 1;
+
+            if (!batchTimer) {
+                batchTimer = setTimeout(() => {
+                    flushPendingCooling();
+                }, 200);
+            }
+        }
+
+        function flushPendingCooling() {
+            if (pendingDrop === 0 || assignedTeam === null) {
+                batchTimer = null;
+                return;
+            }
+
+            const sendDrop = pendingDrop;
+            const sendClicks = pendingClicks;
+            pendingDrop = 0;
+            pendingClicks = 0;
+            batchTimer = null;
+
+            const teamDocRef = db.collection("teams").doc(`team_${assignedTeam}`);
+            
+            teamDocRef.update({
+                temp: firebase.firestore.FieldValue.increment(-sendDrop),
+                count: firebase.firestore.FieldValue.increment(sendClicks)
+            }).then(() => {
+                if (localTemp <= coolingTargetTemp && !isGameOver) {
+                    reportWinnerToServer();
+                }
+            }).catch((err) => {
+                console.error("Firestore 동기화 지연: ", err);
+            });
+        }
+
+        function reportWinnerToServer() {
+            const controlRef = db.collection("control").doc("gameState");
+            controlRef.get().then((doc) => {
+                if (doc.exists && !doc.data().winner) {
+                    controlRef.update({ winner: `${assignedTeam}모둠` });
+                }
+            });
+        }
+
+        function triggerLocalWin() {
+            isGameOver = true;
+            reportWinnerToServer();
+        }
+
+        function returnCoolCoolHome() {
+            coolCup.style.left = initialCoolCoolX + 'px';
+            coolCup.style.top = initialCoolCoolY + 'px';
+        }
+    </script>
+</body>
+</html>

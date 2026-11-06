@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>선생님 전용 관리 대시보드 | 반별 통합 관리</title>
+  <!-- Google Fonts & Tailwind CSS CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase 실시간 DB SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+  <!-- 기본 데이터 파일 -->
+  <script src="data.js"></script>
+  <style>
+    body { font-family: 'Pretendard', sans-serif; background-color: #f1f5f9; }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+  <!-- ==========================================
+       비밀번호 인증 모달 (기본 PIN: 1234)
+  =========================================== -->
+  <div id="authModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center">
+      <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+        🔒
+      </div>
+      <h3 class="text-xl font-extrabold text-slate-900">선생님 전용 관리실</h3>
+      <p class="text-xs text-slate-500 mt-1 mb-6">학생 접근 방지를 위해 관리자 암호를 입력해 주세요.<br><span class="text-indigo-600 font-semibold">(초기 암호: 1234)</span></p>
+
+      <form onsubmit="checkAuth(event)" class="space-y-4">
+        <input 
+          type="password" 
+          id="pinInput" 
+          placeholder="암호 4자리 입력..." 
+          class="w-full text-center text-2xl tracking-widest px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold"
+          maxlength="8"
+          autofocus
+        >
+        <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition-all">
+          관리자 화면 입장하기
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
+       관리자 헤더
+  =========================================== -->
+  <header class="bg-indigo-900 text-white shadow-md sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl p-1.5 rounded-xl bg-white/10">⚙️</span>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-black tracking-tight">선생님 관리 대시보드</h1>
+            <span id="syncStatusBadge" class="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">● Firebase 실시간 연동됨</span>
+          </div>
+          <p class="text-xs text-indigo-200">조작 즉시 학생들 화면에 0.5초 만에 실시간 반영됩니다!</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="openMaterialModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 text-white text-xs font-black shadow transition-all flex items-center gap-1">
+          <span>+ 자료/링크 등록하기</span>
+        </button>
+        <a href="index.html" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
+          <span>👀 학생 화면 열기</span>
+        </a>
+        <button onclick="downloadDataFile()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 text-white text-xs font-black shadow transition-all">
+          <span>💾 백업용 data.js</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ==========================================
+       관리자 메인 본문
+  =========================================== -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8 sm:px-6 space-y-8">
+
+    <!-- 반 선택 탭 -->
+    <div class="bg-white rounded-3xl p-3 sm:p-4 border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-black text-slate-800">관리할 반 선택:</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 bg-slate-100 p-1 rounded-2xl flex-1 max-w-md">
+        <button onclick="setAdminClass('class1')" id="adminClassBtn-class1" class="py-2 px-3 rounded-xl font-black text-xs transition-all bg-white text-indigo-600 shadow-sm">
+          1반 (28명)
+        </button>
+        <button onclick="setAdminClass('class2')" id="adminClassBtn-class2" class="py-2 px-3 rounded-xl font-black text-xs transition-all text-slate-600 hover:text-slate-900">
+          2반 (27명)
+        </button>
+        <button onclick="setAdminClass('class3')" id="adminClassBtn-class3" class="py-2 px-3 rounded-xl font-black text-xs transition-all text-slate-600 hover:text-slate-900">
+          3반 (27명)
+        </button>
+      </div>
+    </div>
+
+
+    <!-- 1. 해당 반 도장 개수 조작 -->
+    <section class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+          <span>🏆 <span id="stampSectionTitle">1학년 1반</span> 도장 관리</span>
+        </h3>
+        <span class="text-xs text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full font-bold">클릭 즉시 학생 폰에 반영 ⚡</span>
+      </div>
+
+      <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+        <div>
+          <span class="text-xs font-bold text-slate-500">현재 누적 도장</span>
+          <div class="flex items-center gap-3 my-1">
+            <span class="text-5xl font-black text-indigo-700" id="currentStampDisplay">0</span>
+            <span class="text-sm font-bold text-slate-500">개</span>
+          </div>
+          <div class="mt-2">
+            <input 
+              type="text" 
+              id="currentMottoInput" 
+              onchange="updateMotto(this.value)" 
+              placeholder="우리 반 응원 문구..." 
+              class="text-xs px-3 py-1.5 rounded-lg border border-slate-300 w-64 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            >
+          </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2">
+          <button onclick="changeStamp(-5)" class="py-3 px-4 rounded-xl bg-slate-200 hover:bg-rose-100 hover:text-rose-700 text-slate-700 font-bold text-sm transition-colors">-5</button>
+          <button onclick="changeStamp(-1)" class="py-3 px-4 rounded-xl bg-slate-200 hover:bg-rose-100 hover:text-rose-700 text-slate-700 font-bold text-sm transition-colors">-1</button>
+          <button onclick="changeStamp(1)" class="py-3 px-4 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-sm transition-colors shadow-sm">+1</button>
+          <button onclick="changeStamp(5)" class="py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-colors shadow-sm">+5</button>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 2. 해당 반 1~5회차 도장판 제출 관리 -->
+    <section class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4 mb-4">
+        <div>
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span>📋 <span id="subSectionTitle">1학년 1반</span> 도장판 제출 관리</span>
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">학생 카드를 <strong>클릭</strong>하면 제출(초록) / 미제출(회색) 상태가 실시간으로 바뀝니다.</p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="flex items-center gap-1">
+            <button onclick="setAdminRound(1)" id="adminRound-1" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-xs shadow-sm">1회차</button>
+            <button onclick="setAdminRound(2)" id="adminRound-2" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">2회차</button>
+            <button onclick="setAdminRound(3)" id="adminRound-3" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">3회차</button>
+            <button onclick="setAdminRound(4)" id="adminRound-4" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">4회차</button>
+            <button onclick="setAdminRound(5)" id="adminRound-5" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">5회차</button>
+          </div>
+          <button onclick="toggleAllStudents(true)" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">전체 제출</button>
+          <button onclick="toggleAllStudents(false)" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">초기화</button>
+        </div>
+      </div>
+
+      <div id="adminStudentsGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2.5"></div>
+    </section>
+
+
+    <!-- 3. 해당 반 수행평가 일정 관리 -->
+    <section class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+        <div>
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span>📅 <span id="assessSectionTitle">1학년 1반</span> 수행평가 D-Day 관리</span>
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">이 반에 해당하는 수행평가 일정을 등록하고 관리합니다.</p>
+        </div>
+        <button onclick="openAssessmentModal()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow">
+          + 새 수행평가 추가
+        </button>
+      </div>
+
+      <div class="space-y-3" id="adminAssessmentsList"></div>
+    </section>
+
+
+    <!-- 4. 단원별 탐구자료 & 외부링크 관리 -->
+    <section class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+        <div>
+          <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+            <span>📚 등록된 단원별 자료 및 외부 링크 관리</span>
+          </h3>
+          <p class="text-xs text-slate-500 mt-0.5">시뮬레이션, 학습지, 유튜브 링크를 확인하고 삭제할 수 있습니다.</p>
+        </div>
+        <button onclick="openMaterialModal()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow">
+          + 자료 / 링크 추가
+        </button>
+      </div>
+
+      <div class="space-y-4" id="adminMaterialsList"></div>
+    </section>
+
+  </main>
+
+
+  <!-- ==========================================
+       자료/링크 추가 모달
+  =========================================== -->
+  <div id="materialModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl">
+      <h3 class="text-lg font-black text-slate-900 mb-1">새 자료 / 외부 링크 등록</h3>
+      <p class="text-xs text-slate-500 mb-4">등록 즉시 모든 학생들 화면에 0.5초 만에 새 카드가 생성됩니다!</p>
+
+      <form onsubmit="saveNewMaterial(event)" class="space-y-3 text-xs font-semibold">
+        <div>
+          <label class="block text-slate-600 mb-1">단원 선택</label>
+          <select id="matUnit" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold">
+            <option value="unit3">3단원. 열</option>
+            <option value="unit4">4단원. 물질의 상태 변화</option>
+            <option value="unit5">5단원. 힘의 작용</option>
+            <option value="unit6">6단원. 기체의 성질</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">자료 종류</label>
+          <select id="matType" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold">
+            <option value="sim">🎮 디지털 시뮬레이션</option>
+            <option value="doc">📄 차시별 학습지 (PDF / 드라이브)</option>
+            <option value="link">🔗 외부 링크 (유튜브 영상, 웹사이트 등)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">자료 제목</label>
+          <input type="text" id="matTitle" required placeholder="예: EBS 열의 이동 원리 영상" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">파일 링크 또는 파일명</label>
+          <input type="text" id="matUrl" required placeholder="예: https://youtu.be/... 또는 파일명.html / 구글드라이브 링크" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">학생 안내 및 설명 (시뮬레이션만 해당, 선택)</label>
+          <input type="text" id="matDesc" placeholder="예: 직접 조작하며 온도 변화를 관찰합니다." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3">
+          <button type="button" onclick="closeMaterialModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">취소</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black shadow">실시간 등록하기</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 수행평가 모달 -->
+  <div id="assessmentModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl">
+      <h3 class="text-lg font-bold text-slate-900 mb-4">새 수행평가 일정 추가</h3>
+      <form onsubmit="saveNewAssessment(event)" class="space-y-3 text-xs font-semibold">
+        <div>
+          <label class="block text-slate-600 mb-1">수행평가 제목</label>
+          <input type="text" id="newAssessTitle" required placeholder="예: 열과 비열 실험 보고서" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">관련 단원</label>
+          <input type="text" id="newAssessUnit" required placeholder="예: 3단원. 열" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">마감 날짜 (D-Day 기준일)</label>
+          <input type="date" id="newAssessDate" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">대상 학급</label>
+          <select id="newAssessTarget" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold">
+            <option value="1반, 2반, 3반 전체">1반, 2반, 3반 전체</option>
+            <option value="1학년 1반">1학년 1반만</option>
+            <option value="1학년 2반">1학년 2반만</option>
+            <option value="1학년 3반">1학년 3반만</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">유의사항 및 안내</label>
+          <textarea id="newAssessNotice" rows="2" placeholder="준비물이나 주의사항을 적어주세요." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeAssessmentModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">취소</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow">추가하기</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- 자바스크립트 관리 로직 -->
+  <script>
+    function checkAuth(e) {
+      e.preventDefault();
+      if (document.getElementById('pinInput').value === '1234') {
+        document.getElementById('authModal').classList.add('hidden');
+        sessionStorage.setItem('ADMIN_AUTH', 'true');
+      } else {
+        alert('암호가 올바르지 않습니다.');
+      }
+    }
+    if (sessionStorage.getItem('ADMIN_AUTH') === 'true') {
+      document.getElementById('authModal').classList.add('hidden');
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDG8ohuujmhvB76PF5IDQ7oBaHhfQg9Sas",
+      authDomain: "myscience-512dc.firebaseapp.com",
+      projectId: "myscience-512dc",
+      storageBucket: "myscience-512dc.firebasestorage.app",
+      messagingSenderId: "937703615607",
+      appId: "1:937703615607:web:e93b5c2c52dccb772a2a72",
+      measurementId: "G-KGLKMC1V3Q",
+      databaseURL: "https://myscience-512dc-default-rtdb.firebaseio.com"
+    };
+
+    let adminData = DASHBOARD_DATA;
+    let firebaseDb = null;
+
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      firebaseDb = firebase.database();
+
+      firebaseDb.ref('science_dashboard').on('value', snap => {
+        const val = snap.val();
+        if (val) {
+          adminData = val;
+          renderCurrentClass();
+          renderMaterials();
+        } else {
+          firebaseDb.ref('science_dashboard').set(DASHBOARD_DATA);
+        }
+      });
+    } catch (e) {
+      console.warn('Firebase error', e);
+      document.getElementById('syncStatusBadge').innerText = '● 로컬 모드';
+      document.getElementById('syncStatusBadge').className = 'px-2 py-0.5 rounded-full bg-slate-500 text-white text-[10px] font-bold';
+    }
+
+    let currentAdminClass = 'class1';
+    let currentAdminRound = 1;
+
+    function autoSave() {
+      localStorage.setItem('SCIENCE_DASHBOARD_DATA', JSON.stringify(adminData));
+      if (firebaseDb) {
+        firebaseDb.ref('science_dashboard').set(adminData);
+      }
+    }
+
+    function setAdminClass(classKey) {
+      currentAdminClass = classKey;
+      ['class1', 'class2', 'class3'].forEach(k => {
+        const btn = document.getElementById(`adminClassBtn-${k}`);
+        if (k === classKey) {
+          btn.className = "py-2 px-3 rounded-xl font-black text-xs transition-all bg-white text-indigo-600 shadow-sm";
+        } else {
+          btn.className = "py-2 px-3 rounded-xl font-black text-xs transition-all text-slate-600 hover:text-slate-900";
+        }
+      });
+      renderCurrentClass();
+    }
+
+    function setAdminRound(r) {
+      currentAdminRound = r;
+      [1, 2, 3, 4, 5].forEach(num => {
+        const btn = document.getElementById(`adminRound-${num}`);
+        if (num === r) {
+          btn.className = "px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white font-bold text-xs shadow-sm";
+        } else {
+          btn.className = "px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs";
+        }
+      });
+      renderSubmissions();
+    }
+
+    function renderCurrentClass() {
+      const classNames = { class1: '1학년 1반', class2: '1학년 2반', class3: '1학년 3반' };
+      const curName = classNames[currentAdminClass];
+
+      document.getElementById('stampSectionTitle').innerText = curName;
+      document.getElementById('subSectionTitle').innerText = curName;
+      document.getElementById('assessSectionTitle').innerText = curName;
+
+      const info = adminData.stamps[currentAdminClass];
+      document.getElementById('currentStampDisplay').innerText = info.count;
+      document.getElementById('currentMottoInput').value = info.motto || '';
+
+      renderSubmissions();
+      renderAssessments();
+    }
+
+    function changeStamp(amount) {
+      adminData.stamps[currentAdminClass].count = Math.max(0, adminData.stamps[currentAdminClass].count + amount);
+      document.getElementById('currentStampDisplay').innerText = adminData.stamps[currentAdminClass].count;
+      autoSave();
+    }
+
+    function updateMotto(val) {
+      adminData.stamps[currentAdminClass].motto = val;
+      autoSave();
+    }
+
+    function renderSubmissions() {
+      const list = adminData.students[currentAdminClass] || [];
+      const grid = document.getElementById('adminStudentsGrid');
+
+      grid.innerHTML = list.map((student, idx) => {
+        if (!student.rounds) student.rounds = {};
+        const isDone = student.rounds[currentAdminRound];
+
+        return `
+          <button 
+            type="button"
+            onclick="toggleStudentSubmission(${idx})" 
+            class="p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between select-none ${isDone ? 'bg-emerald-500 border-emerald-600 text-white shadow-sm' : 'bg-slate-100 border-slate-200 text-slate-500 hover:border-slate-400'}"
+          >
+            <div class="flex items-center justify-between w-full mb-1">
+              <span class="text-xs font-black">${student.num}번</span>
+              <span class="text-[10px] opacity-90">${isDone ? '완료' : '미제출'}</span>
+            </div>
+            <span class="text-[11px] truncate font-semibold">${student.name}</span>
+            <span class="text-[10px] mt-1 font-bold ${isDone ? 'text-emerald-100' : 'text-slate-400'}">
+              ${isDone ? '✅ [제출완료]' : '⏳ [클릭시 제출]'}
+            </span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function toggleStudentSubmission(idx) {
+      const student = adminData.students[currentAdminClass][idx];
+      if (!student.rounds) student.rounds = {};
+      student.rounds[currentAdminRound] = !student.rounds[currentAdminRound];
+      autoSave();
+      renderSubmissions();
+    }
+
+    function toggleAllStudents(status) {
+      adminData.students[currentAdminClass].forEach(s => {
+        if (!s.rounds) s.rounds = {};
+        s.rounds[currentAdminRound] = status;
+      });
+      autoSave();
+      renderSubmissions();
+    }
+
+    function renderAssessments() {
+      const listContainer = document.getElementById('adminAssessmentsList');
+      const curNumStr = currentAdminClass.replace('class', '');
+      const list = adminData.assessments.filter(item => {
+        return item.target.includes('전체') || item.target.includes(`${curNumStr}반`);
+      });
+
+      if (list.length === 0) {
+        listContainer.innerHTML = `<p class="text-xs text-slate-400 py-3 text-center">등록된 수행평가 일정이 없습니다.</p>`;
+        return;
+      }
+
+      listContainer.innerHTML = list.map((item, idx) => `
+        <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">${item.unit}</span>
+              <span class="text-xs font-bold text-slate-700">마감: ${item.dueDate}</span>
+              <span class="text-[11px] text-slate-400">(${item.target})</span>
+            </div>
+            <h5 class="text-xs font-bold text-slate-900">${item.title}</h5>
+            <p class="text-[11px] text-slate-500 mt-0.5">💡 ${item.notice}</p>
+          </div>
+          <button onclick="deleteAssessment(${idx})" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 text-xs font-bold">
+            삭제
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function openAssessmentModal() {
+      document.getElementById('assessmentModal').classList.remove('hidden');
+    }
+    function closeAssessmentModal() {
+      document.getElementById('assessmentModal').classList.add('hidden');
+    }
+
+    function saveNewAssessment(e) {
+      e.preventDefault();
+      const newObj = {
+        id: Date.now(),
+        title: document.getElementById('newAssessTitle').value,
+        unit: document.getElementById('newAssessUnit').value,
+        dueDate: document.getElementById('newAssessDate').value,
+        target: document.getElementById('newAssessTarget').value,
+        notice: document.getElementById('newAssessNotice').value
+      };
+      adminData.assessments.push(newObj);
+      autoSave();
+      renderAssessments();
+      closeAssessmentModal();
+    }
+
+    function deleteAssessment(idx) {
+      if (confirm('이 수행평가를 삭제하시겠습니까?')) {
+        adminData.assessments.splice(idx, 1);
+        autoSave();
+        renderAssessments();
+      }
+    }
+
+    // ==========================================
+    // 자료 및 외부링크 관리 로직
+    // ==========================================
+    function openMaterialModal() {
+      document.getElementById('materialModal').classList.remove('hidden');
+    }
+    function closeMaterialModal() {
+      document.getElementById('materialModal').classList.add('hidden');
+    }
+
+    function saveNewMaterial(e) {
+      e.preventDefault();
+      const unitId = document.getElementById('matUnit').value;
+      const type = document.getElementById('matType').value;
+      const title = document.getElementById('matTitle').value.trim();
+      const url = document.getElementById('matUrl').value.trim();
+      const desc = document.getElementById('matDesc').value.trim();
+
+      const unit = adminData.units.find(u => u.id === unitId);
+      if (!unit) return;
+
+      if (type === 'sim') {
+        if (!unit.simulations) unit.simulations = [];
+        unit.simulations.push({ title, file: url, desc: desc || '인터랙티브 탐구' });
+      } else if (type === 'doc') {
+        if (!unit.worksheets) unit.worksheets = [];
+        unit.worksheets.push({ title, file: url });
+      } else if (type === 'link') {
+        if (!unit.links) unit.links = [];
+        unit.links.push({ title, url });
+      }
+      unit.isComingSoon = false;
+
+      autoSave();
+      renderMaterials();
+      closeMaterialModal();
+      alert(`[${title}] 자료가 실시간으로 등록되었습니다!`);
+    }
+
+    function renderMaterials() {
+      const container = document.getElementById('adminMaterialsList');
+      container.innerHTML = adminData.units.map(unit => {
+        const sims = unit.simulations || [];
+        const docs = unit.worksheets || [];
+        const links = unit.links || [];
+
+        return `
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            <h5 class="font-bold text-xs text-slate-800 mb-2 flex items-center gap-1.5">
+              <span>${unit.icon}</span> <span>${unit.unitNum}. ${unit.title}</span>
+            </h5>
+            <div class="space-y-1.5 text-xs">
+              ${sims.map((s, i) => `
+                <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
+                  <span class="truncate">🎮 <strong>[시뮬레이션]</strong> ${s.title} (${s.file})</span>
+                  <button onclick="deleteMaterial('${unit.id}', 'simulations', ${i})" class="text-rose-500 font-bold hover:underline flex-shrink-0 ml-2">삭제</button>
+                </div>
+              `).join('')}
+              ${docs.map((d, i) => `
+                <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
+                  <span class="truncate">📄 <strong>[학습지]</strong> ${d.title}</span>
+                  <button onclick="deleteMaterial('${unit.id}', 'worksheets', ${i})" class="text-rose-500 font-bold hover:underline flex-shrink-0 ml-2">삭제</button>
+                </div>
+              `).join('')}
+              ${links.map((l, i) => `
+                <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200">
+                  <span class="truncate">🔗 <strong>[외부링크]</strong> ${l.title} (${l.url})</span>
+                  <button onclick="deleteMaterial('${unit.id}', 'links', ${i})" class="text-rose-500 font-bold hover:underline flex-shrink-0 ml-2">삭제</button>
+                </div>
+              `).join('')}
+              ${sims.length === 0 && docs.length === 0 && links.length === 0 ? '<p class="text-[11px] text-slate-400 py-1">등록된 자료가 없습니다.</p>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteMaterial(unitId, prop, index) {
+      if (confirm('이 자료를 삭제하시겠습니까?')) {
+        const unit = adminData.units.find(u => u.id === unitId);
+        if (unit && unit[prop]) {
+          unit[prop].splice(index, 1);
+          autoSave();
+          renderMaterials();
+        }
+      }
+    }
+
+    function downloadDataFile() {
+      autoSave();
+      const content = `// ==============================================================\n`
+                    + `// 🔬 중1 과학 디지털 탐구실 통합 데이터 저장소 (data.js)\n`
+                    + `// 선생님용 대시보드(admin.html)에서 내보낸 최신 백업 파일입니다.\n`
+                    + `// ==============================================================\n\n`
+                    + `const DASHBOARD_DATA = ${JSON.stringify(adminData, null, 2)};\n`;
+
+      const blob = new Blob([content], { type: 'text/javascript;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.js';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    renderCurrentClass();
+    renderMaterials();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>상태 변화와 열에너지 출입 탐구 활동</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #f1f5f9;
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+      background: #ffffff;
+      padding: 24px;
+      border: 2px solid #334155;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    }
+
+    /* 탭 메뉴 */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #cbd5e1;
+      padding-bottom: 6px;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      background: #e2e8f0;
+      border: 1px solid #94a3b8;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+      color: #334155;
+      touch-action: manipulation;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+      box-shadow: 0 -2px 5px rgba(37, 99, 235, 0.2);
+    }
+
+    /* 문제 타이틀 */
+    .title-box {
+      background-color: #334155;
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 17px;
+      margin-bottom: 20px;
+      line-height: 1.4;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* SVG 다이어그램 컨테이너 */
+    .diagram-card {
+      background-color: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .diagram-svg {
+      width: 100%;
+      max-width: 620px;
+      height: auto;
+      max-height: 240px;
+    }
+
+    /* 표 스타일 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+      background-color: #ffffff;
+    }
+
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 10px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      width: 16%;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    /* 드롭 대상 (노란색 칸) */
+    .drop-zone {
+      background-color: #fef08a;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+      border: 2px dashed #eab308;
+      border-radius: 6px;
+      font-size: 16px;
+      color: #1e293b;
+    }
+
+    .drop-zone.inline {
+      display: inline-flex;
+      width: 105px;
+      height: 38px;
+      min-height: 38px;
+      vertical-align: middle;
+      margin: 2px 4px;
+    }
+
+    .drop-zone.correct {
+      background-color: #86efac !important;
+      border-color: #16a34a !important;
+      color: #065f46;
+    }
+
+    .drop-zone.wrong {
+      background-color: #fca5a5 !important;
+      border-color: #dc2626 !important;
+      color: #991b1b;
+    }
+
+    /* 원리 설명 영역 */
+    .sentence-box {
+      line-height: 2.3;
+      font-size: 16px;
+      text-align: left !important;
+      padding: 14px 18px;
+      background-color: #f8fafc;
+    }
+
+    /* 보기 영역 */
+    .보기-section {
+      margin-top: 20px;
+      border: 2px dashed #94a3b8;
+      padding: 16px;
+      background-color: #f8fafc;
+      border-radius: 8px;
+    }
+
+    .보기-title {
+      font-weight: bold;
+      margin-bottom: 12px;
+      font-size: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #1e293b;
+    }
+
+    .보기-guide {
+      font-size: 13px;
+      color: #2563eb;
+      font-weight: normal;
+    }
+
+    .보기-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .draggable-item {
+      background-color: #ffffff;
+      border: 2px solid #64748b;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
+      color: #1e293b;
+      user-select: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      touch-action: manipulation;
+      transition: transform 0.1s, background-color 0.2s, border-color 0.2s;
+    }
+
+    /* 선택된 단어 스타일 */
+    .draggable-item.selected {
+      background-color: #2563eb;
+      color: #ffffff;
+      border-color: #1d4ed8;
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
+    }
+
+    /* 하단 버튼 및 피드백 영역 */
+    .action-area {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-check {
+      padding: 12px 28px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      touch-action: manipulation;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-check:hover {
+      background-color: #1d4ed8;
+    }
+
+    .btn-reset {
+      padding: 12px 20px;
+      background-color: #64748b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .btn-reset:hover {
+      background-color: #475569;
+    }
+
+    .feedback-msg {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    /* 에어컨 시뮬레이션 애니메이션 컨테이너 */
+    .sim-container {
+      margin-top: 25px;
+      border: 2px solid #2563eb;
+      border-radius: 8px;
+      padding: 15px;
+      background-color: #f8fafc;
+    }
+
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .sim-title {
+      font-size: 17px;
+      font-weight: bold;
+      color: #1e3a8a;
+    }
+
+    .sim-controls button {
+      padding: 6px 14px;
+      font-size: 14px;
+      font-weight: bold;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    .sim-controls button:hover {
+      background: #f1f5f9;
+    }
+
+    #acCanvas {
+      width: 100%;
+      height: auto;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 탭 메뉴 (1~7번) -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="selectTab(1)">1번 예시</button>
+    <button class="tab-btn" onclick="selectTab(2)">2번 예시</button>
+    <button class="tab-btn" onclick="selectTab(3)">3번 예시</button>
+    <button class="tab-btn" onclick="selectTab(4)">4번 예시</button>
+    <button class="tab-btn" onclick="selectTab(5)">5번 예시</button>
+    <button class="tab-btn" onclick="selectTab(6)">6번 예시</button>
+    <button class="tab-btn" onclick="selectTab(7)">7번 에어컨 원리</button>
+  </div>
+
+  <!-- 문제 및 SVG 이미지 영역 -->
+  <div id="activity-content"></div>
+
+  <!-- 보기 영역 -->
+  <div class="보기-section">
+    <div class="보기-title">
+      &lt;보기&gt;
+      <span class="보기-guide">💡 단어를 터치한 후, 넣고 싶은 노란색 칸을 터치하세요!</span>
+    </div>
+    <div class="보기-container" id="bogi-container"></div>
+  </div>
+
+  <!-- 제출 및 피드백 버튼 -->
+  <div class="action-area">
+    <button class="btn-check" onclick="checkAnswers()">정답 확인</button>
+    <button class="btn-reset" onclick="resetAnswers()">다시 풀기</button>
+    <span id="feedback" class="feedback-msg"></span>
+  </div>
+
+  <!-- 7번 탭 전용: 에어컨 냉매 관찰 애니메이션 시뮬레이터 -->
+  <div id="sim-area" class="sim-container" style="display: none;">
+    <div class="sim-header">
+      <span class="sim-title">🌀 에어컨 냉매의 상태 변화 및 이동 모션 관찰</span>
+      <div class="sim-controls">
+        <button id="btnPlayPause" onclick="toggleSimPlay()">⏸️ 정지</button>
+        <button onclick="toggleSimSpeed()">⚡ 속도 변경 (<span id="speedTxt">1x</span>)</button>
+      </div>
+    </div>
+    <canvas id="acCanvas" width="850" height="380"></canvas>
+  </div>
+</div>
+
+<script>
+  // 각 예시별 전용 SVG 일러스트 모음
+  const diagrams = {
+    1: `
+      <svg class="diagram-svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- 이마와 사람 얼굴 -->
+        <path d="M 120,180 C 120,120 160,80 230,80 C 280,80 320,110 330,180" fill="#fde047" stroke="#eab308" stroke-width="4"/>
+        <path d="M 160,75 C 190,40 270,40 300,75" fill="#334155" />
+        <!-- 젖은 물수건 -->
+        <path d="M 170,95 Q 230,80 290,95 L 280,125 Q 230,110 180,125 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="3"/>
+        <!-- 기화 화살표 (수증기) -->
+        <g stroke="#0284c7" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M 190,85 Q 185,60 195,35" />
+          <path d="M 230,80 Q 225,55 235,30" />
+          <path d="M 270,85 Q 265,60 275,35" />
+          <path d="M 190,35 L 195,45 M 195,35 L 187,43"/>
+          <path d="M 230,30 L 235,40 M 235,30 L 227,38"/>
+          <path d="M 270,35 L 275,45 M 275,35 L 267,43"/>
+        </g>
+        <text x="230" y="20" text-anchor="middle" fill="#0284c7" font-weight="bold" font-size="14">수증기로 기화 (물 ➔ 수증기)</text>
+        <!-- 열 흡수 (이마 ➔ 물수건) -->
+        <g stroke="#ef4444" stroke-width="3" fill="none">
+          <path d="M 210,150 L 210,115" />
+          <path d="M 210,115 L 205,123 M 210,115 L 215,123"/>
+          <path d="M 250,150 L 250,115" />
+          <path d="M 250,115 L 245,123 M 250,115 L 255,123"/>
+        </g>
+        <text x="230" y="170" text-anchor="middle" fill="#dc2626" font-weight="bold" font-size="14">이마에서 열에너지 흡수 🔥</text>
+        <!-- 텍스트 설명 카드 -->
+        <rect x="380" y="30" width="200" height="140" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+        <text x="480" y="60" text-anchor="middle" fill="#1e293b" font-weight="bold" font-size="15">💡 체온이 내리는 원리</text>
+        <text x="480" y="95" text-anchor="middle" fill="#0284c7" font-size="13">물수건의 물이 기화</text>
+        <text x="480" y="120" text-anchor="middle" fill="#dc2626" font-size="13">이마의 열을 빼앗음</text>
+        <text x="480" y="145" text-anchor="middle" fill="#16a34a" font-weight="bold" font-size="14">➔ 체온 하강! ❄️</text>
+      </svg>
+    `,
+    2: `
+      <svg class="diagram-svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- 구름과 소나기 준비 -->
+        <path d="M 100,80 Q 120,40 160,50 Q 190,30 230,50 Q 270,30 300,60 Q 320,80 300,110 Q 280,130 140,120 Z" fill="#64748b" opacity="0.8"/>
+        <!-- 물방울 형성 (액화) -->
+        <circle cx="150" cy="100" r="6" fill="#38bdf8"/>
+        <circle cx="200" cy="110" r="8" fill="#0284c7"/>
+        <circle cx="250" cy="95" r="7" fill="#38bdf8"/>
+        <!-- 열 방출 화살표 (구름 ➔ 주변 공기) -->
+        <g stroke="#ef4444" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M 290,80 L 360,60" />
+          <path d="M 360,60 L 348,62 M 360,60 L 355,72"/>
+          <path d="M 290,110 L 360,120" />
+          <path d="M 360,120 L 353,110 M 360,120 L 348,122"/>
+        </g>
+        <text x="360" y="45" fill="#dc2626" font-weight="bold" font-size="14">열에너지 방출! 🔥</text>
+        <text x="190" y="150" text-anchor="middle" fill="#0369a1" font-weight="bold" font-size="14">수증기가 물방울로 액화</text>
+        <!-- 후덥지근한 공기 캐릭터/효과 -->
+        <rect x="420" y="30" width="160" height="140" rx="10" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
+        <text x="500" y="65" text-anchor="middle" fill="#c2410c" font-weight="bold" font-size="15">☀️ 주변 공기</text>
+        <text x="500" y="105" text-anchor="middle" fill="#ea580c" font-size="14">방출된 열을 받음</text>
+        <text x="500" y="140" text-anchor="middle" fill="#b91c1c" font-weight="bold" font-size="15">➔ 후덥지근함! 💦</text>
+      </svg>
+    `,
+    3: `
+      <svg class="diagram-svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- 얼음 조각 -->
+        <polygon points="150,50 230,40 270,100 210,160 130,130" fill="#bae6fd" stroke="#0284c7" stroke-width="3"/>
+        <polygon points="150,50 210,160 180,90" fill="#7dd3fc" opacity="0.6"/>
+        <path d="M 130,140 Q 210,170 280,150" stroke="#38bdf8" stroke-width="4" fill="none"/>
+        <text x="200" y="185" text-anchor="middle" fill="#0369a1" font-weight="bold" font-size="14">얼음이 녹음 (융해: 고체 ➔ 액체)</text>
+        <!-- 열 흡수 화살표 (공기 ➔ 얼음) -->
+        <g stroke="#ef4444" stroke-width="3" fill="none">
+          <path d="M 80,70 L 135,80" />
+          <path d="M 135,80 L 125,73 M 135,80 L 127,87"/>
+          <path d="M 320,80 L 265,85" />
+          <path d="M 265,85 L 273,78 M 265,85 L 275,92"/>
+        </g>
+        <text x="70" y="55" fill="#dc2626" font-weight="bold" font-size="13">공기의 열 흡수 🔥</text>
+        <!-- 주변 시원한 공기 -->
+        <rect x="400" y="30" width="170" height="140" rx="10" fill="#f0f9ff" stroke="#7dd3fc" stroke-width="2"/>
+        <text x="485" y="65" text-anchor="middle" fill="#0369a1" font-weight="bold" font-size="15">❄️ 주변 공기</text>
+        <text x="485" y="105" text-anchor="middle" fill="#0284c7" font-size="14">열을 얼음에 빼앗김</text>
+        <text x="485" y="140" text-anchor="middle" fill="#0369a1" font-weight="bold" font-size="15">➔ 공기가 시원해짐!</text>
+      </svg>
+    `,
+    4: `
+      <svg class="diagram-svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- 오렌지 열매 -->
+        <circle cx="180" cy="100" r="55" fill="#fb923c" stroke="#ea580c" stroke-width="3"/>
+        <path d="M 180,45 Q 190,30 205,35" fill="none" stroke="#15803d" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 180,45 C 160,30 170,15 180,45" fill="#22c55e"/>
+        <!-- 뿌려진 물 얼어붙음 (응고) -->
+        <path d="M 130,90 Q 120,110 135,130 Q 180,165 225,125 Q 240,95 225,70 Z" fill="#e0f2fe" opacity="0.6" stroke="#38bdf8" stroke-width="2"/>
+        <text x="180" y="180" text-anchor="middle" fill="#0284c7" font-weight="bold" font-size="14">물이 얼음으로 응고 (액체 ➔ 고체)</text>
+        <!-- 오렌지로 열 전달 화살표 -->
+        <g stroke="#ef4444" stroke-width="3" fill="none">
+          <path d="M 110,100 L 135,100" />
+          <path d="M 135,100 L 127,95 M 135,100 L 127,105"/>
+          <path d="M 250,100 L 225,100" />
+          <path d="M 225,100 L 233,95 M 225,100 L 233,105"/>
+        </g>
+        <text x="180" y="105" text-anchor="middle" fill="#dc2626" font-weight="bold" font-size="13">열 방출 🔥</text>
+        <!-- 오렌지 보호 설명 카드 -->
+        <rect x="380" y="30" width="190" height="140" rx="10" fill="#fff7ed" stroke="#ffedd5" stroke-width="2"/>
+        <text x="475" y="65" text-anchor="middle" fill="#c2410c" font-weight="bold" font-size="15">🍊 오렌지 열매</text>
+        <text x="475" y="100" text-anchor="middle" fill="#ea580c" font-size="13">물이 얼면서 방출하는</text>
+        <text x="475" y="120" text-anchor="middle" fill="#ea580c" font-size="13">열에너지를 공급받음</text>
+        <text x="475" y="148" text-anchor="middle" fill="#15803d" font-weight="bold" font-size="14">➔ 냉해 예방! 🛡️</text>
+      </svg>
+    `,
+    5: `
+      <svg class="diagram-svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- 보온 상자 및 아이스크림 -->
+        <rect x="100" y="60" width="180" height="110" rx="8" fill="#f1f5f9" stroke="#64748b" stroke-width="3"/>
+        <path d="M 130,130 C 130,100 170,100 170,130 Z" fill="#f43f5e"/>
+        <rect x="145" y="130" width="10" height="25" fill="#d97706"/>
+        <!-- 드라이아이스 및 이산화탄소 연기 (승화) -->
+        <rect x="200" y="115" width="45" height="35" rx="4" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+        <path d="M 210,110 Q 200,80 220,60 Q 230,40 215,20" fill="none" stroke="#cbd5e1" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 230,110 Q 240,85 230,65 Q 220,45 235,25" fill="none" stroke="#e2e8f0" stroke-width="3" stroke-linecap="round"/>
+        <text x="190" y="188" text-anchor="middle" fill="#475569" font-weight="bold" font-size="13">드라이아이스 승화 (고체 ➔ 기체)</text>
+        <!-- 열 흡수 (아이스크림 ➔ 드라이아이스) -->
+        <g stroke="#ef4444" stroke-width="3" fill="none">
+          <path d="M 165,120 L 195,120" />
+          <path d="M 195,120 L 187,115 M 195,120 L 187,125"/>
+        </g>
+        <text x="180" y="105" fill="#dc2626" font-size="11" font-weight="bold">열 흡수</text>
+        <!-- 설명 카드 -->
+        <rect x="370" y="30" width="200" height="140" rx="10" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="2"/>
+        <text x="470" y="65" text-anchor="middle" fill="#166534" font-weight="bold" font-size="15">🍦 아이스크림 통</text>
+        <text x="470" y="100" text-anchor="middle" fill="#15803d" font-size="13">드라이아이스가 승화하며</text>
+        <text x="470" y="120" text-anchor="middle" fill="#15803d" font-size="13">주변 열을 계속 흡수</text>
+        <text x="470" y="148" text-anchor="middle" fill="#0369a1" font-weight="bold" font-size="14">➔ 오랫동안 차갑게 유지!</text>
+      </svg>
+    `,
+    6: `
+      <svg class="diagram-svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- 수증기에서 눈송이로 승화 -->
+        <g stroke="#38bdf8" stroke-width="2" fill="none">
+          <path d="M 100,100 Q 120,70 140,100 T 180,100" stroke-dasharray="4,4"/>
+        </g>
+        <!-- 눈송이 (고체) -->
+        <g stroke="#0284c7" stroke-width="3" stroke-linecap="round" transform="translate(210, 95)">
+          <line x1="-30" y1="0" x2="30" y2="0" />
+          <line x1="0" y1="-30" x2="0" y2="30" />
+          <line x1="-20" y1="-20" x2="20" y2="20" />
+          <line x1="-20" y1="20" x2="20" y2="-20" />
+        </g>
+        <text x="170" y="165" text-anchor="middle" fill="#0284c7" font-weight="bold" font-size="14">수증기가 눈으로 승화 (기체 ➔ 고체)</text>
+        <!-- 열 방출 (눈송이 ➔ 주변 공기) -->
+        <g stroke="#ef4444" stroke-width="3" fill="none">
+          <path d="M 250,70 L 310,50" />
+          <path d="M 310,50 L 298,52 M 310,50 L 305,62"/>
+          <path d="M 250,120 L 310,140" />
+          <path d="M 310,140 L 305,128 M 310,140 L 298,138"/>
+        </g>
+        <text x="320" y="100" fill="#dc2626" font-weight="bold" font-size="14">열에너지 방출! 🔥</text>
+        <!-- 포근한 공기 카드 -->
+        <rect x="410" y="30" width="170" height="140" rx="10" fill="#fff1f2" stroke="#fecdd3" stroke-width="2"/>
+        <text x="495" y="65" text-anchor="middle" fill="#be123c" font-weight="bold" font-size="15">❄️ 눈 오는 날 공기</text>
+        <text x="495" y="105" text-anchor="middle" fill="#e11d48" font-size="13">승화 시 방출된 열을 받음</text>
+        <text x="495" y="140" text-anchor="middle" fill="#9f1239" font-weight="bold" font-size="14">➔ 날씨가 포근하게 느껴짐!</text>
+      </svg>
+    `,
+    7: `
+      <svg class="diagram-svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- 실내기 -->
+        <rect x="50" y="40" width="200" height="120" rx="10" fill="#f0f9ff" stroke="#0284c7" stroke-width="3"/>
+        <text x="150" y="75" text-anchor="middle" fill="#0369a1" font-weight="bold" font-size="16">🏠 실내기 (집 안)</text>
+        <text x="150" y="110" text-anchor="middle" fill="#0284c7" font-weight="bold" font-size="14">냉매 기화 (열 흡수)</text>
+        <text x="150" y="135" text-anchor="middle" fill="#16a34a" font-size="13">➔ 실내 온도 낮아짐 ❄️</text>
+        
+        <!-- 순환 파이프 -->
+        <path d="M 250,70 L 350,70 M 250,130 L 350,130" stroke="#94a3b8" stroke-width="8" fill="none"/>
+        <path d="M 290,60 L 310,70 L 290,80" fill="#0284c7"/>
+        <path d="M 310,120 L 290,130 L 310,140" fill="#ea580c"/>
+
+        <!-- 실외기 -->
+        <rect x="350" y="40" width="200" height="120" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="3"/>
+        <text x="450" y="75" text-anchor="middle" fill="#c2410c" font-weight="bold" font-size="16">🌳 실외기 (집 밖)</text>
+        <text x="450" y="110" text-anchor="middle" fill="#ea580c" font-weight="bold" font-size="14">냉매 액화 (열 방출)</text>
+        <text x="450" y="135" text-anchor="middle" fill="#dc2626" font-size="13">➔ 실외기 뜨거운 바람 🔥</text>
+      </svg>
+    `
+  };
+
+  // 1~7번 탐구 활동 데이터 (2번 예시 물질: '수증기')
+  const problemsData = {
+    1: {
+      title: "1. 열이 날 때 이마에 물수건을 올리면 물수건이 마르면서 체온이 내려간다.",
+      answers: {
+        type: "기화",
+        substance: "물",
+        inout: "흡수",
+        target: "이마",
+        heat: "빼앗김",
+        temp: ["낮아짐", "하강"],
+        s_substance: "물",
+        s_type: "기화",
+        s_inout: "흡수",
+        s_target: "이마",
+        s_heat: "빼앗김",
+        s_temp: ["낮아짐", "하강"]
+      },
+      bogi: ["기화", "액화", "응고", "융해", "승화", "물", "흡수", "방출", "이마", "빼앗김", "받음", "낮아짐", "높아짐"],
+      isAirConditioner: false
+    },
+    2: {
+      title: "2. 여름철 소나기가 내리기 전에 주변 공기가 후덥지근하게 느껴진다.",
+      answers: {
+        type: "액화",
+        substance: "수증기",
+        inout: "방출",
+        target: "공기",
+        heat: "받음",
+        temp: ["높아짐", "상승"],
+        s_substance: "수증기",
+        s_type: "액화",
+        s_inout: "방출",
+        s_target: "공기",
+        s_heat: "받음",
+        s_temp: ["높아짐", "상승"]
+      },
+      bogi: ["기화", "액화", "응고", "융해", "승화", "수증기", "흡수", "방출", "공기", "빼앗김", "받음", "낮아짐", "높아짐"],
+      isAirConditioner: false
+    },
+    3: {
+      title: "3. 얼음 조각 주변에 있으면 조각이 녹으면서 주변 공기가 시원하게 느껴진다.",
+      answers: {
+        type: "융해",
+        substance: "얼음",
+        inout: "흡수",
+        target: "공기",
+        heat: "빼앗김",
+        temp: ["낮아짐", "하강"],
+        s_substance: "얼음",
+        s_type: "융해",
+        s_inout: "흡수",
+        s_target: "공기",
+        s_heat: "빼앗김",
+        s_temp: ["낮아짐", "하강"]
+      },
+      bogi: ["기화", "액화", "응고", "융해", "승화", "얼음", "흡수", "방출", "공기", "빼앗김", "받음", "낮아짐", "높아짐"],
+      isAirConditioner: false
+    },
+    4: {
+      title: "4. 오렌지 농장에서 추운 날 나무에 물을 뿌려 열매가 어는 것을 막는다.",
+      answers: {
+        type: "응고",
+        substance: "물",
+        inout: "방출",
+        target: "오렌지",
+        heat: "받음",
+        temp: ["높아짐", "상승"],
+        s_substance: "물",
+        s_type: "응고",
+        s_inout: "방출",
+        s_target: "오렌지",
+        s_heat: "받음",
+        s_temp: ["높아짐", "상승"]
+      },
+      bogi: ["기화", "액화", "응고", "융해", "승화", "물", "흡수", "방출", "오렌지", "빼앗김", "받음", "낮아짐", "높아짐"],
+      isAirConditioner: false
+    },
+    5: {
+      title: "5. 드라이아이스를 넣은 통에 담긴 아이스크림이 오래 차갑게 유지된다.",
+      answers: {
+        type: "승화",
+        substance: "드라이아이스",
+        inout: "흡수",
+        target: "아이스크림",
+        heat: "빼앗김",
+        temp: ["낮아짐", "하강"],
+        s_substance: "드라이아이스",
+        s_type: "승화",
+        s_inout: "흡수",
+        s_target: "아이스크림",
+        s_heat: "빼앗김",
+        s_temp: ["낮아짐", "하강"]
+      },
+      bogi: ["기화", "액화", "응고", "융해", "승화", "아이스크림", "드라이아이스", "흡수", "방출", "빼앗김", "받음", "낮아짐", "높아짐"],
+      isAirConditioner: false
+    },
+    6: {
+      title: "6. 수증기가 눈으로 변할 때 눈이 오는 날 기온이 더 포근하게 느껴진다.",
+      answers: {
+        type: "승화",
+        substance: "수증기",
+        inout: "방출",
+        target: "공기",
+        heat: "받음",
+        temp: ["높아짐", "상승"],
+        s_substance: "수증기",
+        s_type: "승화",
+        s_inout: "방출",
+        s_target: "공기",
+        s_heat: "받음",
+        s_temp: ["높아짐", "상승"]
+      },
+      bogi: ["기화", "액화", "응고", "융해", "승화", "수증기", "흡수", "방출", "공기", "빼앗김", "받음", "낮아짐", "높아짐"],
+      isAirConditioner: false
+    },
+    7: {
+      title: "7. 여름철 실내에 에어컨을 틀면 집 안은 시원해지고, 집 밖 실외기에서는 뜨거운 바람이 나온다.",
+      answers: {
+        indoor_type: "기화",
+        indoor_substance: "냉매",
+        indoor_inout: "흡수",
+        indoor_target: ["실내 공기", "공기"],
+        indoor_heat: "빼앗김",
+        indoor_temp: ["낮아짐", "하강"],
+        
+        outdoor_type: "액화",
+        outdoor_substance: "냉매",
+        outdoor_inout: "방출",
+        outdoor_target: ["실외 공기", "공기"],
+        outdoor_heat: "받음",
+        outdoor_temp: ["높아짐", "상승"]
+      },
+      bogi: ["기화", "액화", "응고", "융해", "승화", "냉매", "흡수", "방출", "실내 공기", "실외 공기", "빼앗김", "받음", "낮아짐", "높아짐"],
+      isAirConditioner: true
+    }
+  };
+
+  let currentTab = 1;
+  let selectedText = null;
+
+  // 탭 변경
+  function selectTab(tabNum) {
+    currentTab = tabNum;
+    selectedText = null;
+
+    document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', idx + 1 === tabNum);
+    });
+
+    document.getElementById('feedback').innerText = '';
+    
+    // 7번 탭일 때만 애니메이션 시뮬레이션 표시
+    const simArea = document.getElementById('sim-area');
+    if (tabNum === 7) {
+      simArea.style.display = 'block';
+      initAcCanvas();
+    } else {
+      simArea.style.display = 'none';
+      stopSim();
+    }
+
+    renderTabContent();
+  }
+
+  // 화면 렌더링 (SVG 일러스트 카드 포함)
+  function renderTabContent() {
+    const data = problemsData[currentTab];
+    const contentArea = document.getElementById('activity-content');
+    const bogiArea = document.getElementById('bogi-container');
+
+    // 보기 버튼들 생성
+    bogiArea.innerHTML = '';
+    data.bogi.forEach(word => {
+      const item = document.createElement('div');
+      item.className = 'draggable-item';
+      item.innerText = word;
+      item.setAttribute('draggable', 'true');
+
+      item.addEventListener('click', () => handleBogiClick(item, word));
+      item.addEventListener('dragstart', (e) => {
+        selectedText = word;
+        e.dataTransfer.setData('text/plain', word);
+      });
+
+      bogiArea.appendChild(item);
+    });
+
+    // 7번 에어컨 전용 레이아웃 vs 1~6번 표준 레이아웃
+    if (data.isAirConditioner) {
+      contentArea.innerHTML = `
+        <div class="title-box">${data.title}</div>
+        <div class="diagram-card">
+          ${diagrams[currentTab]}
+        </div>
+        <h4 style="margin-bottom: 8px; color: #1e40af;">[실내기 - 집 안]</h4>
+        <table>
+          <tr>
+            <th>상태 변화 종류</th>
+            <td><div class="drop-zone" data-ans="indoor_type"></div></td>
+            <th>상태 변화 물질</th>
+            <td><div class="drop-zone" data-ans="indoor_substance"></div></td>
+            <th>열에너지 출입</th>
+            <td><div class="drop-zone" data-ans="indoor_inout"></div></td>
+          </tr>
+          <tr>
+            <th>주변 물질</th>
+            <td><div class="drop-zone" data-ans="indoor_target"></div></td>
+            <th>열에너지 주고받기</th>
+            <td><div class="drop-zone" data-ans="indoor_heat"></div></td>
+            <th>온도 변화</th>
+            <td><div class="drop-zone" data-ans="indoor_temp"></div></td>
+          </tr>
+        </table>
+
+        <h4 style="margin: 15px 0 8px 0; color: #dc2626;">[실외기 - 집 밖]</h4>
+        <table>
+          <tr>
+            <th>상태 변화 종류</th>
+            <td><div class="drop-zone" data-ans="outdoor_type"></div></td>
+            <th>상태 변화 물질</th>
+            <td><div class="drop-zone" data-ans="outdoor_substance"></div></td>
+            <th>열에너지 출입</th>
+            <td><div class="drop-zone" data-ans="outdoor_inout"></div></td>
+          </tr>
+          <tr>
+            <th>주변 물질</th>
+            <td><div class="drop-zone" data-ans="outdoor_target"></div></td>
+            <th>열에너지 주고받기</th>
+            <td><div class="drop-zone" data-ans="outdoor_heat"></div></td>
+            <th>온도 변화</th>
+            <td><div class="drop-zone" data-ans="outdoor_temp"></div></td>
+          </tr>
+        </table>
+      `;
+    } else {
+      contentArea.innerHTML = `
+        <div class="title-box">${data.title}</div>
+        <div class="diagram-card">
+          ${diagrams[currentTab]}
+        </div>
+        <table>
+          <tr>
+            <th>상태 변화 종류</th>
+            <td><div class="drop-zone" data-ans="type"></div></td>
+            <th>상태 변화 물질</th>
+            <td><div class="drop-zone" data-ans="substance"></div></td>
+            <th>열에너지 출입</th>
+            <td><div class="drop-zone" data-ans="inout"></div></td>
+          </tr>
+          <tr>
+            <th>주변 물질</th>
+            <td><div class="drop-zone" data-ans="target"></div></td>
+            <th>열에너지 주고받기</th>
+            <td><div class="drop-zone" data-ans="heat"></div></td>
+            <th>온도 변화</th>
+            <td><div class="drop-zone" data-ans="temp"></div></td>
+          </tr>
+          <tr>
+            <th>원리 설명</th>
+            <td colspan="5" class="sentence-box">
+              -&gt; ( <div class="drop-zone inline" data-ans="s_substance"></div> )은/는 
+              ( <div class="drop-zone inline" data-ans="s_type"></div> )하면서 
+              열에너지를 ( <div class="drop-zone inline" data-ans="s_inout"></div> )하면 
+              주변의 ( <div class="drop-zone inline" data-ans="s_target"></div> )이/가 
+              열에너지를 ( <div class="drop-zone inline" data-ans="s_heat"></div> ) 
+              온도가 ( <div class="drop-zone inline" data-ans="s_temp"></div> ).
+            </td>
+          </tr>
+        </table>
+      `;
+    }
+
+    attachDropEvents();
+  }
+
+  // 보기 클릭
+  function handleBogiClick(item, word) {
+    if (item.classList.contains('selected')) {
+      item.classList.remove('selected');
+      selectedText = null;
+    } else {
+      document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('selected'));
+      item.classList.add('selected');
+      selectedText = word;
+    }
+  }
+
+  // 드롭존 터치 및 이벤트
+  function attachDropEvents() {
+    const zones = document.querySelectorAll('.drop-zone');
+    zones.forEach(zone => {
+      zone.addEventListener('click', () => {
+        if (selectedText) {
+          zone.innerText = selectedText;
+          zone.classList.remove('correct', 'wrong');
+        } else {
+          zone.innerText = '';
+          zone.classList.remove('correct', 'wrong');
+        }
+      });
+
+      zone.addEventListener('dragover', (e) => e.preventDefault());
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (selectedText) {
+          zone.innerText = selectedText;
+          zone.classList.remove('correct', 'wrong');
+        }
+      });
+    });
+  }
+
+  // 정답 확인
+  function checkAnswers() {
+    const data = problemsData[currentTab];
+    const zones = document.querySelectorAll('.drop-zone');
+    let allFilled = true;
+    let correctCount = 0;
+
+    zones.forEach(zone => {
+      const userAns = zone.innerText.trim();
+      const ansKey = zone.getAttribute('data-ans');
+      const expected = data.answers[ansKey];
+
+      if (!userAns) {
+        allFilled = false;
+        zone.classList.remove('correct', 'wrong');
+      } else {
+        let isCorrect = false;
+        if (Array.isArray(expected)) {
+          isCorrect = expected.includes(userAns);
+        } else {
+          isCorrect = (userAns === expected);
+        }
+
+        if (isCorrect) {
+          zone.classList.add('correct');
+          zone.classList.remove('wrong');
+          correctCount++;
+        } else {
+          zone.classList.add('wrong');
+          zone.classList.remove('correct');
+        }
+      }
+    });
+
+    const feedback = document.getElementById('feedback');
+    if (!allFilled) {
+      feedback.style.color = '#d97706';
+      feedback.innerText = '⚠️ 아직 빈칸이 남아있습니다. 모두 채워주세요!';
+    } else if (correctCount === zones.length) {
+      feedback.style.color = '#16a34a';
+      feedback.innerText = '🎉 완벽합니다! 모두 맞았습니다.';
+    } else {
+      feedback.style.color = '#dc2626';
+      feedback.innerText = `❌ 틀린 부분이 있습니다. (맞은 개수: ${correctCount} / ${zones.length})`;
+    }
+  }
+
+  // 다시 풀기
+  function resetAnswers() {
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+      zone.innerText = '';
+      zone.classList.remove('correct', 'wrong');
+    });
+    document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('selected'));
+    selectedText = null;
+    document.getElementById('feedback').innerText = '';
+  }
+
+  /* -------------------------------------------------------------
+     7번 탭 전용: 에어컨 냉매 관찰 애니메이션 시뮬레이터 (Canvas)
+  ------------------------------------------------------------- */
+  let animId = null;
+  let isPlaying = true;
+  let simSpeed = 1;
+  let particles = [];
+
+  function initAcCanvas() {
+    const canvas = document.getElementById('acCanvas');
+    if (!canvas) return;
+
+    particles = [];
+    const numParticles = 24;
+    for (let i = 0; i < numParticles; i++) {
+      particles.push({
+        progress: (i / numParticles) * 100
+      });
+    }
+
+    startSim();
+  }
+
+  function startSim() {
+    if (animId) cancelAnimationFrame(animId);
+    loopSim();
+  }
+
+  function stopSim() {
+    if (animId) cancelAnimationFrame(animId);
+    animId = null;
+  }
+
+  function toggleSimPlay() {
+    isPlaying = !isPlaying;
+    const btn = document.getElementById('btnPlayPause');
+    btn.innerText = isPlaying ? "⏸️ 정지" : "▶️ 재생";
+    if (isPlaying) startSim();
+  }
+
+  function toggleSimSpeed() {
+    simSpeed = simSpeed === 1 ? 2 : 1;
+    document.getElementById('speedTxt').innerText = simSpeed + 'x';
+  }
+
+  function getPathInfo(prog) {
+    let x = 0, y = 0, state = 'liquid';
+
+    if (prog < 35) {
+      const ratio = prog / 35;
+      x = 650 - ratio * (650 - 200);
+      y = 150;
+      state = 'liquid';
+    } else if (prog < 50) {
+      const ratio = (prog - 35) / 15;
+      x = 200 - Math.sin(ratio * Math.PI * 3) * 30;
+      y = 150 + ratio * 100;
+      state = 'gasifying';
+    } else if (prog < 85) {
+      const ratio = (prog - 50) / 35;
+      x = 200 + ratio * (650 - 200);
+      y = 250;
+      state = 'gas';
+    } else {
+      const ratio = (prog - 85) / 15;
+      x = 650 + Math.sin(ratio * Math.PI * 3) * 30;
+      y = 250 - ratio * 100;
+      state = 'liquefying';
+    }
+
+    return { x, y, state };
+  }
+
+  function loopSim() {
+    const canvas = document.getElementById('acCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = '#94a3b8';
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(425, 20);
+    ctx.lineTo(425, 360);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#f0f9ff';
+    ctx.strokeStyle = '#0284c7';
+    ctx.lineWidth = 2;
+    ctx.roundRect(50, 40, 260, 90, 10);
+    ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = '#0369a1';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('🏢 실내기 (집 안)', 110, 75);
+    ctx.font = '13px sans-serif';
+    ctx.fillText('❄️ 찬 바람 배출 / 열 흡수', 105, 105);
+
+    ctx.fillStyle = '#fff7ed';
+    ctx.strokeStyle = '#ea580c';
+    ctx.roundRect(540, 40, 260, 90, 10);
+    ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = '#c2410c';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('☀️ 실외기 (집 밖)', 600, 75);
+    ctx.font = '13px sans-serif';
+    ctx.fillText('🔥 더운 바람 배출 / 열 방출', 595, 105);
+
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(650, 150);
+    ctx.lineTo(200, 150);
+    ctx.lineTo(170, 180); ctx.lineTo(230, 210); ctx.lineTo(200, 250);
+    ctx.lineTo(650, 250);
+    ctx.lineTo(680, 220); ctx.lineTo(620, 180); ctx.lineTo(650, 150);
+    ctx.stroke();
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#64748b';
+    ctx.stroke();
+
+    ctx.fillStyle = '#0284c7';
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillText('⬅️ 차가운 액체 냉매 이동', 360, 138);
+
+    ctx.fillStyle = '#ea580c';
+    ctx.fillText('➡️ 뜨거운 기체 냉매 이동', 360, 275);
+
+    ctx.fillStyle = '#0369a1';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText('기화 (액체 ➔ 기체)', 150, 285);
+    ctx.fillText('🔥 열에너지 흡수', 150, 302);
+
+    ctx.fillStyle = '#c2410c';
+    ctx.fillText('액화 (기체 ➔ 액체)', 600, 285);
+    ctx.fillText('💨 열에너지 방출', 600, 302);
+
+    particles.forEach(p => {
+      if (isPlaying) {
+        p.progress = (p.progress + 0.2 * simSpeed) % 100;
+      }
+
+      const info = getPathInfo(p.progress);
+
+      ctx.beginPath();
+      ctx.arc(info.x, info.y, 7, 0, Math.PI * 2);
+
+      if (info.state === 'liquid') {
+        ctx.fillStyle = '#0284c7';
+      } else if (info.state === 'gas') {
+        ctx.fillStyle = '#ef4444';
+      } else if (info.state === 'gasifying') {
+        ctx.fillStyle = '#f97316';
+      } else {
+        ctx.fillStyle = '#38bdf8';
+      }
+
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
+    if (isPlaying) {
+      animId = requestAnimationFrame(loopSim);
+    }
+  }
+
+  window.onload = () => {
+    selectTab(1);
+  };
+</script>
+
+</body>
+</html>
