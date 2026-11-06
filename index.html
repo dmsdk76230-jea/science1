@@ -16,12 +16,18 @@
   <script src="data.js"></script>
   <style>
     body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .live-pulse { animation: pulse-ring 2s infinite ease-in-out; }
   </style>
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col">
 
   <!-- ==========================================
-       학생 내 실명 등록 모달 (실시간 DB 저장)
+       학생 내 실명 등록 모달
   =========================================== -->
   <div id="studentProfileModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl">
@@ -88,6 +94,36 @@
   </header>
 
 
+  <!-- ==========================================
+       ★ 실시간 선생님 지시등 (지금 여기로 모여라!)
+  =========================================== -->
+  <aside id="liveSpotlightBanner" class="hidden bg-gradient-to-r from-rose-600 via-amber-600 to-orange-600 text-white shadow-xl sticky top-[60px] z-30 transition-all">
+    <div class="max-w-6xl mx-auto px-4 py-3 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="flex h-3 w-3 relative flex-shrink-0">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-400"></span>
+        </span>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-black/30 text-yellow-300 text-[10px] font-black tracking-wider uppercase">🔴 LIVE 지금 수업 중</span>
+            <h3 class="text-sm sm:text-base font-black text-white" id="spotlightTitle">활동 안내 중</h3>
+          </div>
+          <p class="text-xs text-amber-100 font-medium mt-0.5" id="spotlightMessage">선생님의 지시에 따라 아래 버튼을 클릭하여 이동하세요.</p>
+        </div>
+      </div>
+
+      <!-- 원클릭 바로가기 버튼 -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button id="spotlightActionBtn" onclick="handleSpotlightClick()" class="live-pulse px-5 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-black text-xs sm:text-sm shadow-lg flex items-center gap-1.5 transition-all">
+          <span>👉 지금 바로 이동하기 (클릭)</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+
   <!-- 메인 본문 -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8 sm:px-6 space-y-16">
 
@@ -122,8 +158,7 @@
     <!-- ==========================================
          PART 2. 반별 전용 학급 마당 (도장 + 제출 + 수행평가)
     =========================================== -->
-    <section id="class-section" class="scroll-mt-20 space-y-6">
-      <!-- 반 선택 대형 탭 -->
+    <section id="class-section" class="scroll-mt-24 space-y-6">
       <div class="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-bold mb-1 border border-indigo-200">
@@ -145,7 +180,6 @@
         </div>
       </div>
 
-      <!-- 선택된 반의 통합 현황 컨테이너 -->
       <div id="classDashboardContainer" class="space-y-6">
         <!-- 1. 우리 반 도장 카드 -->
         <div id="classStampCard" class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -167,7 +201,7 @@
         </div>
 
         <!-- 2. 우리 반 도장판 제출 현황 -->
-        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
+        <div id="submission-card" class="scroll-mt-24 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
               <h4 class="font-black text-slate-900 text-base flex items-center gap-2">
@@ -176,7 +210,6 @@
               <p class="text-xs text-slate-500 mt-0.5">회차별(1~5회) 도장판 제출 여부를 확인하세요.</p>
             </div>
 
-            <!-- 1회~5회차 탭 -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
               <button onclick="selectRound(1)" id="roundBtn-1" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-xs shadow-sm">1회차</button>
               <button onclick="selectRound(2)" id="roundBtn-2" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">2회차</button>
@@ -186,7 +219,6 @@
             </div>
           </div>
 
-          <!-- 제출률 프로그레스 바 -->
           <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80">
             <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
               <span id="submissionStatsText">제출 현황 계산 중...</span>
@@ -197,12 +229,11 @@
             </div>
           </div>
 
-          <!-- 학생 카드 그리드 -->
           <div id="studentsGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2.5"></div>
         </div>
 
         <!-- 3. 우리 반 수행평가 일정 & D-Day 알리미 -->
-        <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-6 text-white shadow-xl space-y-4">
+        <div id="assessment-card" class="scroll-mt-24 bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-6 text-white shadow-xl space-y-4">
           <div class="border-b border-white/10 pb-4">
             <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-rose-500/20 text-rose-300 rounded-full text-[11px] font-bold mb-1 border border-rose-500/30">
               <span>📅 우리 반 D-Day</span>
@@ -243,6 +274,19 @@
     let appData = DASHBOARD_DATA;
     let firebaseDb = null;
 
+    function normalizeData(data) {
+      if (!data) return;
+      if (data.assessments && !Array.isArray(data.assessments)) data.assessments = Object.values(data.assessments);
+      if (data.units && !Array.isArray(data.units)) data.units = Object.values(data.units);
+      if (data.units) {
+        data.units.forEach(u => {
+          if (u.simulations && !Array.isArray(u.simulations)) u.simulations = Object.values(u.simulations);
+          if (u.worksheets && !Array.isArray(u.worksheets)) u.worksheets = Object.values(u.worksheets);
+          if (u.links && !Array.isArray(u.links)) u.links = Object.values(u.links);
+        });
+      }
+    }
+
     try {
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       firebaseDb = firebase.database();
@@ -251,6 +295,7 @@
         const val = snapshot.val();
         if (val) {
           appData = val;
+          normalizeData(appData);
           renderAll();
         }
       });
@@ -268,6 +313,40 @@
 
     let currentSelectedClass = myProfile.class || 'class1';
     let currentSelectedRound = 1;
+
+    // 실시간 수업 안내(Live Spotlight) 렌더링
+    function renderLiveSpotlight() {
+      const banner = document.getElementById('liveSpotlightBanner');
+      const cur = appData.currentActivity;
+
+      if (!cur || !cur.active) {
+        banner.classList.add('hidden');
+        return;
+      }
+
+      banner.classList.remove('hidden');
+      document.getElementById('spotlightTitle').innerText = cur.title || '수업 활동 진행 중';
+      document.getElementById('spotlightMessage').innerText = cur.message || '선생님의 안내에 따라 이동하세요!';
+    }
+
+    // 학생이 '지금 바로 이동하기' 버튼을 눌렀을 때
+    function handleSpotlightClick() {
+      const cur = appData.currentActivity;
+      if (!cur || !cur.targetUrl) return;
+
+      if (cur.targetType === 'scroll') {
+        // 내부 섹션으로 스크롤 이동
+        const el = document.querySelector(cur.targetUrl);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+          el.classList.add('ring-4', 'ring-yellow-400', 'transition-all');
+          setTimeout(() => el.classList.remove('ring-4', 'ring-yellow-400'), 3000);
+        }
+      } else {
+        // 외부 링크 또는 파일 열기
+        window.open(safeUrl(cur.targetUrl), '_blank');
+      }
+    }
 
     function updateProfileUI() {
       if (myProfile.name && myProfile.num && myProfile.class) {
@@ -332,11 +411,9 @@
       return { text: "마감 완료", badge: "bg-slate-600 text-slate-300" };
     }
 
-    // 단원 자료 렌더링 (시뮬레이션 + 학습지 + 외부링크)
     function renderUnits() {
       const container = document.getElementById('unitsContainer');
       container.innerHTML = appData.units.map(unit => {
-        // 1. 시뮬레이션
         const simHtml = unit.simulations && unit.simulations.length > 0 ? `
           <div class="mb-4">
             <span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 inline-block mb-2.5">🎮 디지털 시뮬레이션</span>
@@ -357,7 +434,6 @@
           </div>
         ` : '';
 
-        // 2. 학습지
         const docHtml = unit.worksheets && unit.worksheets.length > 0 ? `
           <div class="mb-3">
             <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200 inline-block mb-2.5">📄 차시별 학습지</span>
@@ -375,7 +451,6 @@
           </div>
         ` : '';
 
-        // 3. 외부 링크 (유튜브 영상 등)
         const linkHtml = unit.links && unit.links.length > 0 ? `
           <div class="pt-2 border-t border-slate-200">
             <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 inline-block mb-2">🔗 추천 영상 & 외부 자료</span>
@@ -398,7 +473,7 @@
         ` : '';
 
         return `
-          <div class="bg-slate-50/90 rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+          <div class="bg-slate-50/90 rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm" id="${unit.id}">
             <div class="flex items-center gap-2.5 pb-3 mb-3 border-b border-slate-200">
               <span class="text-xl p-1.5 rounded-lg bg-white shadow-sm border border-slate-200">${unit.icon}</span>
               <div>
@@ -534,6 +609,7 @@
     }
 
     function renderAll() {
+      renderLiveSpotlight();
       renderUnits();
       renderClassDashboard();
       updateProfileUI();

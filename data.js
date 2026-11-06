@@ -2,9 +2,20 @@
 // 🔬 중1 과학 디지털 탐구실 통합 데이터 저장소 (data.js)
 // 1반(1~28번), 2반(1~26, 28번), 3반(1~5, 7~28번) 결번 반영 완료
 // 1회차 ~ 5회차 도장판 제출 관리 지원
+// 실시간 수업 위치(Live Spotlight) 기능 지원
 // ==============================================================
 
 const DASHBOARD_DATA = {
+  // 0. 실시간 수업 위치 안내 (지금 여기로 모여라!)
+  currentActivity: {
+    active: true,
+    title: "비열 대항전 시뮬레이션 탐구",
+    message: "선생님과 함께 비열 대항전 시뮬레이션을 실행해 봅시다!",
+    targetType: "link", // 'link' (파일/URL 열기) 또는 'scroll' (화면 내 이동)
+    targetUrl: "비열 대항전.html",
+    updatedAt: "수업 준비 중"
+  },
+
   // 1. 반별 총 도장 개수
   stamps: {
     class1: { name: "1학년 1반", count: 32, motto: "열정 가득 1반! 🔥" },
@@ -15,7 +26,7 @@ const DASHBOARD_DATA = {
   // 2. 수행평가 현황 및 D-Day 알리미
   assessments: [
     {
-      id: 1,
+      id: "assess_1",
       title: "1학기 1차 탐구: 열과 비열 실험 보고서",
       unit: "3단원. 열",
       dueDate: "2026-05-18",
@@ -23,7 +34,7 @@ const DASHBOARD_DATA = {
       notice: "가열 시간에 따른 온도 변화 그래프 및 물질별 비열 비교 분석을 반드시 포함할 것!"
     },
     {
-      id: 2,
+      id: "assess_2",
       title: "물질의 상태 변화 입자 모형 그리기",
       unit: "4단원. 물질의 상태 변화",
       dueDate: "2026-06-08",
@@ -32,16 +43,13 @@ const DASHBOARD_DATA = {
     }
   ],
 
-  // 3. 학생 도장판 1회차~5회차 제출 현황 (보내주신 결번 완벽 반영)
+  // 3. 학생 도장판 1회차~5회차 제출 현황
   students: {
-    // 1반: 1번 ~ 28번 (총 28명)
     class1: Array.from({ length: 28 }, (_, i) => ({
       num: i + 1,
       name: `${i + 1}번`,
       rounds: { 1: false, 2: false, 3: false, 4: false, 5: false }
     })),
-
-    // 2반: 1번 ~ 26번, 28번 (27번 결번, 총 27명)
     class2: [
       ...Array.from({ length: 26 }, (_, i) => ({
         num: i + 1,
@@ -54,8 +62,6 @@ const DASHBOARD_DATA = {
         rounds: { 1: false, 2: false, 3: false, 4: false, 5: false }
       }
     ],
-
-    // 3반: 1번 ~ 5번, 7번 ~ 28번 (6번 결번, 총 27명)
     class3: [
       ...Array.from({ length: 5 }, (_, i) => ({
         num: i + 1,

@@ -51,7 +51,7 @@
   <!-- ==========================================
        관리자 헤더
   =========================================== -->
-  <header class="bg-indigo-900 text-white shadow-md sticky top-0 z-30">
+  <header class="bg-indigo-900 text-white shadow-md sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-3 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div class="flex items-center gap-3">
         <span class="text-2xl p-1.5 rounded-xl bg-white/10">⚙️</span>
@@ -66,7 +66,7 @@
 
       <div class="flex items-center gap-2 flex-wrap">
         <button onclick="openMaterialModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 text-white text-xs font-black shadow transition-all flex items-center gap-1">
-          <span>+ 자료/링크 등록하기</span>
+          <span>+ 자료/링크 등록</span>
         </button>
         <a href="index.html" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
           <span>👀 학생 화면 열기</span>
@@ -83,6 +83,66 @@
        관리자 메인 본문
   =========================================== -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8 sm:px-6 space-y-8">
+
+    <!-- ==========================================
+         ★ [신규 기능] 실시간 수업 지시등 (지금 여기로 모여라!)
+    =========================================== -->
+    <section class="bg-gradient-to-br from-rose-500 via-amber-500 to-orange-500 rounded-3xl p-5 sm:p-6 text-white shadow-lg space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/20 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="p-2 rounded-xl bg-white/20 text-xl">📢</span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-black text-base sm:text-lg">실시간 수업 지시등 (지금 여기로 모여라!)</h3>
+              <span id="spotlightStatusBadge" class="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-400 text-slate-900">작동 중</span>
+            </div>
+            <p class="text-xs text-amber-100">선생님이 지정한 활동이 학생 화면 맨 위에 실시간으로 떠서 클릭 한 번에 이동시킵니다.</p>
+          </div>
+        </div>
+        <button type="button" onclick="toggleSpotlightActive()" id="spotlightToggleBtn" class="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-black/30 hover:bg-black/40 text-white text-xs font-bold transition-all">
+          지시등 끄기 (수업 종료)
+        </button>
+      </div>
+
+      <!-- 빠른 퀵 선택 버튼들 -->
+      <div class="space-y-2">
+        <span class="text-xs font-extrabold text-amber-100 block">⚡ 클릭 한 번으로 학생 화면 위치 지정:</span>
+        <div class="flex flex-wrap gap-2 text-xs font-bold">
+          <button type="button" onclick="quickSetSpotlight('비열 대항전 탐구', '모두 비열 대항전 시뮬레이션을 실행하세요!', 'link', '비열 대항전.html')" class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-900 transition-all">
+            🎮 3단원 비열 대항전
+          </button>
+          <button type="button" onclick="quickSetSpotlight('비열 실험실 가상실험', '가열 시간을 조절하며 비열을 실험해 봅시다!', 'link', '비열 실험실.html')" class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-900 transition-all">
+            🎮 3단원 비열 실험실
+          </button>
+          <button type="button" onclick="quickSetSpotlight('상태 변화 시뮬레이션', '열에너지 흡수와 방출을 관찰해 보세요!', 'link', '상태 변화와 열에너지 출입 이용.html')" class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-900 transition-all">
+            🎮 4단원 상태변화
+          </button>
+          <button type="button" onclick="quickSetSpotlight('중력의 방향 시뮬레이션', '지구 중심을 향하는 중력의 방향을 탐구합시다!', 'link', '중력의 방향4.html')" class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-900 transition-all">
+            🎮 5단원 중력의 방향
+          </button>
+          <button type="button" onclick="quickSetSpotlight('도장판 제출 확인', '자신의 도장판 제출 완료 여부를 확인하세요!', 'scroll', '#submission-card')" class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-900 transition-all">
+            📋 도장판 제출로 이동
+          </button>
+          <button type="button" onclick="quickSetSpotlight('수행평가 D-Day 확인', '다가오는 수행평가 일정을 확인하고 준비하세요!', 'scroll', '#assessment-card')" class="px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-900 transition-all">
+            📅 수행평가 D-Day로 이동
+          </button>
+        </div>
+      </div>
+
+      <!-- 직접 입력 폼 -->
+      <div class="bg-black/20 rounded-2xl p-3.5 space-y-2 text-xs">
+        <span class="font-bold text-amber-200">또는 직접 문구와 링크 지정:</span>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <input type="text" id="customSpotTitle" placeholder="활동 제목 (예: 4.1.2 탐구 학습지)" class="px-3 py-2 rounded-xl bg-white/90 text-slate-800 placeholder-slate-400 font-semibold focus:outline-none">
+          <input type="text" id="customSpotUrl" placeholder="링크 주소 또는 파일명 (예: 4.1.2. 입자 모형.pdf)" class="px-3 py-2 rounded-xl bg-white/90 text-slate-800 placeholder-slate-400 font-mono focus:outline-none">
+          <input type="text" id="customSpotMsg" placeholder="학생들에게 보낼 안내 (예: 3번 문항 풀기)" class="px-3 py-2 rounded-xl bg-white/90 text-slate-800 placeholder-slate-400 font-semibold focus:outline-none">
+        </div>
+        <button type="button" onclick="applyCustomSpotlight()" class="w-full py-2 rounded-xl bg-white text-slate-900 font-black hover:bg-amber-100 transition-all shadow">
+          ⚡ 학생들 화면에 지금 즉시 띄우기
+        </button>
+      </div>
+    </section>
+
 
     <!-- 반 선택 탭 -->
     <div class="bg-white rounded-3xl p-3 sm:p-4 border border-slate-200 shadow-sm flex items-center justify-between gap-4">
@@ -167,17 +227,17 @@
     </section>
 
 
-    <!-- 3. 해당 반 수행평가 일정 관리 -->
+    <!-- 3. 해당 반 수행평가 일정 관리 (수정 기능 완비) -->
     <section class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
         <div>
           <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
-            <span>📅 <span id="assessSectionTitle">1학년 1반</span> 수행평가 D-Day 관리</span>
+            <span>📅 수행평가 D-Day 관리 (<span id="assessSectionTitle">1학년 1반</span> 대상)</span>
           </h3>
-          <p class="text-xs text-slate-500 mt-0.5">이 반에 해당하는 수행평가 일정을 등록하고 관리합니다.</p>
+          <p class="text-xs text-slate-500 mt-0.5">등록, 수정, 삭제 시 모든 학생 화면에 실시간으로 즉시 반영됩니다.</p>
         </div>
-        <button onclick="openAssessmentModal()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow">
-          + 새 수행평가 추가
+        <button type="button" onclick="openAssessmentModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow transition-all flex items-center gap-1">
+          <span>+ 새 수행평가 추가</span>
         </button>
       </div>
 
@@ -194,7 +254,7 @@
           </h3>
           <p class="text-xs text-slate-500 mt-0.5">시뮬레이션, 학습지, 유튜브 링크를 확인하고 삭제할 수 있습니다.</p>
         </div>
-        <button onclick="openMaterialModal()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow">
+        <button type="button" onclick="openMaterialModal()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow">
           + 자료 / 링크 추가
         </button>
       </div>
@@ -206,14 +266,66 @@
 
 
   <!-- ==========================================
+       수행평가 추가/수정 모달 (수정 기능 지원)
+  =========================================== -->
+  <div id="assessmentModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-black text-slate-900" id="assessModalTitle">새 수행평가 일정 추가</h3>
+        <button type="button" onclick="closeAssessmentModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+
+      <input type="hidden" id="editAssessId" value="">
+
+      <div class="space-y-3.5 text-xs font-semibold">
+        <div>
+          <label class="block text-slate-600 mb-1">수행평가 제목 <span class="text-rose-500">*</span></label>
+          <input type="text" id="newAssessTitle" placeholder="예: 열과 비열 실험 보고서" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">관련 단원 <span class="text-rose-500">*</span></label>
+          <input type="text" id="newAssessUnit" placeholder="예: 3단원. 열" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">마감 날짜 (D-Day 기준일) <span class="text-rose-500">*</span></label>
+          <input type="date" id="newAssessDate" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold">
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">대상 학급</label>
+          <select id="newAssessTarget" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold">
+            <option value="1반, 2반, 3반 전체">1반, 2반, 3반 전체</option>
+            <option value="1학년 1반">1학년 1반만</option>
+            <option value="1학년 2반">1학년 2반만</option>
+            <option value="1학년 3반">1학년 3반만</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-slate-600 mb-1">유의사항 및 안내</label>
+          <textarea id="newAssessNotice" rows="2" placeholder="준비물이나 주의사항을 적어주세요." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeAssessmentModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">취소</button>
+          <button type="button" onclick="submitAssessmentForm()" id="assessSubmitBtn" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow transition-all">
+            등록하기
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==========================================
        자료/링크 추가 모달
   =========================================== -->
   <div id="materialModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl">
-      <h3 class="text-lg font-black text-slate-900 mb-1">새 자료 / 외부 링크 등록</h3>
-      <p class="text-xs text-slate-500 mb-4">등록 즉시 모든 학생들 화면에 0.5초 만에 새 카드가 생성됩니다!</p>
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-lg font-black text-slate-900">새 자료 / 외부 링크 등록</h3>
+        <button type="button" onclick="closeMaterialModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+      </div>
+      <p class="text-xs text-slate-500 mb-4">등록 즉시 모든 학생들 화면에 실시간으로 새 카드가 생깁니다!</p>
 
-      <form onsubmit="saveNewMaterial(event)" class="space-y-3 text-xs font-semibold">
+      <div class="space-y-3 text-xs font-semibold">
         <div>
           <label class="block text-slate-600 mb-1">단원 선택</label>
           <select id="matUnit" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold">
@@ -232,61 +344,22 @@
           </select>
         </div>
         <div>
-          <label class="block text-slate-600 mb-1">자료 제목</label>
-          <input type="text" id="matTitle" required placeholder="예: EBS 열의 이동 원리 영상" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500">
+          <label class="block text-slate-600 mb-1">자료 제목 <span class="text-rose-500">*</span></label>
+          <input type="text" id="matTitle" placeholder="예: EBS 열의 이동 원리 영상" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500">
         </div>
         <div>
-          <label class="block text-slate-600 mb-1">파일 링크 또는 파일명</label>
-          <input type="text" id="matUrl" required placeholder="예: https://youtu.be/... 또는 파일명.html / 구글드라이브 링크" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono">
+          <label class="block text-slate-600 mb-1">파일 링크 또는 파일명 <span class="text-rose-500">*</span></label>
+          <input type="text" id="matUrl" placeholder="예: https://youtu.be/... 또는 파일명.html / 구글드라이브 링크" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono">
         </div>
         <div>
-          <label class="block text-slate-600 mb-1">학생 안내 및 설명 (시뮬레이션만 해당, 선택)</label>
+          <label class="block text-slate-600 mb-1">학생 안내 및 설명 (시뮬레이션 전용, 선택)</label>
           <input type="text" id="matDesc" placeholder="예: 직접 조작하며 온도 변화를 관찰합니다." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500">
         </div>
-        <div class="flex items-center justify-end gap-2 pt-3">
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
           <button type="button" onclick="closeMaterialModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">취소</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black shadow">실시간 등록하기</button>
+          <button type="button" onclick="submitMaterialForm()" class="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black shadow">실시간 등록하기</button>
         </div>
-      </form>
-    </div>
-  </div>
-
-
-  <!-- 수행평가 모달 -->
-  <div id="assessmentModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl">
-      <h3 class="text-lg font-bold text-slate-900 mb-4">새 수행평가 일정 추가</h3>
-      <form onsubmit="saveNewAssessment(event)" class="space-y-3 text-xs font-semibold">
-        <div>
-          <label class="block text-slate-600 mb-1">수행평가 제목</label>
-          <input type="text" id="newAssessTitle" required placeholder="예: 열과 비열 실험 보고서" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div>
-          <label class="block text-slate-600 mb-1">관련 단원</label>
-          <input type="text" id="newAssessUnit" required placeholder="예: 3단원. 열" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div>
-          <label class="block text-slate-600 mb-1">마감 날짜 (D-Day 기준일)</label>
-          <input type="date" id="newAssessDate" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-        <div>
-          <label class="block text-slate-600 mb-1">대상 학급</label>
-          <select id="newAssessTarget" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold">
-            <option value="1반, 2반, 3반 전체">1반, 2반, 3반 전체</option>
-            <option value="1학년 1반">1학년 1반만</option>
-            <option value="1학년 2반">1학년 2반만</option>
-            <option value="1학년 3반">1학년 3반만</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-slate-600 mb-1">유의사항 및 안내</label>
-          <textarea id="newAssessNotice" rows="2" placeholder="준비물이나 주의사항을 적어주세요." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-        </div>
-        <div class="flex items-center justify-end gap-2 pt-2">
-          <button type="button" onclick="closeAssessmentModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">취소</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow">추가하기</button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 
@@ -320,6 +393,19 @@
     let adminData = DASHBOARD_DATA;
     let firebaseDb = null;
 
+    function normalizeData(data) {
+      if (!data) return;
+      if (data.assessments && !Array.isArray(data.assessments)) data.assessments = Object.values(data.assessments);
+      if (data.units && !Array.isArray(data.units)) data.units = Object.values(data.units);
+      if (data.units) {
+        data.units.forEach(u => {
+          if (u.simulations && !Array.isArray(u.simulations)) u.simulations = Object.values(u.simulations);
+          if (u.worksheets && !Array.isArray(u.worksheets)) u.worksheets = Object.values(u.worksheets);
+          if (u.links && !Array.isArray(u.links)) u.links = Object.values(u.links);
+        });
+      }
+    }
+
     try {
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       firebaseDb = firebase.database();
@@ -328,8 +414,10 @@
         const val = snap.val();
         if (val) {
           adminData = val;
+          normalizeData(adminData);
           renderCurrentClass();
           renderMaterials();
+          renderSpotlightUI();
         } else {
           firebaseDb.ref('science_dashboard').set(DASHBOARD_DATA);
         }
@@ -344,12 +432,79 @@
     let currentAdminRound = 1;
 
     function autoSave() {
+      normalizeData(adminData);
       localStorage.setItem('SCIENCE_DASHBOARD_DATA', JSON.stringify(adminData));
       if (firebaseDb) {
-        firebaseDb.ref('science_dashboard').set(adminData);
+        try {
+          firebaseDb.ref('science_dashboard').set(adminData);
+        } catch (err) {
+          console.error('Firebase save error', err);
+        }
       }
     }
 
+    // ==========================================
+    // 실시간 수업 지시등 (Live Spotlight) 컨트롤
+    // ==========================================
+    function renderSpotlightUI() {
+      const cur = adminData.currentActivity || { active: false };
+      const badge = document.getElementById('spotlightStatusBadge');
+      const toggleBtn = document.getElementById('spotlightToggleBtn');
+
+      if (cur.active) {
+        badge.innerText = `● 작동 중: ${cur.title || ''}`;
+        badge.className = 'text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-400 text-slate-900';
+        toggleBtn.innerText = '지시등 끄기 (수업 종료)';
+      } else {
+        badge.innerText = '○ 꺼짐 (숨김 상태)';
+        badge.className = 'text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-700 text-slate-300';
+        toggleBtn.innerText = '지시등 다시 켜기';
+      }
+    }
+
+    function toggleSpotlightActive() {
+      if (!adminData.currentActivity) adminData.currentActivity = { active: false };
+      adminData.currentActivity.active = !adminData.currentActivity.active;
+      autoSave();
+      renderSpotlightUI();
+    }
+
+    function quickSetSpotlight(title, message, targetType, targetUrl) {
+      adminData.currentActivity = {
+        active: true,
+        title: title,
+        message: message,
+        targetType: targetType,
+        targetUrl: targetUrl,
+        updatedAt: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+      };
+      autoSave();
+      renderSpotlightUI();
+      alert(`[${title}] 위치로 학생 화면에 실시간 안내가 전송되었습니다! 🚀`);
+    }
+
+    function applyCustomSpotlight() {
+      const title = document.getElementById('customSpotTitle').value.trim();
+      const url = document.getElementById('customSpotUrl').value.trim();
+      const msg = document.getElementById('customSpotMsg').value.trim();
+
+      if (!title || !url) {
+        alert('활동 제목과 링크 주소를 입력해 주세요!');
+        return;
+      }
+
+      const isScroll = url.startsWith('#');
+      quickSetSpotlight(title, msg || '선생님의 안내에 따라 이동하세요!', isScroll ? 'scroll' : 'link', url);
+
+      document.getElementById('customSpotTitle').value = '';
+      document.getElementById('customSpotUrl').value = '';
+      document.getElementById('customSpotMsg').value = '';
+    }
+
+
+    // ==========================================
+    // 반 선택 및 도장/제출
+    // ==========================================
     function setAdminClass(classKey) {
       currentAdminClass = classKey;
       ['class1', 'class2', 'class3'].forEach(k => {
@@ -447,10 +602,16 @@
       renderSubmissions();
     }
 
+    // ==========================================
+    // 수행평가 렌더링, 추가, ★수정, 삭제 완벽 동작
+    // ==========================================
     function renderAssessments() {
       const listContainer = document.getElementById('adminAssessmentsList');
       const curNumStr = currentAdminClass.replace('class', '');
-      const list = adminData.assessments.filter(item => {
+      
+      normalizeData(adminData);
+      const allAssess = adminData.assessments || [];
+      const list = allAssess.filter(item => {
         return item.target.includes('전체') || item.target.includes(`${curNumStr}반`);
       });
 
@@ -459,57 +620,125 @@
         return;
       }
 
-      listContainer.innerHTML = list.map((item, idx) => `
+      listContainer.innerHTML = list.map(item => `
         <div class="p-3.5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2 mb-1">
               <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">${item.unit}</span>
               <span class="text-xs font-bold text-slate-700">마감: ${item.dueDate}</span>
-              <span class="text-[11px] text-slate-400">(${item.target})</span>
+              <span class="text-[11px] text-indigo-600 font-semibold">(${item.target})</span>
             </div>
             <h5 class="text-xs font-bold text-slate-900">${item.title}</h5>
-            <p class="text-[11px] text-slate-500 mt-0.5">💡 ${item.notice}</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">💡 ${item.notice || '안내사항 없음'}</p>
           </div>
-          <button onclick="deleteAssessment(${idx})" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 text-xs font-bold">
-            삭제
-          </button>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <button type="button" onclick="openEditAssessmentModal('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-colors">
+              수정
+            </button>
+            <button type="button" onclick="deleteAssessment('${item.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition-colors">
+              삭제
+            </button>
+          </div>
         </div>
       `).join('');
     }
 
+    // 수행평가 추가 모달 열기
     function openAssessmentModal() {
+      document.getElementById('editAssessId').value = '';
+      document.getElementById('assessModalTitle').innerText = '새 수행평가 일정 추가';
+      document.getElementById('assessSubmitBtn').innerText = '등록하기';
+      document.getElementById('newAssessTitle').value = '';
+      document.getElementById('newAssessUnit').value = '';
+      document.getElementById('newAssessDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('newAssessNotice').value = '';
       document.getElementById('assessmentModal').classList.remove('hidden');
     }
+
+    // ★ 수행평가 수정 모달 열기
+    function openEditAssessmentModal(id) {
+      normalizeData(adminData);
+      const item = (adminData.assessments || []).find(a => String(a.id) === String(id));
+      if (!item) return;
+
+      document.getElementById('editAssessId').value = item.id;
+      document.getElementById('assessModalTitle').innerText = '수행평가 일정 수정';
+      document.getElementById('assessSubmitBtn').innerText = '수정 완료하기';
+      document.getElementById('newAssessTitle').value = item.title;
+      document.getElementById('newAssessUnit').value = item.unit;
+      document.getElementById('newAssessDate').value = item.dueDate;
+      document.getElementById('newAssessTarget').value = item.target;
+      document.getElementById('newAssessNotice').value = item.notice || '';
+
+      document.getElementById('assessmentModal').classList.remove('hidden');
+    }
+
     function closeAssessmentModal() {
       document.getElementById('assessmentModal').classList.add('hidden');
     }
 
-    function saveNewAssessment(e) {
-      e.preventDefault();
-      const newObj = {
-        id: Date.now(),
-        title: document.getElementById('newAssessTitle').value,
-        unit: document.getElementById('newAssessUnit').value,
-        dueDate: document.getElementById('newAssessDate').value,
-        target: document.getElementById('newAssessTarget').value,
-        notice: document.getElementById('newAssessNotice').value
-      };
-      adminData.assessments.push(newObj);
+    // 수행평가 저장 (추가 & 수정 공통)
+    function submitAssessmentForm() {
+      const editId = document.getElementById('editAssessId').value;
+      const title = document.getElementById('newAssessTitle').value.trim();
+      const unit = document.getElementById('newAssessUnit').value.trim();
+      const dueDate = document.getElementById('newAssessDate').value;
+      const target = document.getElementById('newAssessTarget').value;
+      const notice = document.getElementById('newAssessNotice').value.trim();
+
+      if (!title) {
+        alert('수행평가 제목을 입력해 주세요!');
+        return;
+      }
+      if (!unit) {
+        alert('관련 단원을 입력해 주세요! (예: 3단원. 열)');
+        return;
+      }
+      if (!dueDate) {
+        alert('마감 날짜를 선택해 주세요!');
+        return;
+      }
+
+      normalizeData(adminData);
+      if (!adminData.assessments) adminData.assessments = [];
+
+      if (editId) {
+        // [수정 모드]
+        const idx = adminData.assessments.findIndex(a => String(a.id) === String(editId));
+        if (idx !== -1) {
+          adminData.assessments[idx] = {
+            id: editId,
+            title, unit, dueDate, target, notice
+          };
+          alert(`[${title}] 수행평가가 성공적으로 수정되었습니다! ✨`);
+        }
+      } else {
+        // [신규 추가 모드]
+        const newObj = {
+          id: String(Date.now()),
+          title, unit, dueDate, target, notice
+        };
+        adminData.assessments.push(newObj);
+        alert(`[${title}] 새 수행평가가 등록되었습니다! 🎉`);
+      }
+
       autoSave();
       renderAssessments();
       closeAssessmentModal();
     }
 
-    function deleteAssessment(idx) {
-      if (confirm('이 수행평가를 삭제하시겠습니까?')) {
-        adminData.assessments.splice(idx, 1);
+    function deleteAssessment(id) {
+      if (confirm('이 수행평가를 정말 삭제하시겠습니까?')) {
+        normalizeData(adminData);
+        adminData.assessments = adminData.assessments.filter(item => String(item.id) !== String(id));
         autoSave();
         renderAssessments();
+        alert('수행평가가 삭제되었습니다.');
       }
     }
 
     // ==========================================
-    // 자료 및 외부링크 관리 로직
+    // 자료 및 외부링크 관리
     // ==========================================
     function openMaterialModal() {
       document.getElementById('materialModal').classList.remove('hidden');
@@ -518,14 +747,23 @@
       document.getElementById('materialModal').classList.add('hidden');
     }
 
-    function saveNewMaterial(e) {
-      e.preventDefault();
+    function submitMaterialForm() {
       const unitId = document.getElementById('matUnit').value;
       const type = document.getElementById('matType').value;
       const title = document.getElementById('matTitle').value.trim();
       const url = document.getElementById('matUrl').value.trim();
       const desc = document.getElementById('matDesc').value.trim();
 
+      if (!title) {
+        alert('자료 제목을 입력해 주세요!');
+        return;
+      }
+      if (!url) {
+        alert('파일 링크 또는 파일명을 입력해 주세요!');
+        return;
+      }
+
+      normalizeData(adminData);
       const unit = adminData.units.find(u => u.id === unitId);
       if (!unit) return;
 
@@ -544,11 +782,17 @@
       autoSave();
       renderMaterials();
       closeMaterialModal();
-      alert(`[${title}] 자료가 실시간으로 등록되었습니다!`);
+
+      document.getElementById('matTitle').value = '';
+      document.getElementById('matUrl').value = '';
+      document.getElementById('matDesc').value = '';
+
+      alert(`[${title}] 자료가 실시간 등록되었습니다!`);
     }
 
     function renderMaterials() {
       const container = document.getElementById('adminMaterialsList');
+      normalizeData(adminData);
       container.innerHTML = adminData.units.map(unit => {
         const sims = unit.simulations || [];
         const docs = unit.worksheets || [];
@@ -587,6 +831,7 @@
 
     function deleteMaterial(unitId, prop, index) {
       if (confirm('이 자료를 삭제하시겠습니까?')) {
+        normalizeData(adminData);
         const unit = adminData.units.find(u => u.id === unitId);
         if (unit && unit[prop]) {
           unit[prop].splice(index, 1);
@@ -617,6 +862,7 @@
 
     renderCurrentClass();
     renderMaterials();
+    renderSpotlightUI();
   </script>
 </body>
 </html>
