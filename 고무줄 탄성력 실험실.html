@@ -1,0 +1,3605 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>탄성력 가상 실험실 & 탄성력 표현하기 | 중1 과학</title>
+  <!-- Tailwind CSS CDN & Pretendard 폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Pretendard', sans-serif; background-color: #0b1120; touch-action: none; }
+    canvas { touch-action: none; }
+    .tab-active {
+      background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+    }
+    .tab-inactive {
+      background: rgba(30, 41, 59, 0.8);
+      color: #94a3b8;
+    }
+    .tab-inactive:hover {
+      background: rgba(51, 65, 85, 0.9);
+      color: #e2e8f0;
+    }
+    .card-active {
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col select-none overflow-x-hidden">
+
+  <!-- ====================================================
+       상단 메인 네비게이션 헤더 & 실험 모드 탭 (3개 탭)
+  ==================================================== -->
+  <header class="bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-3 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      
+      <!-- 제목 & 설명 -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-2xl shadow-inner">
+          <span id="headerIcon">🎨</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-black tracking-tight text-white" id="headerTitle">탄성력 표현하기 실험실</h1>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-[10px] font-bold">중1 과학 여러 가지 힘</span>
+          </div>
+          <p class="text-[11px] text-slate-400" id="headerDesc">풍선, 공, 트램펄린, 장대, 활 등 9가지 물체를 터치하여 변형시키고 탄성력의 방향을 관찰해 보세요.</p>
+        </div>
+      </div>
+
+      <!-- 상단 모드 전환 탭 (1. 탄성력 표현하기 / 2. 고무줄 실험 / 3. 용수철 실험) -->
+      <div class="flex items-center justify-between md:justify-end gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+        <div class="flex items-center p-1 rounded-2xl bg-slate-950 border border-slate-800">
+          <!-- 탭 1 (제일 왼쪽): 탄성력을 표현하기 -->
+          <button 
+            id="tabExpress" 
+            onclick="switchMainTab('express')" 
+            class="px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-active whitespace-nowrap"
+          >
+            <span>🎨</span> 탄성력 표현하기
+          </button>
+          <!-- 탭 2: 고무줄 실험 -->
+          <button 
+            id="tabRubber" 
+            onclick="switchMainTab('rubber')" 
+            class="px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap"
+          >
+            <span>🏹</span> 고무줄 실험
+          </button>
+          <!-- 탭 3: 용수철 실험 -->
+          <button 
+            id="tabSpring" 
+            onclick="switchMainTab('spring')" 
+            class="px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap"
+          >
+            <span>🌀</span> 용수철 실험
+          </button>
+        </div>
+
+        <!-- 전체화면 버튼 -->
+        <button 
+          onclick="toggleFullScreen()" 
+          class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all border border-slate-700 flex-shrink-0" 
+          title="전체화면"
+        >
+          ⛶
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+
+  <!-- ====================================================
+       [모드 1]: 탄성력을 표현하기 (9가지 일상 현상 탐구 컨테이너)
+  ==================================================== -->
+  <section id="expressContainer" class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 flex flex-col gap-4">
+    
+    <!-- 상단 안내 바 및 힘의 방향 범례 -->
+    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-lg">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">✨</span>
+        <div>
+          <h2 class="text-sm sm:text-base font-extrabold text-white">물체의 모양을 변형시킬 때 작용하는 탄성력 표현</h2>
+          <p class="text-[11px] text-slate-400">9가지 물체를 터치·드래그하여 모양을 변형시키고, 작용하는 외력과 탄성력의 방향을 관찰하세요.</p>
+        </div>
+      </div>
+
+      <!-- 힘의 방향 범례 배지 -->
+      <div class="flex items-center gap-2 text-xs flex-wrap">
+        <span class="px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-400/30 font-bold flex items-center gap-1.5 shadow">
+          <span class="w-2 h-2 rounded-full bg-blue-400"></span> 외부 힘 F_외 (내가 가한 힘)
+        </span>
+        <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-400/30 font-bold flex items-center gap-1.5 shadow">
+          <span class="w-2 h-2 rounded-full bg-rose-400"></span> 탄성력 F_탄 (원래대로 되돌아가려는 힘)
+        </span>
+      </div>
+    </div>
+
+    <!-- 2단 레이아웃: 왼쪽 9가지 물체 카드 그리드 (한눈에 보기) / 오른쪽 인터랙티브 가상 물리 캔버스 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+      
+      <!-- ==================================================
+           [좌측 5/12]: 9가지 물체 한눈에 보기 카드 그리드 (3x3)
+      ================================================== -->
+      <div class="lg:col-span-5 flex flex-col gap-2.5">
+        <div class="flex items-center justify-between px-1">
+          <span class="text-xs font-bold text-slate-300 flex items-center gap-1">
+            <span>📚</span> 탄성력을 이용하는 9가지 물체 & 현상
+          </span>
+          <span class="text-[11px] text-indigo-400 font-semibold">카드를 터치해 선택</span>
+        </div>
+
+        <!-- 3x3 카드 그리드 (9개 물체 전부 한 화면에 배치) -->
+        <div class="grid grid-cols-3 gap-2 flex-1" id="phenomenaCardGrid">
+          <!-- 1. 풍선 -->
+          <button onclick="selectPhenomenon('balloon')" id="card-balloon" class="p-2 sm:p-2.5 rounded-2xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 transition-all text-left flex flex-col justify-between card-active">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-2xl">🎈</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold">누름/늘림</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-xs font-extrabold text-white">풍선</div>
+              <div class="text-[10px] text-slate-400 line-clamp-1">누르거나 당김</div>
+            </div>
+          </button>
+
+          <!-- 2. 고무공 -->
+          <button onclick="selectPhenomenon('ball')" id="card-ball" class="p-2 sm:p-2.5 rounded-2xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 transition-all text-left flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-2xl">⚽</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">누름/늘림</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-xs font-extrabold text-white">고무공</div>
+              <div class="text-[10px] text-slate-400 line-clamp-1">찌그러짐/늘어남</div>
+            </div>
+          </button>
+
+          <!-- 3. 용수철 -->
+          <button onclick="selectPhenomenon('spring')" id="card-spring" class="p-2 sm:p-2.5 rounded-2xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 transition-all text-left flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-2xl">🌀</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 font-bold">화면 안 제한</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-xs font-extrabold text-white">용수철</div>
+              <div class="text-[10px] text-slate-400 line-clamp-1">인장 / 압축</div>
+            </div>
+          </button>
+
+          <!-- 4. 고무줄 -->
+          <button onclick="selectPhenomenon('band')" id="card-band" class="p-2 sm:p-2.5 rounded-2xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 transition-all text-left flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-2xl">🟡</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">양쪽 늘림</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-xs font-extrabold text-white">고무줄</div>
+              <div class="text-[10px] text-slate-400 line-clamp-1">양쪽으로 잡아당기기</div>
+            </div>
+          </button>
+
+          <!-- 5. 볼펜 -->
+          <button onclick="selectPhenomenon('pen')" id="card-pen" class="p-2 sm:p-2.5 rounded-2xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 transition-all text-left flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-2xl">🖊️</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">수직 누름만</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-xs font-extrabold text-white">볼펜</div>
+              <div class="text-[10px] text-slate-400 line-clamp-1">노크 스프링 압축</div>
+            </div>
+          </button>
+
+          <!-- 6. 샤프 -->
+          <button onclick="selectPhenomenon('pencil')" id="card-pencil" class="p-2 sm:p-2.5 rounded-2xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 transition-all text-left flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-2xl">✏️</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 font-bold">심 배출!</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-xs font-extrabold text-white">샤프</div>
+              <div class="text-[10px] text-slate-400 line-clamp-1">누르면 심 나옴</div>
+            </div>
+          </button>
+
+          <!-- 7. 트램펄린 -->
+          <button onclick="selectPhenomenon('trampoline')" id="card-trampoline" class="p-2 sm:p-2.5 rounded-2xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 transition-all text-left flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-2xl">🏀</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">공 튀기기!</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-xs font-extrabold text-white">트램펄린</div>
+              <div class="text-[10px] text-slate-400 line-clamp-1">공이 튕겨 오름</div>
+            </div>
+          </button>
+
+          <!-- 8. 장대 높이 뛰기 -->
+          <button onclick="selectPhenomenon('pole')" id="card-pole" class="p-2 sm:p-2.5 rounded-2xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 transition-all text-left flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-2xl">🏃</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 font-bold">꽂기·누름·도약</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-xs font-extrabold text-white">장대 높이 뛰기</div>
+              <div class="text-[10px] text-slate-400 line-clamp-1">누르면 탄성 도약</div>
+            </div>
+          </button>
+
+          <!-- 9. 활 쏘기 -->
+          <button onclick="selectPhenomenon('bow')" id="card-bow" class="p-2 sm:p-2.5 rounded-2xl border border-slate-800 bg-slate-900/80 hover:bg-slate-800 transition-all text-left flex flex-col justify-between">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-2xl">🎯</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-300 font-bold">당긴 각도 발사!</span>
+            </div>
+            <div class="mt-2">
+              <div class="text-xs font-extrabold text-white">활 쏘기</div>
+              <div class="text-[10px] text-slate-400 line-clamp-1">각도대로 화살 발사</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- 핵심 요약 카드 -->
+        <div class="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-300 space-y-1">
+          <div class="font-bold text-white flex items-center gap-1">
+            <span>💡</span> 탄성력의 핵심 법칙
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            탄성체는 누르거나 당겨서 변형시키는 순간, <strong class="text-rose-400">원래 모양으로 돌아가려는 반대 방향의 탄성력</strong>이 발생합니다!
+          </p>
+        </div>
+      </div>
+
+
+      <!-- ==================================================
+           [우측 7/12]: 대형 멀티 터치 인터랙티브 캔버스
+      ================================================== -->
+      <div class="lg:col-span-7 flex flex-col gap-3">
+        <div class="relative bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex-1 min-h-[470px] flex flex-col justify-between">
+          
+          <!-- 상단 현재 물체 타이틀 & 액션 툴바 -->
+          <div class="p-3.5 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 flex items-center justify-between z-10 flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl" id="expCurrentIcon">🎈</span>
+              <div>
+                <h3 class="text-sm font-extrabold text-white flex items-center gap-1.5">
+                  <span id="expCurrentTitle">풍선의 탄성력 표현하기</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 font-bold" id="expCurrentTag">누름/늘림</span>
+                </h3>
+                <p class="text-[11px] text-slate-400" id="expCurrentGuide">풍선을 터치하여 누르거나 바깥으로 당겨 늘려보세요!</p>
+              </div>
+            </div>
+
+            <!-- 모드별 액션 버튼 (풍선/공 모드 전환 토글 & 과학쌤 장대높이뛰기 조작바 & 리셋) -->
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <!-- 장대 높이 뛰기 전용 조작 패널 (장대 꽂기, 장대 누르기, 도약!, 연속 시연) -->
+              <div id="poleVaultControlBar" class="hidden flex items-center gap-1.5 flex-wrap">
+                <button id="btnPolePlant" onclick="poleActionPlant()" class="px-2.5 py-1 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 text-xs font-extrabold flex items-center gap-1 transition-all active:scale-95" title="S 키 또는 클릭: 장대를 바닥 홈에 꽂고 준비합니다">
+                  <span class="bg-teal-500 text-slate-950 px-1 rounded text-[10px] font-black">S</span>
+                  <span id="btnPolePlantText">📍 장대 꽂기</span>
+                </button>
+                <button id="btnPolePress" onclick="poleActionPress()" class="px-2.5 py-1 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-extrabold flex items-center gap-1 transition-all active:scale-95" title="W/아래 키 또는 클릭하여 장대를 휘게 합니다 (외력으로 탄성 에너지 충전)">
+                  <span class="bg-amber-500 text-slate-950 px-1 rounded text-[10px] font-black">W/↓</span>
+                  <span>⬇️ 장대 누르기</span>
+                </button>
+                <button id="btnPoleVault" onclick="poleActionVault()" class="px-2.5 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-extrabold flex items-center gap-1 transition-all active:scale-95" title="D/스페이스 키: 장대와 분리되어 가로대를 넘습니다!">
+                  <span class="bg-rose-500 text-white px-1 rounded text-[10px] font-black">D/Space</span>
+                  <span>🚀 도약!</span>
+                </button>
+                <button id="btnPoleAuto" onclick="poleActionAutoPlay()" class="px-2 py-1 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1 transition-all" title="한 번의 클릭으로 꽂기 ➔ 누르기 ➔ 도약 연속 시연">
+                  <span>▶️ 연속 시연</span>
+                </button>
+              </div>
+
+              <!-- 풍선/공 전용: 누르기 vs 늘리기 모드 토글 -->
+              <div id="balloonBallModeToggle" class="flex items-center bg-slate-800/90 rounded-xl p-0.5 border border-slate-700">
+                <button onclick="setDeformMode('squash')" id="btnDeformSquash" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-indigo-600 text-white transition-all">
+                  누르기(압축)
+                </button>
+                <button onclick="setDeformMode('stretch')" id="btnDeformStretch" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-slate-300 hover:text-white transition-all">
+                  잡고 늘리기
+                </button>
+              </div>
+
+              <!-- 처음 상태로 리셋 -->
+              <button onclick="resetExpressDeform()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all border border-slate-700 active:scale-95" title="처음 모양으로 리셋">
+                ↺ 원래대로
+              </button>
+
+              <!-- 학습지 그림 자료 열기 (하얀 배경 9가지 도해) -->
+              <a href="탄성력_9가지_현상_학습지_그림자료.html" target="_blank" class="px-3 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 text-xs font-bold transition-all border border-indigo-500/40 active:scale-95 flex items-center gap-1.5" title="학습지에 넣을 수 있는 하얀 배경의 9가지 단순 그림 및 인쇄용 자료">
+                <span>📄</span> 학습지 그림 자료
+              </a>
+            </div>
+          </div>
+
+          <!-- 메인 캔버스 -->
+          <canvas id="expressCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+
+          <!-- 하단 실시간 힘 벡터 & 원리 설명 피드백 바 -->
+          <div class="p-3.5 bg-slate-950/85 backdrop-blur-md border-t border-slate-800/80 flex flex-col gap-2 z-10">
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2 font-bold">
+                <span class="text-blue-400 flex items-center gap-1" id="expForceAppliedText">
+                  🔵 외부 힘(F_외): <span class="font-extrabold text-sm" id="expAppliedVal">0.0 N</span>
+                </span>
+                <span class="text-slate-600">|</span>
+                <span class="text-rose-400 flex items-center gap-1" id="expForceElasticText">
+                  🔴 탄성력(F_탄): <span class="font-extrabold text-sm" id="expElasticVal">0.0 N</span>
+                </span>
+              </div>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700" id="expStatusBadge">
+                평형 상태 (외력 없음)
+              </span>
+            </div>
+
+            <!-- 현재 현상의 물리적 설명 -->
+            <p class="text-xs text-indigo-200/90 bg-indigo-950/30 border border-indigo-800/30 rounded-xl p-2 font-medium leading-relaxed" id="expPhysicsExplanation">
+              풍선을 누르거나 바깥으로 당겨 늘리면, 원래 모양으로 되돌아가려는 반대 방향의 탄성력이 발생합니다.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================
+       [모드 2 & 3]: 고무줄 & 용수철 훅의 법칙 실험 컨테이너 (기존)
+  ==================================================== -->
+  <section id="hookeContainer" class="hidden flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+    <!-- [왼쪽 7/12]: 가상 실험 캔버스 & 인터랙션 조작대 -->
+    <div class="lg:col-span-7 flex flex-col gap-3">
+
+      <!-- 용수철 모드 전용: 다양한 용수철 선택 바 -->
+      <div id="springSelectorBar" class="bg-slate-900 p-3 rounded-2xl border border-slate-800 shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-extrabold text-slate-200 flex items-center gap-1.5">
+            <span>⚙️</span> 용수철 종류 선택 (탄성 계수 k):
+          </span>
+          <span class="text-[11px] text-indigo-300 font-semibold" id="springTypeDesc">
+            보통 철사 코일 (중학교 실험 표준)
+          </span>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-2">
+          <!-- 1. 부드러운 용수철 -->
+          <button 
+            type="button"
+            onclick="selectSpringType('soft')" 
+            id="btnSpringSoft"
+            class="p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200"
+          >
+            <div class="flex items-center gap-1 font-black text-xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> 부드러운 용수철
+            </div>
+            <span class="text-[10px] text-slate-300">k = 0.5 N/cm (가는 코일)</span>
+          </button>
+
+          <!-- 2. 표준 용수철 -->
+          <button 
+            type="button"
+            onclick="selectSpringType('standard')" 
+            id="btnSpringStandard"
+            class="p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 bg-sky-950/60 border-sky-500 text-sky-300 ring-2 ring-sky-500/30"
+          >
+            <div class="flex items-center gap-1 font-black text-xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span> 표준 용수철
+            </div>
+            <span class="text-[10px] text-slate-300">k = 1.0 N/cm (보통 코일)</span>
+          </button>
+
+          <!-- 3. 단단한 용수철 -->
+          <button 
+            type="button"
+            onclick="selectSpringType('stiff')" 
+            id="btnSpringStiff"
+            class="p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200"
+          >
+            <div class="flex items-center gap-1 font-black text-xs">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> 단단한 용수철
+            </div>
+            <span class="text-[10px] text-slate-300">k = 2.0 N/cm (굵은 코일)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 캔버스 컨테이너 -->
+      <div class="relative bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden flex-1 min-h-[390px] sm:min-h-[440px] flex flex-col justify-between">
+        
+        <!-- 상단 힘 벡터 안내 배지 -->
+        <div class="p-3 sm:p-4 flex items-center justify-between pointer-events-none z-10 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-300 border border-blue-400/30 text-xs font-bold flex items-center gap-1.5 shadow">
+              <span class="w-2 h-2 rounded-full bg-blue-400"></span> 외부 힘 (가한 힘)
+            </span>
+            <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-400/30 text-xs font-bold flex items-center gap-1.5 shadow">
+              <span class="w-2 h-2 rounded-full bg-rose-400"></span> 탄성력 (되돌아가려는 힘)
+            </span>
+          </div>
+          <span class="text-xs font-bold text-amber-300 bg-slate-800/95 backdrop-blur px-2.5 py-1 rounded-lg border border-slate-700 shadow flex items-center gap-1">
+            <span>↔️</span> 좌우로 당기거나 밀어보세요!
+          </span>
+        </div>
+
+        <!-- 메인 인터랙티브 캔버스 -->
+        <canvas id="simCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></canvas>
+
+        <!-- 하단 실시간 4대 물리 수치 바 -->
+        <div class="p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md border-t border-slate-800/80 grid grid-cols-12 gap-2 text-center text-xs z-10">
+          <div class="col-span-6 sm:col-span-4 p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-center items-center min-h-[68px]">
+            <span class="text-slate-400 text-[11px] block whitespace-nowrap mb-0.5" id="labelStretch">변형된 길이 (Δx)</span>
+            <div class="text-sm sm:text-base font-black flex items-center justify-center gap-1.5 whitespace-nowrap" id="dispStretch">
+              <span class="text-amber-400">0.0 cm</span>
+              <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded font-bold">평형</span>
+            </div>
+          </div>
+          <div class="col-span-6 sm:col-span-3 p-2.5 rounded-xl bg-blue-950/40 border border-blue-800/40 flex flex-col justify-center items-center min-h-[68px]">
+            <span class="text-blue-300 text-[11px] block whitespace-nowrap mb-0.5">외부 힘 (F_외)</span>
+            <span class="text-base sm:text-lg font-black text-blue-400 whitespace-nowrap" id="dispAppliedForce">0.0 N</span>
+          </div>
+          <div class="col-span-6 sm:col-span-3 p-2.5 rounded-xl bg-rose-950/40 border border-rose-800/40 flex flex-col justify-center items-center min-h-[68px]">
+            <span class="text-rose-300 text-[11px] block whitespace-nowrap mb-0.5">탄성력 (F_탄)</span>
+            <span class="text-base sm:text-lg font-black text-rose-400 whitespace-nowrap" id="dispElasticForce">0.0 N</span>
+          </div>
+          <div class="col-span-6 sm:col-span-2 p-2.5 rounded-xl bg-indigo-950/40 border border-indigo-800/40 flex flex-col justify-center items-center min-h-[68px]">
+            <span class="text-indigo-300 text-[11px] block whitespace-nowrap mb-0.5">탄성 계수 (k)</span>
+            <span class="text-base sm:text-lg font-black text-indigo-400 whitespace-nowrap" id="dispKValue">1.0 N/cm</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 정밀 조절 슬라이더 -->
+      <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center gap-3">
+        <span class="text-xs font-bold text-slate-300 whitespace-nowrap flex items-center gap-1">
+          <span>📏</span> 정밀 길이 조절:
+        </span>
+        <span class="text-[11px] font-bold text-rose-400 whitespace-nowrap">◀ 줄이기(압축)</span>
+        <input 
+          type="range" 
+          id="lengthSlider" 
+          min="-8" 
+          max="15" 
+          step="0.5" 
+          value="0" 
+          class="flex-1 accent-indigo-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
+          oninput="handleSliderChange(this.value)"
+        >
+        <span class="text-[11px] font-bold text-sky-400 whitespace-nowrap">늘리기(인장) ▶</span>
+        <span class="text-xs font-black text-amber-400 w-16 text-right" id="sliderValDisplay">0.0 cm</span>
+      </div>
+
+    </div>
+
+    <!-- [오른쪽 5/12]: 힘 비교 게이지 & 실시간 그래프 분석 -->
+    <div class="lg:col-span-5 flex flex-col gap-3">
+
+      <!-- 1. 힘의 크기 실시간 비교 듀얼 바 -->
+      <div class="bg-slate-900 p-4 rounded-3xl border border-slate-800 shadow-xl space-y-3">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-bold text-slate-300 flex items-center gap-1.5">
+            <span>⚖️</span> 힘의 평형 및 방향 관계
+          </span>
+          <span class="font-black text-emerald-400 text-[11px] bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-0.5 rounded-full" id="forceStateBadge">
+            크기는 같고 방향은 정반대!
+          </span>
+        </div>
+        
+        <div class="space-y-2.5 text-xs">
+          <div>
+            <div class="flex justify-between text-[11px] text-blue-300 mb-1">
+              <span class="font-semibold" id="barLabelApplied">외부 힘 (가한 힘)</span>
+              <span id="barValApplied" class="font-bold">0.0 N</span>
+            </div>
+            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+              <div id="barApplied" class="bg-blue-500 h-full rounded-full transition-all duration-75" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[11px] text-rose-300 mb-1">
+              <span class="font-semibold" id="barLabelElastic">탄성력 (복원하려는 힘)</span>
+              <span id="barValElastic" class="font-bold">0.0 N</span>
+            </div>
+            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+              <div id="barElastic" class="bg-rose-500 h-full rounded-full transition-all duration-75" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 실시간 비례 그래프 (상단 측정값 기록 버튼) -->
+      <div class="bg-slate-900 p-4 rounded-3xl border border-slate-800 shadow-xl flex-1 flex flex-col justify-between">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-800/80 gap-2">
+          <div>
+            <h4 class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+              <span>📈</span> 탄성력과 길이 변화 관계 그래프
+            </h4>
+            <p class="text-[10px] text-slate-400 mt-0.5">원하는 길이로 조절한 후 버튼을 누르면 그래프가 그려집니다.</p>
+          </div>
+          
+          <div class="flex items-center gap-2 self-end sm:self-auto">
+            <button 
+              type="button"
+              onclick="recordDataPoint()" 
+              class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs font-black shadow-lg shadow-emerald-950/60 transition-all flex items-center gap-1.5 active:scale-95 border border-emerald-400/30"
+            >
+              <span class="text-sm">📍</span> 측정값 기록 (그래프 그리기)
+            </button>
+            <button 
+              type="button"
+              onclick="clearGraphPoints()" 
+              class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-rose-400 text-xs font-semibold transition-all border border-slate-700"
+            >
+              지우기
+            </button>
+          </div>
+        </div>
+
+        <div class="relative w-full h-[225px] bg-slate-950 rounded-2xl border border-slate-800/80 overflow-hidden my-3">
+          <canvas id="graphCanvas" class="w-full h-full"></canvas>
+        </div>
+
+        <!-- 범례 -->
+        <div class="flex items-center justify-between text-[10px] text-slate-400 px-1 border-t border-slate-800/60 pt-2 flex-wrap gap-1">
+          <span class="flex items-center gap-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> 고무줄(k=1.0)
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> 부드러운 용수철(k=0.5)
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span> 표준 용수철(k=1.0)
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span> 단단한 용수철(k=2.0)
+          </span>
+        </div>
+
+        <!-- 핵심 요약 -->
+        <div class="mt-3 p-3 rounded-2xl bg-indigo-950/40 border border-indigo-800/40 text-xs text-indigo-200 leading-relaxed">
+          <p class="font-bold text-white mb-1 flex items-center gap-1">
+            <span>💡</span> 핵심 과학 원리
+          </p>
+          <ul class="list-disc list-inside space-y-0.5 text-[11px] text-indigo-300/90">
+            <li><strong>방향</strong>: 탄성력은 물체가 변형된 방향의 <strong>정반대 방향</strong>으로 작용합니다.</li>
+            <li><strong>크기</strong>: 변형된 길이($|\Delta x|$)가 클수록 탄성력도 <strong>정비례하여 커집니다.</strong></li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ====================================================
+       스크립트: 9가지 탄성력 표현 & 훅의 법칙 통합 로직
+  ==================================================== -->
+  <script>
+    // ----------------------------------------------------
+    // 크로스 브라우징 / 구형 크롬북 Canvas roundRect 폴리필
+    // ----------------------------------------------------
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, radii) {
+        let r = 0;
+        if (typeof radii === 'number') r = radii;
+        else if (Array.isArray(radii)) r = radii[0] || 0;
+        if (w < 2 * r) r = w / 2;
+        if (h < 2 * r) r = h / 2;
+        this.beginPath();
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r);
+        this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y);
+        this.closePath();
+        return this;
+      };
+    }
+
+    // 안전한 둥근 사각형 그리기 유틸리티 함수
+    function drawSafeRoundRect(ctx, x, y, w, h, radii, fill, stroke) {
+      let r = 4;
+      if (typeof radii === 'number') r = radii;
+      else if (Array.isArray(radii)) r = radii[0] || 4;
+      if (w < 2 * r) r = w / 2;
+      if (h < 2 * r) r = h / 2;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    // ====================================================
+    // A. 탭 전환 제어
+    // ====================================================
+    let activeMainTab = 'express'; // 'express' | 'rubber' | 'spring'
+
+    function switchMainTab(tab) {
+      activeMainTab = tab;
+      const tabExpress = document.getElementById('tabExpress');
+      const tabRubber = document.getElementById('tabRubber');
+      const tabSpring = document.getElementById('tabSpring');
+      const expressContainer = document.getElementById('expressContainer');
+      const hookeContainer = document.getElementById('hookeContainer');
+
+      const headerIcon = document.getElementById('headerIcon');
+      const headerTitle = document.getElementById('headerTitle');
+      const headerDesc = document.getElementById('headerDesc');
+
+      tabExpress.className = "px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap";
+      tabRubber.className = "px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap";
+      tabSpring.className = "px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap";
+
+      if (tab === 'express') {
+        tabExpress.className = "px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-active whitespace-nowrap";
+        expressContainer.classList.remove('hidden');
+        hookeContainer.classList.add('hidden');
+        headerIcon.innerText = "🎨";
+        headerTitle.innerText = "탄성력 표현하기 실험실";
+        headerDesc.innerText = "풍선, 공, 트램펄린, 장대, 활 등 9가지 물체를 터치하여 변형시키고 탄성력의 방향을 관찰해 보세요.";
+        resizeExpressCanvas();
+      } else {
+        expressContainer.classList.add('hidden');
+        hookeContainer.classList.remove('hidden');
+        switchHookeMode(tab);
+      }
+    }
+
+
+    // ====================================================
+    // B. [탄성력 표현하기] 9가지 물체 인터랙션 시스템
+    // ====================================================
+    let currentPhenomenon = 'balloon';
+    let balloonBallDeformMode = 'squash'; // 'squash' (누르기) | 'stretch' (늘리기)
+
+    let expDeformX = 0; // 마우스/터치로 변형된 X 오프셋 (px)
+    let expDeformY = 0; // 마우스/터치로 변형된 Y 오프셋 (px)
+    let isExpDragging = false;
+    let expDragStartX = 0;
+    let expDragStartY = 0;
+    let expInitDeformX = 0;
+    let expInitDeformY = 0;
+
+    // 복원 진동 변수
+    let expVelX = 0;
+    let expVelY = 0;
+    let isExpOscillating = false;
+
+    // 샤프심 배출 상태
+    let pencilLeadLength = 0; // 샤프심 배출 길이 (px)
+    let pencilClickedThisPress = false;
+
+    // 트램펄린 공 튀기기 상태
+    let isTrampBouncing = false;
+    let trampBallY = 0;
+    let trampBallVy = 0;
+    let trampBallRot = 0;
+    let trampMatSag = 0;
+
+    // ====================================================
+    // 과학쌤(sciencessaem) 스타일 장대높이뛰기 시뮬레이터 상태
+    // ====================================================
+    // 장대높이뛰기 시뮬레이터 상태 (3단계: 꽂기 ➔ 누르기 ➔ 도약!)
+    // ====================================================
+    let pvState = 'planted'; // 'planted' | 'bending' | 'vaulting' | 'landing' | 'success' | 'failed'
+    let pvBendAmount = 0;    // 0 ~ 90 px
+    let pvVaultTimer = 0;
+    let pvLandingTimer = 0;
+    let pvBarKnocked = false;
+    let pvBarFallY = 0;
+    let pvBarAngle = 0;
+    let pvAutoPlay = false;
+    let pvElasticEnergy = 0;   // 0 ~ 100 (%)
+    let pvPotentialEnergy = 0; // 0 ~ 100 (%)
+    let pvAnimFrame = null;
+    let polePressInterval = null;
+
+    // 활쏘기 화살 발사 애니메이션 변수 (실시간 조준 각도 연동)
+    let isArrowShooting = false;
+    let arrowFlightX = 0;
+    let arrowFlightY = 0;
+    let arrowFlightVx = 0;
+    let arrowFlightVy = 0;
+    let arrowFlightAngle = 0;
+    let arrowAimAngle = 0;
+    let arrowHitScore = "";
+    let arrowHitTarget = false;
+
+    // 9가지 물체 스펙 및 설명
+    const PHENOMENA_DATA = {
+      balloon: {
+        title: "풍선의 탄성력 표현하기",
+        icon: "🎈",
+        tag: "누름 / 잡고 늘림",
+        guide: "풍선을 터치하여 꾹 누르거나, [잡고 늘리기] 모드로 쭉 당겨 늘려보세요!",
+        explanation: "풍선을 누르면 원래대로 팽창하려는 탄성력이, 풍선을 잡고 늘리면 원래 크기로 줄어들려는 반대 방향의 탄성력이 작용합니다.",
+        hasToggle: true
+      },
+      ball: {
+        title: "고무공의 탄성력 표현하기",
+        icon: "⚽",
+        tag: "누름 / 잡고 늘림",
+        guide: "고무공을 바닥에 눌러 찌그러뜨리거나, [잡고 늘리기]로 위로 길쭉하게 당겨보세요!",
+        explanation: "고무공을 누르면 튕겨 나가려는 탄성력이, 고무공을 잡아당겨 늘리면 원래 둥근 구형으로 수축하려는 탄성력이 작용합니다.",
+        hasToggle: true
+      },
+      spring: {
+        title: "용수철의 탄성력 표현하기",
+        icon: "🌀",
+        tag: "화면 네모칸 안 제한",
+        guide: "손잡이를 잡고 네모칸 안에서 당기거나 꾹 밀어 압축해 보세요!",
+        explanation: "용수철을 당겨 늘리면 안쪽으로, 밀어 줄이면 바깥쪽으로 언제나 변형과 반대 방향으로 작용합니다.",
+        hasToggle: false
+      },
+      band: {
+        title: "고무줄의 탄성력 표현하기",
+        icon: "🟡",
+        tag: "양쪽 늘림",
+        guide: "고무줄을 터치하여 양쪽으로 늘려보세요! 원래 모양으로 수축하려는 탄성력이 안쪽으로 작용합니다.",
+        explanation: "양손으로 고무줄을 늘리면 외력은 바깥쪽으로 작용하고, 탄성력은 원래 모양으로 되돌아가기 위해 안쪽 중심으로 작용합니다.",
+        hasToggle: false
+      },
+      pen: {
+        title: "볼펜 노크의 탄성력 표현하기",
+        icon: "🖊️",
+        tag: "수직 누름만 가능",
+        guide: "노크 버튼을 아래로 꾹 눌러보세요! (수직 누름만 가능, 늘리기 불가)",
+        explanation: "노크 버튼을 아래로 누르면 내부 용수철이 압축되며(외력 ↓), 노크를 다시 위로 밀어 올리는 탄성력(↑)이 작용합니다.",
+        hasToggle: false
+      },
+      pencil: {
+        title: "샤프 노크의 탄성력과 심 배출",
+        icon: "✏️",
+        tag: "누르면 샤프심 배출!",
+        guide: "샤프 뒷부분(노크 캡)을 아래로 꾹 눌러보세요! 누를 때마다 찰칵하며 샤프심이 나옵니다!",
+        explanation: "샤프 뒷부분을 누르면 내부 스프링이 압축되며(외력 ↓), 스프링이 위로 밀어내는 탄성력(↑)에 의해 노크가 복원되고 샤프심이 앞으로 배출됩니다.",
+        hasToggle: false
+      },
+      trampoline: {
+        title: "트램펄린의 탄성력과 공 튀기기",
+        icon: "🏀",
+        tag: "누른 후 놓으면 공 점프!",
+        guide: "매트를 아래로 꾹 누른 뒤 손을 놓아보세요! 위에 있는 공이 높이 튀어 오릅니다!",
+        explanation: "매트를 아래로 누르면(외력 ↓), 매트와 스프링이 위로 펴지려는 강력한 탄성력(↑)이 작용하여 위에 있는 공을 공중으로 높이 튕겨 올립니다.",
+        hasToggle: false
+      },
+      pole: {
+        title: "장대 높이 뛰기의 탄성력과 도약",
+        icon: "🏃",
+        tag: "꽂기 · 누르기 · 도약",
+        guide: "장대를 꽂은 뒤 [⬇️ 장대 누르기](또는 장대를 아래로 드래그)로 탄성 에너지를 모으고, [🚀 도약!]으로 가로대를 넘어보세요!",
+        explanation: "장대를 아래로 누르면 탄성 에너지가 충전되고(외력 ↓), 장대가 펴지는 강력한 탄성력(↑)에 의해 선수가 장대에서 분리되어 하늘 높이 가로대를 도약합니다.",
+        hasToggle: false
+      },
+      bow: {
+        title: "활 쏘기의 탄성력과 각도 조절",
+        icon: "🎯",
+        tag: "당기는 방향대로 발사!",
+        guide: "시위를 원하는 방향과 각도로 당겼다가 손을 놓아보세요! 당긴 반대 방향(조준 방향)으로 화살이 날아갑니다!",
+        explanation: "시위를 당기는 방향과 정반대로 활대의 강력한 복원 탄성력이 작용하여, 실시간으로 조준한 각도 그대로 화살을 과녁으로 날려 보냅니다.",
+        hasToggle: false
+      }
+    };
+
+    const expCanvas = document.getElementById('expressCanvas');
+    const expCtx = expCanvas.getContext('2d');
+
+    function resizeExpressCanvas() {
+      const rect = expCanvas.getBoundingClientRect();
+      expCanvas.width = rect.width * window.devicePixelRatio;
+      expCanvas.height = rect.height * window.devicePixelRatio;
+      expCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      renderExpressSim();
+    }
+
+    // 풍선/고무공 누르기 vs 늘리기 모드 전환
+    function setDeformMode(mode) {
+      balloonBallDeformMode = mode;
+      expDeformX = 0;
+      expDeformY = 0;
+      isExpOscillating = false;
+
+      const btnSquash = document.getElementById('btnDeformSquash');
+      const btnStretch = document.getElementById('btnDeformStretch');
+      if (mode === 'squash') {
+        btnSquash.className = "px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-indigo-600 text-white transition-all";
+        btnStretch.className = "px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-slate-300 hover:text-white transition-all";
+      } else {
+        btnStretch.className = "px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-emerald-600 text-white transition-all";
+        btnSquash.className = "px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-slate-300 hover:text-white transition-all";
+      }
+      renderExpressSim();
+    }
+
+    // 9가지 현상 선택
+    function selectPhenomenon(key) {
+      currentPhenomenon = key;
+      expDeformX = 0;
+      expDeformY = 0;
+      isExpOscillating = false;
+      isTrampBouncing = false;
+      trampBallY = 0;
+      trampBallVy = 0;
+      trampMatSag = 0;
+      isPoleVaulting = false;
+      poleVaultProgress = 0;
+      isArrowShooting = false;
+      arrowHitTarget = false;
+      pencilClickedThisPress = false;
+
+      // 카드 하이라이트 갱신
+      document.querySelectorAll('#phenomenaCardGrid button').forEach(btn => {
+        btn.classList.remove('card-active');
+      });
+      const activeCard = document.getElementById(`card-${key}`);
+      if (activeCard) activeCard.classList.add('card-active');
+
+      const data = PHENOMENA_DATA[key];
+      document.getElementById('expCurrentIcon').innerText = data.icon;
+      document.getElementById('expCurrentTitle').innerText = data.title;
+      document.getElementById('expCurrentTag').innerText = data.tag;
+      document.getElementById('expCurrentGuide').innerText = data.guide;
+      document.getElementById('expPhysicsExplanation').innerText = data.explanation;
+
+      // 누르기/늘리기 토글 표시 여부
+      const toggle = document.getElementById('balloonBallModeToggle');
+      if (data.hasToggle) {
+        toggle.classList.remove('hidden');
+      } else {
+        toggle.classList.add('hidden');
+      }
+
+      // 장대높이뛰기 전용 조작바 토글 (과학쌤 모드)
+      const pvBar = document.getElementById('poleVaultControlBar');
+      if (pvBar) {
+        if (key === 'pole') {
+          pvBar.classList.remove('hidden');
+          resetPoleVaultGame();
+        } else {
+          pvBar.classList.add('hidden');
+          if (pvAnimFrame) {
+            cancelAnimationFrame(pvAnimFrame);
+            pvAnimFrame = null;
+          }
+        }
+      }
+
+      renderExpressSim();
+    }
+
+    function resetExpressDeform() {
+      expDeformX = 0;
+      expDeformY = 0;
+      isExpOscillating = false;
+      isTrampBouncing = false;
+      trampBallY = 0;
+      trampBallVy = 0;
+      trampMatSag = 0;
+      isPoleVaulting = false;
+      poleVaultProgress = 0;
+      isArrowShooting = false;
+      arrowHitTarget = false;
+      pencilLeadLength = 0;
+      pencilClickedThisPress = false;
+      if (currentPhenomenon === 'pole') {
+        resetPoleVaultGame();
+      }
+      renderExpressSim();
+    }
+
+    // 메인 표현 캔버스 렌더링
+    function renderExpressSim() {
+      const width = expCanvas.clientWidth;
+      const height = expCanvas.clientHeight;
+      expCtx.clearRect(0, 0, width, height);
+
+      const cx = width / 2;
+      const cy = height / 2;
+
+      // 변형 크기 계산
+      const dist = Math.hypot(expDeformX, expDeformY);
+      const forceMag = Math.min(25, dist * 0.25);
+
+      // UI 수치 갱신 & 상태 배지
+      if (currentPhenomenon === 'pole') {
+        const appliedN = (pvBendAmount * 0.28);
+        const elasticN = (pvBendAmount * 0.28);
+        document.getElementById('expAppliedVal').innerText = `${appliedN.toFixed(1)} N`;
+        document.getElementById('expElasticVal').innerText = `${elasticN.toFixed(1)} N`;
+
+        const badge = document.getElementById('expStatusBadge');
+        if (pvState === 'bending') {
+          badge.innerText = "탄성 에너지 충전 중 (외력으로 장대 휨)";
+          badge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-950/60 text-rose-300 border border-rose-800/40";
+        } else if (pvState === 'vaulting') {
+          badge.innerText = "장대 분리 공중 도약 중 (위치E 전환)";
+          badge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-950/60 text-indigo-300 border border-indigo-800/40";
+        } else if (pvState === 'success') {
+          badge.innerText = "5.80m 도약 성공!";
+          badge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800/40";
+        } else {
+          badge.innerText = "장대 꽂기 준비 상태 (누르기 대기)";
+          badge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+        }
+      } else {
+        document.getElementById('expAppliedVal').innerText = `${forceMag.toFixed(1)} N`;
+        document.getElementById('expElasticVal').innerText = `${forceMag.toFixed(1)} N`;
+
+        const badge = document.getElementById('expStatusBadge');
+        if (forceMag > 0.4 || isTrampBouncing || isArrowShooting) {
+          badge.innerText = "탄성력 작용 중 (방향 반대)";
+          badge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-rose-950/60 text-rose-300 border border-rose-800/40";
+        } else {
+          badge.innerText = "평형 상태 (외력 없음)";
+          badge.className = "text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700";
+        }
+      }
+
+      // 배경 격자 패턴 (장대높이뛰기는 전용 스타디움 트랙 배경 사용)
+      if (currentPhenomenon !== 'pole') {
+        drawExpGrid(expCtx, width, height);
+      }
+
+      // 9가지 물체 렌더링
+      switch (currentPhenomenon) {
+        case 'balloon':
+          drawExpBalloon(expCtx, cx, cy, expDeformX, expDeformY, width, height);
+          break;
+        case 'ball':
+          drawExpRubberBall(expCtx, cx, cy, expDeformX, expDeformY, width, height);
+          break;
+        case 'spring':
+          drawExpSpring(expCtx, cx, cy, expDeformX, expDeformY, width, height);
+          break;
+        case 'band':
+          drawExpRubberBand(expCtx, cx, cy, expDeformX, expDeformY, width, height);
+          break;
+        case 'pen':
+          drawExpPen(expCtx, cx, cy, expDeformX, expDeformY, width, height);
+          break;
+        case 'pencil':
+          drawExpPencil(expCtx, cx, cy, expDeformX, expDeformY, width, height);
+          break;
+        case 'trampoline':
+          drawExpTrampoline(expCtx, cx, cy, expDeformX, expDeformY, width, height);
+          break;
+        case 'pole':
+          drawExpPoleVault(expCtx, cx, cy, expDeformX, expDeformY, width, height);
+          break;
+        case 'bow':
+          drawExpBow(expCtx, cx, cy, expDeformX, expDeformY, width, height);
+          break;
+      }
+
+      // 힘 화살표 그리기 (터치 드래그 중일 때만)
+      if (forceMag > 0.6 && isExpDragging) {
+        renderForceVectorsForCurrent(expCtx, cx, cy, forceMag, width, height);
+      }
+    }
+
+    // 각 물체별 정밀 힘 벡터 화살표 렌더링
+    function renderForceVectorsForCurrent(ctx, cx, cy, forceMag, w, h) {
+      const arrowLen = Math.min(120, forceMag * 6.5);
+      const dist = Math.hypot(expDeformX, expDeformY) || 1;
+      const normX = expDeformX / dist;
+      const normY = expDeformY / dist;
+
+      if (currentPhenomenon === 'pen' || currentPhenomenon === 'pencil') {
+        // 볼펜/샤프: 수직으로만 작용 (외력 ↓, 탄성력 ↑)
+        const topY = cy - 145 + expDeformY;
+        drawVectorArrow(ctx, cx, topY - 10, 0, arrowLen * 0.8, '#38bdf8', '외력', `${forceMag.toFixed(1)} N`);
+        drawVectorArrow(ctx, cx, topY + 25, 0, -arrowLen * 0.8, '#f43f5e', '탄성력', `${forceMag.toFixed(1)} N`);
+      } else if (currentPhenomenon === 'trampoline') {
+        // 트램펄린: 외력 ↓, 탄성력 ↑
+        const matY = cy + 40 + expDeformY;
+        drawVectorArrow(ctx, cx, matY - 20, 0, arrowLen, '#38bdf8', '외력 (누름 ↓)', `${forceMag.toFixed(1)} N`);
+        drawVectorArrow(ctx, cx, matY + 10, 0, -arrowLen, '#f43f5e', '탄성력 (도약 ↑)', `${forceMag.toFixed(1)} N`);
+      } else if (currentPhenomenon === 'bow') {
+        // 활쏘기: 당긴 방향(외력)과 조준 발사 방향(탄성력)
+        const pullDist = Math.hypot(expDeformX, expDeformY);
+        if (pullDist > 8) {
+          const bowX = Math.max(90, cx - 80);
+          const bowY = cy;
+          const aimAngle = arrowAimAngle || 0;
+          const nockX = bowX - pullDist * Math.cos(aimAngle);
+          const nockY = bowY + pullDist * Math.sin(aimAngle);
+
+          // 외력 화살표: nock에서 당긴 방향으로 (뒤쪽)
+          const pullVx = -arrowLen * Math.cos(aimAngle);
+          const pullVy = -arrowLen * Math.sin(aimAngle);
+          drawVectorArrow(ctx, nockX, nockY, pullVx, pullVy, '#38bdf8', '외력 (당김)', `${forceMag.toFixed(1)} N`);
+
+          // 탄성력 화살표: nock에서 발사(조준) 방향으로 (앞쪽)
+          const pushVx = arrowLen * Math.cos(aimAngle);
+          const pushVy = arrowLen * Math.sin(aimAngle);
+          drawVectorArrow(ctx, nockX, nockY, pushVx, pushVy, '#f43f5e', '탄성력 (발사)', `${forceMag.toFixed(1)} N`);
+        }
+      } else if (currentPhenomenon === 'pole') {
+        // 장대높이뛰기: 누르는 외력(↓)과 위로 펴지려는 탄성력(↑)
+        const boxX = w * 0.50;
+        const groundY = h - 90;
+        const bend = pvBendAmount || expDeformY || 0;
+        if (bend > 6) {
+          const bendX = boxX - 35;
+          const bendY = groundY - 110 + bend * 0.45;
+          const fN = (bend * 0.28).toFixed(1);
+          drawVectorArrow(ctx, bendX, bendY - 15, 0, arrowLen, '#38bdf8', '외력 (누름 ↓)', `${fN} N`);
+          drawVectorArrow(ctx, bendX, bendY + 15, 0, -arrowLen, '#f43f5e', '탄성력 (도약 ↑)', `${fN} N`);
+        }
+      } else if (currentPhenomenon === 'band') {
+        // 고무줄: 학습지 도해대로 양쪽으로 작용하는 외력(바깥 당김)과 탄성력(안쪽 수축)
+        const dist = Math.hypot(expDeformX, expDeformY);
+        if (dist > 5) {
+          const angle = Math.atan2(expDeformY, expDeformX);
+          const stretch = Math.min(130, dist);
+          const rX = 52 + stretch * 0.95;
+
+          const ux = Math.cos(angle);
+          const uy = Math.sin(angle);
+
+          // 오른쪽 끝점 (Global)
+          const rightX = cx + rX * ux;
+          const rightY = cy + rX * uy;
+          // 왼쪽 끝점 (Global)
+          const leftX = cx - rX * ux;
+          const leftY = cy - rX * uy;
+
+          const fText = `${forceMag.toFixed(1)} N`;
+
+          // 1) 오른쪽 끝: 외력(바깥 당김), 탄성력(안쪽 수축)
+          drawVectorArrow(ctx, rightX, rightY, ux * arrowLen, uy * arrowLen, '#38bdf8', '외력 (당김)', fText);
+          drawVectorArrow(ctx, rightX, rightY, -ux * arrowLen, -uy * arrowLen, '#f43f5e', '탄성력 (수축)', fText);
+
+          // 2) 왼쪽 끝: 외력(바깥 당김), 탄성력(안쪽 수축)
+          drawVectorArrow(ctx, leftX, leftY, -ux * arrowLen, -uy * arrowLen, '#38bdf8', '외력 (당김)', fText);
+          drawVectorArrow(ctx, leftX, leftY, ux * arrowLen, uy * arrowLen, '#f43f5e', '탄성력 (수축)', fText);
+        }
+      } else if (balloonBallDeformMode === 'stretch' && (currentPhenomenon === 'balloon' || currentPhenomenon === 'ball')) {
+        // 늘리기 모드: 외력 (바깥으로 당김), 탄성력 (중심으로 복원)
+        const attachX = cx + normX * 80 + expDeformX;
+        const attachY = cy + normY * 80 + expDeformY;
+        drawVectorArrow(ctx, attachX, attachY, normX * arrowLen, normY * arrowLen, '#38bdf8', '외력 (늘림)', `${forceMag.toFixed(1)} N`);
+        drawVectorArrow(ctx, attachX, attachY, -normX * arrowLen, -normY * arrowLen, '#f43f5e', '탄성력 (수축)', `${forceMag.toFixed(1)} N`);
+      } else {
+        // 기본 압축/변형: 외력 (미는 방향), 탄성력 (반대 복원 방향)
+        const contactX = cx + expDeformX;
+        const contactY = cy + expDeformY;
+        drawVectorArrow(ctx, contactX, contactY, normX * arrowLen, normY * arrowLen, '#38bdf8', '외력', `${forceMag.toFixed(1)} N`);
+        drawVectorArrow(ctx, contactX, contactY, -normX * arrowLen, -normY * arrowLen, '#f43f5e', '탄성력', `${forceMag.toFixed(1)} N`);
+      }
+    }
+
+    // 은은한 배경 격자
+    function drawExpGrid(ctx, w, h) {
+      ctx.save();
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      for (let x = 30; x < w; x += 30) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 30; y < h; y += 30) {
+        ctx.beginPath();
+        ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 1. 풍선 그리기 (누르기 & 잡고 늘리기 모션 완벽 지원!)
+    // ----------------------------------------------------
+    function drawExpBalloon(ctx, cx, cy, dx, dy, w, h) {
+      ctx.save();
+      const r = 65;
+      const dist = Math.hypot(dx, dy);
+      const angle = Math.atan2(dy, dx);
+
+      ctx.translate(cx, cy);
+
+      if (balloonBallDeformMode === 'stretch') {
+        // [늘리기 모션]: 당기는 방향으로 길쭉하게 팽창!
+        const stretchFactor = 1 + Math.min(1.2, dist / 85);
+        const thinFactor = 1 / Math.sqrt(stretchFactor);
+
+        ctx.rotate(angle);
+        const grad = ctx.createRadialGradient(0, 0, 10, 0, 0, r * stretchFactor);
+        grad.addColorStop(0, '#fda4af');
+        grad.addColorStop(0.5, '#f43f5e');
+        grad.addColorStop(1, '#9f1239');
+        ctx.fillStyle = grad;
+
+        ctx.beginPath();
+        ctx.ellipse(dist * 0.4, 0, r * stretchFactor, r * thinFactor, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 손잡이 집게 표시
+        if (dist > 5) {
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(r * stretchFactor + dist * 0.4, 0, 9, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      } else {
+        // [누르기 모션]: 누른 방향으로 납작 찌그러짐
+        const scaleX = Math.max(0.4, 1 - (Math.abs(dx) / 160) + (Math.abs(dy) / 240));
+        const scaleY = Math.max(0.4, 1 - (Math.abs(dy) / 160) + (Math.abs(dx) / 240));
+
+        ctx.translate(dx * 0.4, dy * 0.4);
+        const grad = ctx.createRadialGradient(-20, -25, 10, 0, 0, r);
+        grad.addColorStop(0, '#fda4af');
+        grad.addColorStop(0.5, '#f43f5e');
+        grad.addColorStop(1, '#9f1239');
+        ctx.fillStyle = grad;
+
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * scaleX, (r * 1.15) * scaleY, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 2. 고무공 그리기 (누르기 & 잡고 늘리기 모션 완벽 지원!)
+    // ----------------------------------------------------
+    function drawExpRubberBall(ctx, cx, cy, dx, dy, w, h) {
+      ctx.save();
+      const floorY = cy + 90;
+      // 바닥선
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(cx - 150, floorY);
+      ctx.lineTo(cx + 150, floorY);
+      ctx.stroke();
+
+      const r = 55;
+      const dist = Math.hypot(dx, dy);
+
+      if (balloonBallDeformMode === 'stretch') {
+        // [늘리기 모션]: 위쪽/사방으로 길쭉하게 늘어남
+        const stretchY = 1 + Math.min(1.3, dist / 80);
+        const thinX = 1 / Math.sqrt(stretchY);
+
+        ctx.translate(cx + dx * 0.3, floorY - (r * stretchY));
+        const grad = ctx.createRadialGradient(-15, -15, 8, 0, 0, r);
+        grad.addColorStop(0, '#fef08a');
+        grad.addColorStop(0.5, '#eab308');
+        grad.addColorStop(1, '#a16207');
+        ctx.fillStyle = grad;
+
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * thinX, r * stretchY, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 스포츠 공 줄무늬
+        ctx.strokeStyle = '#713f12';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * thinX * 0.8, r * stretchY * 0.4, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        // [누르기 모션]: 바닥에 꾹 찌그러짐
+        const squashY = Math.max(0.35, 1 - Math.abs(dy) / 130);
+        const stretchX = Math.max(0.6, 1 + Math.abs(dy) / 160);
+
+        ctx.translate(cx + dx * 0.4, floorY - (r * squashY));
+        const grad = ctx.createRadialGradient(-15, -15, 8, 0, 0, r);
+        grad.addColorStop(0, '#fef08a');
+        grad.addColorStop(0.5, '#eab308');
+        grad.addColorStop(1, '#a16207');
+        ctx.fillStyle = grad;
+
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * stretchX, r * squashY, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#713f12';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r * stretchX * 0.8, r * squashY * 0.4, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 3. 용수철 그리기 (★ 화면 네모칸 안으로 완벽 제한!)
+    // ----------------------------------------------------
+    function drawExpSpring(ctx, cx, cy, dx, dy, w, h) {
+      ctx.save();
+      const startX = 65;
+      const startY = cy;
+
+      // ★ 캔버스 네모칸 안으로 드래그 엄격 제한 (padding 45px)
+      const clampedEndX = Math.max(startX + 35, Math.min(w - 45, cx + 80 + dx));
+      const clampedEndY = Math.max(45, Math.min(h - 45, cy + dy));
+
+      // 고정 벽
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(startX - 18, startY - 45, 18, 90);
+
+      const coils = 12;
+      const len = Math.hypot(clampedEndX - startX, clampedEndY - startY);
+      const angle = Math.atan2(clampedEndY - startY, clampedEndX - startX);
+
+      ctx.translate(startX, startY);
+      ctx.rotate(angle);
+
+      const pitch = len / coils;
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      for (let i = 0; i < coils; i++) {
+        const x = i * pitch;
+        ctx.lineTo(x + pitch * 0.25, -20);
+        ctx.lineTo(x + pitch * 0.75, 20);
+        ctx.lineTo(x + pitch, 0);
+      }
+      ctx.lineTo(len, 0);
+      ctx.stroke();
+
+      // 손잡이
+      ctx.fillStyle = '#cbd5e1';
+      ctx.beginPath();
+      ctx.arc(len + 12, 0, 14, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 4. 고무줄 그리기 (★ 학습지 도해 일치: 노란 고무줄 루프 & 원래 모양 점선)
+    // ----------------------------------------------------
+    function drawExpRubberBand(ctx, cx, cy, dx, dy, w, h) {
+      ctx.save();
+
+      const dist = Math.hypot(dx, dy);
+      const angle = (dist > 4) ? Math.atan2(dy, dx) : 0;
+      const stretch = Math.min(130, dist);
+
+      // 1. 변형 전 원래 모양 (회색 점선 타원 고리)
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+      ctx.lineWidth = 1.8;
+      // 원래 고무줄 외곽
+      drawSafeRoundRect(ctx, -52, -20, 104, 40, 20, false, true);
+      // 원래 고무줄 내부 구멍
+      drawSafeRoundRect(ctx, -40, -11, 80, 22, 11, false, true);
+      ctx.setLineDash([]);
+
+      ctx.font = 'bold 11px Pretendard';
+      ctx.fillStyle = '#94a3b8';
+      ctx.textAlign = 'center';
+      ctx.fillText('원래 모양 (점선)', 0, -28);
+      ctx.restore();
+
+      // 2. 늘어난 노란색 고무줄 루프 (늘어날수록 길어지고 얇아짐)
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+
+      const rX = 52 + stretch * 0.95; // 반경 길이
+      const rY = Math.max(7, 20 - stretch * 0.08); // 반경 높이 (얇아짐)
+      const bandThickness = Math.max(4.5, 9 - stretch * 0.035); // 고무줄 두께
+
+      // 고무줄 외곽 그림자
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetY = 3;
+
+      // 고무줄 외곽 (선명한 천연 생고무 노란색)
+      ctx.fillStyle = '#facc15';
+      ctx.strokeStyle = '#ca8a04';
+      ctx.lineWidth = 2;
+      drawSafeRoundRect(ctx, -rX, -rY, rX * 2, rY * 2, rY, true, true);
+
+      // 고무줄 내부 구멍 (어두운 배경색으로 뚫기)
+      const holeRx = Math.max(8, rX - bandThickness * 2);
+      const holeRy = Math.max(2, rY - bandThickness);
+      ctx.shadowColor = 'transparent';
+      ctx.fillStyle = '#090d16'; // 캔버스 배경색과 일치
+      ctx.strokeStyle = '#a16207';
+      ctx.lineWidth = 1.5;
+      drawSafeRoundRect(ctx, -holeRx, -holeRy, holeRx * 2, holeRy * 2, holeRy, true, true);
+
+      // 고무줄 표면 하이라이트 (탄력 광택)
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-rX + 16, -rY + 2.5);
+      ctx.lineTo(rX - 16, -rY + 2.5);
+      ctx.stroke();
+
+      // 3. 양쪽을 잡고 당기는 손잡이 / 핀 그립
+      // 왼쪽 그립
+      ctx.fillStyle = '#0284c7';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(-rX, 0, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // 오른쪽 그립 (사용자가 터치/드래그하는 포인트)
+      ctx.fillStyle = isExpDragging ? '#f43f5e' : '#0284c7';
+      ctx.strokeStyle = isExpDragging ? '#fda4af' : '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(rX, 0, 11, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // 당기기 안내 말풍선 (안 당기고 있을 때)
+      if (dist < 5 && !isExpOscillating) {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.2;
+        drawSafeRoundRect(ctx, -100, 32, 200, 26, 6, true, true);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 11px Pretendard';
+        ctx.textAlign = 'center';
+        ctx.fillText('👉 고무줄을 터치해 양쪽으로 늘려보세요!', 0, 49);
+      }
+
+      ctx.restore();
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 5. 볼펜 그리기 (★ 수직으로만 눌림, 늘리기 불가!)
+    // ----------------------------------------------------
+    function drawExpPen(ctx, cx, cy, dx, dy, w, h) {
+      ctx.save();
+      // 수직으로만 누름 가능 (음수=늘리기 방지, 최대 32px)
+      const pressY = Math.max(0, Math.min(32, dy));
+      const penX = cx;
+      const penTopY = cy - 120;
+
+      // 볼펜 몸체
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(penX - 22, penTopY, 44, 200);
+      ctx.fillRect(penX - 22, penTopY, 44, 200);
+
+      // 볼펜 촉 (하단)
+      ctx.fillStyle = '#64748b';
+      ctx.beginPath();
+      ctx.moveTo(penX - 18, penTopY + 200);
+      ctx.lineTo(penX + 18, penTopY + 200);
+      ctx.lineTo(penX, penTopY + 245 + (pressY > 10 ? 15 : 0));
+      ctx.closePath();
+      ctx.fill();
+
+      // 볼펜 노크 버튼 (상단 - 수직으로만 이동)
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillRect(penX - 14, penTopY - 25 + pressY, 28, 25);
+
+      // 내부 용수철 (압축되는 코일)
+      const springTopY = penTopY + 120;
+      const springLen = Math.max(22, 65 - pressY * 1.15);
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(penX, springTopY);
+      for (let i = 0; i < 8; i++) {
+        const step = springLen / 8;
+        ctx.lineTo(penX + (i % 2 === 0 ? 12 : -12), springTopY + i * step);
+      }
+      ctx.lineTo(penX, springTopY + springLen);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 6. 샤프 그리기 (★ 누르면 샤프심이 배출되는 기구!)
+    // ----------------------------------------------------
+    function drawExpPencil(ctx, cx, cy, dx, dy, w, h) {
+      ctx.save();
+      // 수직으로만 누름 가능 (늘리기 방지, 0~26px)
+      const pressY = Math.max(0, Math.min(26, dy));
+      const penX = cx;
+      const penTopY = cy - 110;
+      const barrelH = 185;
+      const barrelW = 32;
+
+      // 샤프 외관 (투명 아크릴 바디)
+      const gradBody = ctx.createLinearGradient(penX - barrelW / 2, 0, penX + barrelW / 2, 0);
+      gradBody.addColorStop(0, 'rgba(168, 85, 247, 0.35)');
+      gradBody.addColorStop(0.5, 'rgba(192, 132, 252, 0.15)');
+      gradBody.addColorStop(1, 'rgba(147, 51, 234, 0.4)');
+
+      ctx.fillStyle = gradBody;
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 2.5;
+      drawSafeRoundRect(ctx, penX - barrelW / 2, penTopY, barrelW, barrelH, 4, true, true);
+
+      // 내부 샤프심 보관 튜브 (흰색 반투명 관)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fillRect(penX - 6, penTopY + 10, 12, 130);
+
+      // 보관 튜브 속 대기 중인 흑연 샤프심들
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(penX - 2, penTopY + 20); ctx.lineTo(penX - 2, penTopY + 125);
+      ctx.moveTo(penX + 2, penTopY + 15); ctx.lineTo(penX + 2, penTopY + 120);
+      ctx.stroke();
+
+      // 내부 척(황동 클러치 메커니즘 - 노크를 누르면 전진)
+      const chuckY = penTopY + 140 + pressY * 0.4;
+      ctx.fillStyle = '#eab308';
+      ctx.beginPath();
+      ctx.moveTo(penX - 8, chuckY);
+      ctx.lineTo(penX + 8, chuckY);
+      ctx.lineTo(penX + 4, chuckY + 14);
+      ctx.lineTo(penX - 4, chuckY + 14);
+      ctx.closePath();
+      ctx.fill();
+
+      // 내부 복원 용수철 (스프링) - 노크 누를 때 압축됨!
+      const springTopY = penTopY + 98 + pressY * 0.6;
+      const springLen = Math.max(16, 42 - pressY * 0.7);
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(penX, springTopY);
+      for (let i = 0; i < 7; i++) {
+        const step = springLen / 7;
+        ctx.lineTo(penX + (i % 2 === 0 ? 9 : -9), springTopY + (i + 1) * step);
+      }
+      ctx.stroke();
+
+      // 상단 노크 캡 (지우개 캡 버튼 - 누르면 수직 이동)
+      const knockY = penTopY - 24 + pressY;
+      const gradKnock = ctx.createLinearGradient(penX - 10, 0, penX + 10, 0);
+      gradKnock.addColorStop(0, '#94a3b8');
+      gradKnock.addColorStop(0.5, '#f1f5f9');
+      gradKnock.addColorStop(1, '#64748b');
+      ctx.fillStyle = gradKnock;
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      drawSafeRoundRect(ctx, penX - 10, knockY, 20, 24, 5, true, true);
+
+      // 샤프 포켓 클립
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(penX + barrelW / 2 - 2, penTopY + 8 + pressY * 0.2, 5, 45);
+
+      // 하단 원뿔 선단 (메탈 콘 Tip)
+      const coneTopY = penTopY + barrelH;
+      const gradCone = ctx.createLinearGradient(penX - barrelW / 2, 0, penX + barrelW / 2, 0);
+      gradCone.addColorStop(0, '#64748b');
+      gradCone.addColorStop(0.5, '#e2e8f0');
+      gradCone.addColorStop(1, '#475569');
+      ctx.fillStyle = gradCone;
+      ctx.beginPath();
+      ctx.moveTo(penX - barrelW / 2 + 1, coneTopY);
+      ctx.lineTo(penX + barrelW / 2 - 1, coneTopY);
+      ctx.lineTo(penX + 3.5, coneTopY + 36);
+      ctx.lineTo(penX - 3.5, coneTopY + 36);
+      ctx.closePath();
+      ctx.fill();
+
+      // 스테인리스 가이드 슬리브 (샤프심 나오는 얇은 쇠 파이프)
+      const sleeveTopY = coneTopY + 36;
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(penX - 2, sleeveTopY, 4, 8);
+
+      // ★ [핵심] 돌출되는 흑연 샤프심!
+      const currentLeadTotal = pencilLeadLength + (pressY > 16 ? 4 : 0);
+      if (currentLeadTotal > 0) {
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'square';
+        ctx.beginPath();
+        ctx.moveTo(penX, sleeveTopY + 8);
+        ctx.lineTo(penX, sleeveTopY + 8 + currentLeadTotal);
+        ctx.stroke();
+      }
+
+      // 샤프심 길이 및 상태 텍스트 안내
+      ctx.font = 'bold 12px Pretendard';
+      ctx.textAlign = 'center';
+      if (pencilLeadLength > 0) {
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillText(`샤프심: ${(pencilLeadLength * 0.25).toFixed(1)} mm 배출됨`, penX, sleeveTopY + 8 + currentLeadTotal + 18);
+      } else {
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(`샤프 뒷부분(노크)을 누르면 심이 나옵니다`, penX, sleeveTopY + 32);
+      }
+
+      // 노크 누름 피드백 (찰칵!)
+      if (pressY > 16) {
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'extrabold 12px Pretendard';
+        ctx.fillText('⚡ 찰칵! (심 배출)', penX, knockY - 8);
+      }
+
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 7. 트램펄린 그리기 (★ 누르면 공이 솟구쳐 튀는 물리 모션!)
+    // ----------------------------------------------------
+    function drawExpTrampoline(ctx, cx, cy, dx, dy, w, h) {
+      ctx.save();
+      const floorY = cy + 45;
+      const legBottomY = floorY + 65;
+      const frameLeft = cx - 145;
+      const frameRight = cx + 145;
+
+      // 1. 강철 프레임 지지 다리 (3개)
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(frameLeft + 15, floorY); ctx.lineTo(frameLeft + 5, legBottomY);
+      ctx.moveTo(frameRight - 15, floorY); ctx.lineTo(frameRight - 5, legBottomY);
+      ctx.moveTo(cx, floorY); ctx.lineTo(cx, legBottomY);
+      ctx.stroke();
+
+      // 다리 고무 받침대
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(frameLeft, legBottomY - 5, 12, 6);
+      ctx.fillRect(frameRight - 12, legBottomY - 5, 12, 6);
+      ctx.fillRect(cx - 7, legBottomY - 5, 14, 6);
+
+      // 바닥 지면선
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - 170, legBottomY);
+      ctx.lineTo(cx + 170, legBottomY);
+      ctx.stroke();
+
+      // 2. 탄성 매트 처짐 정도 계산
+      let curMatSag = 0;
+      if (isExpDragging) {
+        curMatSag = Math.max(0, Math.min(85, dy));
+      } else if (isTrampBouncing) {
+        curMatSag = trampMatSag;
+      }
+      const matCenterY = floorY + curMatSag;
+
+      // 트램펄린 가장자리 안전 쿠션 패드 (노란색)
+      ctx.fillStyle = '#f59e0b';
+      drawSafeRoundRect(ctx, frameLeft - 10, floorY - 8, 25, 16, 4, true, false);
+      drawSafeRoundRect(ctx, frameRight - 15, floorY - 8, 25, 16, 4, true, false);
+
+      // 가장자리 인장 스프링들 (양쪽 각 3개씩)
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2.5;
+      for (let i = -1; i <= 1; i++) {
+        const offset = i * 6;
+        ctx.beginPath();
+        ctx.moveTo(frameLeft + 15, floorY + offset);
+        ctx.lineTo(frameLeft + 30, floorY + curMatSag * 0.4 + offset);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(frameRight - 15, floorY + offset);
+        ctx.lineTo(frameRight - 30, floorY + curMatSag * 0.4 + offset);
+        ctx.stroke();
+      }
+
+      // 3. 고탄성 중앙 점핑 매트 (파란색 곡선)
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 5.5;
+      ctx.beginPath();
+      ctx.moveTo(frameLeft + 30, floorY);
+      ctx.quadraticCurveTo(cx, matCenterY, frameRight - 30, floorY);
+      ctx.stroke();
+
+      // 4. ★ [핵심] 위에 있는 공 (농구공/탄성 스포츠볼)
+      const ballR = 24;
+      let ballYOffset = 0;
+      if (isExpDragging) {
+        ballYOffset = curMatSag; // 드래그 중엔 매트와 함께 아래로 눌림
+      } else if (isTrampBouncing) {
+        ballYOffset = trampBallY; // 공중 도약 중
+      } else {
+        ballYOffset = 0; // 평형 상태
+      }
+
+      const ballX = cx;
+      const ballYPos = floorY + ballYOffset - ballR;
+
+      // 공 그림자 (공중에 떴을 때 매트 위에 비침)
+      if (ballYOffset < 0) {
+        const shadowScale = Math.max(0.25, 1 - Math.abs(ballYOffset) / 190);
+        ctx.fillStyle = `rgba(15, 23, 42, ${0.45 * shadowScale})`;
+        ctx.beginPath();
+        ctx.ellipse(cx, floorY + curMatSag, ballR * shadowScale, 6 * shadowScale, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 공 찌그러짐 (Squash & Stretch 탄성 효과)
+      let scaleX = 1;
+      let scaleY = 1;
+      if (ballYOffset > 5) {
+        scaleY = Math.max(0.72, 1 - ballYOffset * 0.004);
+        scaleX = 1 / Math.sqrt(scaleY);
+      } else if (isTrampBouncing && Math.abs(trampBallVy) > 4) {
+        scaleY = Math.min(1.2, 1 + Math.abs(trampBallVy) * 0.008);
+        scaleX = 1 / Math.sqrt(scaleY);
+      }
+
+      // 입체적인 스포츠 공 드로잉
+      ctx.save();
+      ctx.translate(ballX, ballYPos);
+      ctx.rotate(trampBallRot);
+      ctx.scale(scaleX, scaleY);
+
+      // 구체 그라데이션
+      const ballGrad = ctx.createRadialGradient(-ballR * 0.35, -ballR * 0.35, 3, 0, 0, ballR);
+      ballGrad.addColorStop(0, '#fed7aa');
+      ballGrad.addColorStop(0.3, '#fb923c');
+      ballGrad.addColorStop(0.75, '#ea580c');
+      ballGrad.addColorStop(1, '#9a3412');
+      ctx.fillStyle = ballGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, ballR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 공 줄무늬 (Sports Seams)
+      ctx.strokeStyle = '#431407';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, ballR, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-ballR, 0); ctx.lineTo(ballR, 0);
+      ctx.moveTo(0, -ballR); ctx.lineTo(0, ballR);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(0, 0, ballR * 0.55, ballR * 0.88, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 하이라이트 광택
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.beginPath();
+      ctx.arc(-ballR * 0.35, -ballR * 0.35, ballR * 0.28, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+
+      // 텍스트 안내
+      if (isTrampBouncing && ballYOffset < -15) {
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 12px Pretendard';
+        ctx.textAlign = 'center';
+        ctx.fillText('🏀 탄성력으로 공 튀어오름!', cx, ballYPos - ballR - 10);
+      }
+
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 선형 보간 헬퍼 (Lerp)
+    // ----------------------------------------------------
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    // ----------------------------------------------------
+    // 장대높이뛰기 3단계 조작 액션 (장대 꽂기, 누르기, 도약!)
+    // ----------------------------------------------------
+    function poleActionPlant() {
+      if (pvAnimFrame) {
+        cancelAnimationFrame(pvAnimFrame);
+        pvAnimFrame = null;
+      }
+      stopPolePress();
+      pvState = 'planted';
+      pvBendAmount = 0;
+      pvElasticEnergy = 0;
+      pvPotentialEnergy = 0;
+      pvVaultTimer = 0;
+      pvLandingTimer = 0;
+      pvBarKnocked = false;
+      pvBarFallY = 0;
+      pvBarAngle = 0;
+      pvAutoPlay = false;
+      expDeformX = 0;
+      expDeformY = 0;
+      updatePoleVaultButtons();
+      renderExpressSim();
+    }
+
+    function poleActionPress() {
+      if (pvState === 'vaulting' || pvState === 'landing') return;
+      if (pvState === 'success' || pvState === 'failed') {
+        pvState = 'planted';
+        pvBendAmount = 0;
+      }
+      pvState = 'bending';
+      pvBendAmount = Math.min(90, pvBendAmount + 18);
+      pvElasticEnergy = Math.min(100, (pvBendAmount / 90) * 100);
+      expDeformX = 0;
+      expDeformY = pvBendAmount;
+      updatePoleVaultButtons();
+      renderExpressSim();
+    }
+
+    function startPolePress() {
+      if (pvState === 'vaulting' || pvState === 'landing') return;
+      if (pvState !== 'planted' && pvState !== 'bending') {
+        pvState = 'planted';
+        pvBendAmount = 0;
+      }
+      poleActionPress();
+      if (polePressInterval) clearInterval(polePressInterval);
+      polePressInterval = setInterval(() => {
+        poleActionPress();
+      }, 90);
+    }
+
+    function stopPolePress() {
+      if (polePressInterval) {
+        clearInterval(polePressInterval);
+        polePressInterval = null;
+      }
+    }
+
+    function poleActionVault() {
+      if (pvState === 'vaulting' || pvState === 'landing') return;
+      stopPolePress();
+
+      // 만약 누름이 너무 적으면 기본 탄성력 부여 (시원한 도약 보장)
+      if (pvBendAmount < 25) {
+        pvBendAmount = 65;
+        pvElasticEnergy = 72;
+      }
+
+      pvState = 'vaulting';
+      pvVaultTimer = 0;
+      ensurePoleVaultLoop();
+    }
+
+    function poleActionAutoPlay() {
+      poleActionPlant();
+      pvAutoPlay = true;
+      pvState = 'bending';
+
+      // 0.6초간 장대를 깊게 누른 후 도약!
+      let bendStep = 0;
+      const autoInterval = setInterval(() => {
+        bendStep++;
+        pvBendAmount = Math.min(85, bendStep * 15);
+        pvElasticEnergy = Math.min(100, (pvBendAmount / 90) * 100);
+        expDeformY = pvBendAmount;
+        renderExpressSim();
+
+        if (bendStep >= 6) {
+          clearInterval(autoInterval);
+          poleActionVault();
+        }
+      }, 90);
+    }
+
+    function resetPoleVaultGame() {
+      poleActionPlant();
+    }
+
+    function ensurePoleVaultLoop() {
+      if (!pvAnimFrame) {
+        pvAnimFrame = requestAnimationFrame(updatePoleVaultGame);
+      }
+    }
+
+    // 버튼 하이라이트 실시간 갱신 (3단계 연동)
+    function updatePoleVaultButtons() {
+      const btnPlant = document.getElementById('btnPolePlant');
+      const btnPress = document.getElementById('btnPolePress');
+      const btnVault = document.getElementById('btnPoleVault');
+      const plantText = document.getElementById('btnPolePlantText');
+      if (!btnPlant || !btnPress || !btnVault) return;
+
+      const baseBtn = "px-2.5 py-1 rounded-xl text-xs font-extrabold flex items-center gap-1 transition-all active:scale-95";
+
+      // 1. 꽂기 버튼 (성공/실패 시 '다시 꽂기'로 유도)
+      if (pvState === 'success' || pvState === 'failed') {
+        btnPlant.className = `${baseBtn} bg-teal-400 text-slate-950 font-black ring-2 ring-teal-200 animate-pulse shadow-lg`;
+        if (plantText) plantText.innerText = "📍 다시 꽂기";
+      } else {
+        btnPlant.className = `${baseBtn} bg-teal-500/20 text-teal-300 border border-teal-500/40`;
+        if (plantText) plantText.innerText = "📍 장대 꽂기";
+      }
+
+      // 2. 누르기 버튼 (꽂힌 상태일 때 눌러보도록 유도)
+      if (pvState === 'planted') {
+        btnPress.className = `${baseBtn} bg-amber-500 text-slate-950 font-black ring-2 ring-amber-300 animate-pulse shadow-lg`;
+      } else if (pvState === 'bending') {
+        btnPress.className = `${baseBtn} bg-amber-400 text-slate-950 font-black ring-1 ring-amber-300`;
+      } else {
+        btnPress.className = `${baseBtn} bg-amber-500/20 text-amber-300 border border-amber-500/40`;
+      }
+
+      // 3. 도약 버튼 (장대가 휘었을 때 도약 유도)
+      if (pvState === 'bending' && pvBendAmount >= 20) {
+        btnVault.className = `${baseBtn} bg-rose-500 text-white font-black ring-2 ring-rose-300 animate-pulse shadow-lg`;
+      } else {
+        btnVault.className = `${baseBtn} bg-rose-500/20 text-rose-300 border border-rose-500/40`;
+      }
+    }
+
+    // 장대높이뛰기 물리 갱신 루프 (60 FPS)
+    function updatePoleVaultGame() {
+      if (currentPhenomenon !== 'pole') {
+        pvAnimFrame = null;
+        return;
+      }
+
+      if (pvState === 'vaulting') {
+        pvVaultTimer += 0.024;
+        pvElasticEnergy = Math.max(0, pvElasticEnergy - 4.5);
+        // 포물선 정점에서 위치 에너지가 최고조
+        pvPotentialEnergy = Math.min(100, Math.sin(pvVaultTimer * Math.PI) * 100);
+
+        if (pvVaultTimer >= 1.0) {
+          pvState = 'landing';
+          pvLandingTimer = 0;
+        }
+      } else if (pvState === 'landing') {
+        pvLandingTimer += 0.042;
+        if (pvLandingTimer >= 1.0) {
+          pvState = 'success';
+          updatePoleVaultButtons();
+          renderExpressSim();
+          pvAnimFrame = null;
+          return;
+        }
+      }
+
+      updatePoleVaultButtons();
+      renderExpressSim();
+
+      if (pvState === 'vaulting' || pvState === 'landing') {
+        pvAnimFrame = requestAnimationFrame(updatePoleVaultGame);
+      } else {
+        pvAnimFrame = null;
+      }
+    }
+
+    // ----------------------------------------------------
+    // 장대높이뛰기 선수 실루엣 드로잉 헬퍼 (★ 사용자 요청: 순백색 #ffffff 실루엣)
+    // ----------------------------------------------------
+    function drawPoleVaultAthlete(ctx, x, y, stage, progress) {
+      ctx.save();
+      ctx.translate(x, y);
+
+      // 사용자 요청: 순수 하얀색 선수 모습 (#ffffff) & 또렷한 음영
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      ctx.shadowBlur = 5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      if (stage === 'standing') {
+        // [장대 꽂기 상태] 지면에 서서 장대를 두 손으로 단단히 잡고 준비하는 백색 육상 선수
+        // 머리
+        ctx.beginPath(); ctx.arc(0, -66, 8, 0, Math.PI * 2); ctx.fill();
+        // 몸통
+        ctx.lineWidth = 10;
+        ctx.beginPath(); ctx.moveTo(0, -58); ctx.lineTo(-3, -24); ctx.stroke();
+        // 팔 (장대 그립)
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(-1, -52); ctx.lineTo(14, -42); // 앞손 (장대 위쪽 쥠)
+        ctx.moveTo(-1, -48); ctx.lineTo(-14, -34); // 뒷손 (장대 아래쪽 쥠)
+        ctx.stroke();
+        // 다리 (안정적인 준비 자세)
+        ctx.lineWidth = 5.5;
+        ctx.beginPath();
+        ctx.moveTo(-3, -24); ctx.lineTo(4, -12); ctx.lineTo(6, 0); // 앞다리
+        ctx.moveTo(-3, -24); ctx.lineTo(-10, -12); ctx.lineTo(-10, 0); // 뒷다리
+        ctx.stroke();
+
+      } else if (stage === 'bending') {
+        // [장대 누름 상태] 장대가 C자로 깊게 휠 때 매달려 웅크린 백색 선수
+        // 머리
+        ctx.beginPath(); ctx.arc(-6, -18, 8, 0, Math.PI * 2); ctx.fill();
+        // 몸통
+        ctx.lineWidth = 10;
+        ctx.beginPath(); ctx.moveTo(-6, -10); ctx.lineTo(-16, 18); ctx.stroke();
+        // 팔 (장대를 강하게 누르며 쥠)
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(-6, -8); ctx.lineTo(8, -32);
+        ctx.moveTo(-6, -6); ctx.lineTo(-6, -22);
+        ctx.stroke();
+        // 다리 (무릎을 모아 도약 직전 웅크린 포즈)
+        ctx.lineWidth = 5.5;
+        ctx.beginPath();
+        ctx.moveTo(-16, 18); ctx.lineTo(-28, 6); ctx.lineTo(-32, -8);
+        ctx.moveTo(-16, 18); ctx.lineTo(-12, 28); ctx.lineTo(-4, 22);
+        ctx.stroke();
+
+      } else if (stage === 'clearing') {
+        // [★ 도약! 사람과 막대 완전 분리! 배면으로 바 넘기] (참고 사진 실루엣 완벽 일치!)
+        const archRot = -0.18 + progress * 0.48;
+        ctx.rotate(archRot);
+
+        // 머리 (바를 바라보며 젖혀짐)
+        ctx.beginPath(); ctx.arc(26, 4, 8, 0, Math.PI * 2); ctx.fill();
+        // 등 (가로대 위를 활처럼 둥글게 휘며 통과하는 배면 아치)
+        ctx.lineWidth = 9.5;
+        ctx.beginPath();
+        ctx.moveTo(20, 2);
+        ctx.quadraticCurveTo(0, -16, -22, 0);
+        ctx.stroke();
+        // 양팔 (바에 닿지 않도록 가슴 앞으로 모아 넘김)
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(16, 0); ctx.lineTo(10, -12); ctx.lineTo(0, -10);
+        ctx.stroke();
+        // 양다리 (바를 스치듯 공중으로 차올리며 통과)
+        ctx.lineWidth = 5.5;
+        ctx.beginPath();
+        ctx.moveTo(-22, 0); ctx.lineTo(-38, 12); ctx.lineTo(-52, 6);
+        ctx.moveTo(-22, 0); ctx.lineTo(-34, 18); ctx.lineTo(-46, 22);
+        ctx.stroke();
+
+      } else if (stage === 'landing') {
+        // [착지 매트에 등부터 푹신하게 떨어짐]
+        ctx.beginPath(); ctx.arc(-22, -6, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.lineWidth = 10;
+        ctx.beginPath(); ctx.moveTo(-16, -4); ctx.lineTo(18, -2); ctx.stroke();
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(-8, -4); ctx.lineTo(-4, -18);
+        ctx.moveTo(-8, -4); ctx.lineTo(-4, 10);
+        ctx.stroke();
+        ctx.lineWidth = 5.5;
+        ctx.beginPath();
+        ctx.moveTo(18, -2); ctx.lineTo(34, -16); ctx.lineTo(46, -24);
+        ctx.moveTo(18, -2); ctx.lineTo(32, -8); ctx.lineTo(42, -14);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 8. 장대 높이 뛰기 렌더링 (꽂기 ➔ 누르기 ➔ 도약 3단계)
+    // ----------------------------------------------------
+    function drawExpPoleVault(ctx, cx, cy, dx, dy, w, h) {
+      ctx.save();
+      const groundY = h - 90;
+      const boxX = w * 0.50; // 지지홈 박스 위치
+      const barX = w * 0.70; // 5.80m 가로대 바 위치
+      const barY = groundY - 140; // 바 높이
+      const matLeft = barX + 12;
+      const matRight = Math.min(w - 20, barX + 130);
+      const matTop = groundY - 34;
+      const matH = 34;
+
+      // 1. 경기장 밤하늘 배경 & 조명
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, w, h);
+
+      // 원형 스포트라이트 조명
+      const spotGrad1 = ctx.createRadialGradient(boxX - 30, 60, 10, boxX - 30, 60, 220);
+      spotGrad1.addColorStop(0, 'rgba(56, 189, 248, 0.16)');
+      spotGrad1.addColorStop(1, 'rgba(56, 189, 248, 0)');
+      ctx.fillStyle = spotGrad1;
+      ctx.fillRect(0, 0, w, groundY);
+
+      const spotGrad2 = ctx.createRadialGradient(barX, 50, 10, barX, 50, 210);
+      spotGrad2.addColorStop(0, 'rgba(251, 191, 36, 0.14)');
+      spotGrad2.addColorStop(1, 'rgba(251, 191, 36, 0)');
+      ctx.fillStyle = spotGrad2;
+      ctx.fillRect(0, 0, w, groundY);
+
+      // 2. 붉은색 육상 주로 트랙 (Tartan Track)
+      ctx.fillStyle = '#7f1d1d';
+      ctx.fillRect(0, groundY, w, 90);
+
+      // 주로 라인
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, groundY); ctx.lineTo(w, groundY);
+      ctx.moveTo(0, groundY + 12); ctx.lineTo(boxX + 10, groundY + 12);
+      ctx.moveTo(0, groundY + 52); ctx.lineTo(boxX + 10, groundY + 52);
+      ctx.stroke();
+
+      // 지지홈 거리 안내
+      ctx.font = 'bold 10px Pretendard';
+      ctx.fillStyle = '#fca5a5';
+      ctx.textAlign = 'center';
+      ctx.fillText("0m 지지홈 (장대 고정점)", boxX, groundY + 28);
+
+      // 3. 지면 지지홈 박스 (Planting Box)
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.moveTo(boxX - 25, groundY);
+      ctx.lineTo(boxX + 6, groundY);
+      ctx.lineTo(boxX + 1, groundY + 18);
+      ctx.lineTo(boxX - 25, groundY + 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // 4. 높이뛰기 가로대 지지대 & 오렌지색 가로대 바 (Crossbar)
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(barX - 40, groundY); ctx.lineTo(barX - 40, barY - 20);
+      ctx.moveTo(barX + 40, groundY); ctx.lineTo(barX + 40, barY - 20);
+      ctx.stroke();
+
+      // 바 지지 핀
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(barX - 45, barY); ctx.lineTo(barX - 35, barY);
+      ctx.moveTo(barX + 35, barY); ctx.lineTo(barX + 45, barY);
+      ctx.stroke();
+
+      // 가로대 바
+      ctx.strokeStyle = '#f97316';
+      ctx.lineWidth = 4.5;
+      ctx.beginPath();
+      ctx.moveTo(barX - 45, barY);
+      ctx.lineTo(barX + 45, barY);
+      ctx.stroke();
+
+      // 가로대 높이 라벨 배지 (5.80m)
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5;
+      drawSafeRoundRect(ctx, barX + 45, barY - 14, 82, 22, 6, true, true);
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'black 11px Pretendard';
+      ctx.textAlign = 'center';
+      ctx.fillText('높이: 5.80 m', barX + 86, barY + 1);
+
+      // 5. 착지 매트 (파란색 다층 에어 쿠션)
+      const matW = matRight - matLeft;
+      ctx.fillStyle = '#1e3a8a';
+      ctx.fillRect(matLeft, matTop, matW, matH);
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(matLeft + 2, matTop + 2, matW - 4, 10);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(matLeft + 4, matTop + 2, matW - 8, 4);
+
+      // 매트 격자선
+      ctx.strokeStyle = '#1d4ed8';
+      ctx.lineWidth = 1;
+      for (let mx = matLeft + 20; mx < matRight; mx += 20) {
+        ctx.beginPath(); ctx.moveTo(mx, matTop); ctx.lineTo(mx, groundY); ctx.stroke();
+      }
+
+      // 6. 상단 핵심 HUD (장대 탄성 에너지 ➔ 도약 위치 에너지 2색 게이지)
+      const hudY = 16;
+      const hudH = 14;
+      const barW = Math.min(150, Math.max(90, (w - 100) / 2));
+
+      // 1) 장대 탄성 에너지 (누름으로 축적)
+      const eX = w / 2 - barW - 20;
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(eX, hudY, barW, hudH);
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillRect(eX, hudY, barW * (pvElasticEnergy / 100), hudH);
+      ctx.strokeStyle = '#e11d48';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(eX, hudY, barW, hudH);
+      ctx.fillStyle = '#ffe4e6';
+      ctx.font = 'bold 10px Pretendard';
+      ctx.textAlign = 'left';
+      ctx.fillText(`⚡ 장대 탄성E ${pvElasticEnergy.toFixed(0)}%`, eX + 5, hudY + 11);
+
+      // 화살표 ➔
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 13px Pretendard';
+      ctx.textAlign = 'center';
+      ctx.fillText('➔', w / 2, hudY + 11);
+
+      // 2) 도약 위치 에너지 (바 넘기)
+      const pX = w / 2 + 20;
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(pX, hudY, barW, hudH);
+      ctx.fillStyle = '#10b981';
+      ctx.fillRect(pX, hudY, barW * (pvPotentialEnergy / 100), hudH);
+      ctx.strokeStyle = '#059669';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(pX, hudY, barW, hudH);
+      ctx.fillStyle = '#d1fae5';
+      ctx.font = 'bold 10px Pretendard';
+      ctx.textAlign = 'left';
+      ctx.fillText(`📈 도약 위치E ${pvPotentialEnergy.toFixed(0)}%`, pX + 5, hudY + 11);
+
+      // 7. 실시간 3단계 가이드 안내 바
+      let guideMsg = "";
+      let guideColor = "#38bdf8";
+      if (pvState === 'planted') {
+        guideMsg = "① [⬇️ 장대 누르기] 버튼을 누르거나 장대를 아래로 드래그하여 장대를 휘어보세요! (탄성 에너지 충전)";
+        guideColor = "#fbbf24";
+      } else if (pvState === 'bending') {
+        guideMsg = `⚡ 장대가 휘며 탄성 에너지가 충전되었습니다! [🚀 도약!] 버튼을 누르거나 손을 놓으세요!`;
+        guideColor = "#f43f5e";
+      } else if (pvState === 'vaulting') {
+        guideMsg = "🚀 사람이 장대에서 완전히 떨어져(분리되어) 5.80m 가로대 바를 넘는 중!";
+        guideColor = "#38bdf8";
+      } else if (pvState === 'landing' || pvState === 'success') {
+        guideMsg = "🎉 5.80m 도약 성공! (장대의 탄성 위치 에너지 ➔ 선수의 중력 위치 에너지 완벽 전환!)";
+        guideColor = "#34d399";
+      }
+
+      ctx.fillStyle = guideColor;
+      ctx.font = 'bold 12px Pretendard';
+      ctx.textAlign = 'center';
+      ctx.fillText(guideMsg, w / 2, hudY + 35);
+
+      // 8. 상태별 하얀색 선수 & 장대 애니메이션 렌더링
+      const poleLen = 185;
+
+      if (pvState === 'planted') {
+        // [1단계: 장대 꽂기 상태] 지지홈에 꽂힌 직선 장대와 이를 잡고 서 있는 하얀색 선수
+        const tipX = boxX - 68;
+        const tipY = groundY - 170;
+
+        ctx.strokeStyle = '#14b8a6';
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(boxX, groundY);
+        ctx.lineTo(tipX, tipY);
+        ctx.stroke();
+
+        // 순백색 육상 선수 실루엣
+        drawPoleVaultAthlete(ctx, boxX - 52, groundY, 'standing', 0);
+
+      } else if (pvState === 'bending') {
+        // [2단계: 장대 누르기 상태] 외력으로 장대가 C자로 깊게 휘고, 선수가 매달려 탄성 에너지를 모음
+        const bend = pvBendAmount;
+        const gripX = boxX - 52 + bend * 0.32;
+        const gripY = groundY - 170 + bend * 1.12;
+
+        const ctrlX = (boxX + gripX) / 2 + bend * 0.82;
+        const ctrlY = (groundY + gripY) / 2 + bend * 0.45;
+
+        // C자로 깊게 휘는 유리섬유 장대
+        ctx.strokeStyle = '#14b8a6';
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(boxX, groundY);
+        ctx.quadraticCurveTo(ctrlX, ctrlY, gripX, gripY);
+        ctx.stroke();
+
+        // 웅크려 매달린 순백색 선수
+        drawPoleVaultAthlete(ctx, gripX, gripY + 28, 'bending', bend / 90);
+
+      } else if (pvState === 'vaulting') {
+        // [3단계: ★ 도약! 사람과 장대 완전 분리]
+        const p = Math.min(1.0, pvVaultTimer);
+
+        // 1) 완전히 분리된 장대: 바닥 뒤쪽으로 회전하며 넘어짐
+        const poleAngle = lerp(-1.35, -2.95, p);
+        const detachedTipX = boxX + poleLen * Math.cos(poleAngle);
+        const detachedTipY = groundY + poleLen * Math.sin(poleAngle);
+
+        ctx.strokeStyle = '#14b8a6';
+        ctx.lineWidth = 5.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(boxX, groundY);
+        ctx.lineTo(detachedTipX, detachedTipY);
+        ctx.stroke();
+
+        // 2) 장대와 떨어진 순백색 선수: 바 위를 우아하게 통과하는 배면 아치 비행
+        const athleteX = lerp(boxX - 35, barX + 50, p);
+        const apexY = barY - 32;
+        const athleteY = apexY - Math.sin(p * Math.PI) * 25 + (p * 22);
+
+        drawPoleVaultAthlete(ctx, athleteX, athleteY, 'clearing', p);
+
+      } else if (pvState === 'landing' || pvState === 'success' || pvState === 'failed') {
+        // [착지 완료]
+        const p = Math.min(1.0, pvLandingTimer);
+
+        // 장대는 지면에 완전히 누워 있음
+        ctx.strokeStyle = '#14b8a6';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(boxX, groundY);
+        ctx.lineTo(boxX - 175, groundY);
+        ctx.stroke();
+
+        // 파란색 매트 위 착지한 순백색 선수
+        const athleteX = barX + 54;
+        const athleteY = lerp(barY + 15, matTop + 4, p * p);
+
+        drawPoleVaultAthlete(ctx, athleteX, athleteY, 'landing', p);
+
+        // 매트 쿠션 살짝 눌림
+        if (p > 0.7) {
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.45)';
+          ctx.beginPath();
+          ctx.ellipse(athleteX, matTop + 4, 34, 5, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 성공 축하 별가루/폭죽 효과
+        if (pvState === 'success') {
+          ctx.fillStyle = '#fbbf24';
+          for (let i = 0; i < 7; i++) {
+            const starX = barX + (i - 3) * 24;
+            const starY = barY - 45 - (i % 2) * 15;
+            ctx.beginPath();
+            ctx.arc(starX, starY, 3.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 9. 활 쏘기 (★ 당기는 각도/방향대로 실시간 조준 및 화살 발사!)
+    // ----------------------------------------------------
+    function drawExpBow(ctx, cx, cy, dx, dy, w, h) {
+      ctx.save();
+      const bowX = Math.max(90, cx - 80);
+      const bowY = cy;
+      const bowH = 175;
+      const targetX = w - 65;
+      const targetY = cy;
+
+      // 1. 오른쪽 과녁 (Target) & 지지대 그리기
+      // 과녁 나무 스탠드 다리
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(targetX, targetY);
+      ctx.lineTo(targetX - 22, h - 80);
+      ctx.moveTo(targetX, targetY);
+      ctx.lineTo(targetX + 22, h - 80);
+      ctx.stroke();
+
+      // 과녁 링들 (국제 양궁 타깃 규격 색상: 흰색 ➔ 검정 ➔ 파랑 ➔ 빨강 ➔ 노랑 10점)
+      const rings = [
+        { r: 38, color: '#f8fafc', border: '#cbd5e1' },
+        { r: 30, color: '#1e293b', border: '#0f172a' },
+        { r: 22, color: '#0284c7', border: '#0369a1' },
+        { r: 14, color: '#ef4444', border: '#b91c1c' },
+        { r: 6.5, color: '#fbbf24', border: '#d97706' }
+      ];
+      rings.forEach(ring => {
+        ctx.fillStyle = ring.color;
+        ctx.strokeStyle = ring.border;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(targetX, targetY, ring.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+
+      // 10점 정중앙 십자선
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(targetX - 4, targetY); ctx.lineTo(targetX + 4, targetY);
+      ctx.moveTo(targetX, targetY - 4); ctx.lineTo(targetX, targetY + 4);
+      ctx.stroke();
+
+      // 당긴 거리 및 조준 각도 계산
+      const pullR = Math.hypot(dx, dy);
+      const currentAimAngle = (pullR > 4) ? (arrowAimAngle || 0) : 0;
+
+      // 2. 조준 보조선 (당기는 중일 때 날아갈 궤적 미리보기)
+      if (isExpDragging && pullR > 12 && !isArrowShooting) {
+        ctx.save();
+        ctx.setLineDash([4, 6]);
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(bowX, bowY);
+        ctx.lineTo(bowX + Math.cos(currentAimAngle) * 320, bowY + Math.sin(currentAimAngle) * 320);
+        ctx.stroke();
+        ctx.restore();
+
+        // 발사 각도 안내 배지
+        const deg = (-currentAimAngle * 180 / Math.PI).toFixed(0);
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 11px Pretendard';
+        ctx.textAlign = 'center';
+        ctx.fillText(`조준 각도: ${deg >= 0 ? '+' : ''}${deg}°`, bowX, bowY - 105);
+      }
+
+      // 3. 활 및 장전된 화살 렌더링 (★ 조준 각도로 회전)
+      ctx.save();
+      ctx.translate(bowX, bowY);
+      ctx.rotate(currentAimAngle);
+
+      // 1) 활대 (Fiberglass & Wood)
+      ctx.strokeStyle = '#b45309';
+      ctx.lineWidth = 8;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-15, -bowH / 2);
+      ctx.quadraticCurveTo(24 - pullR * 0.12, 0, -15, bowH / 2);
+      ctx.stroke();
+
+      // 활대 하이라이트
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-14, -bowH / 2 + 8);
+      ctx.quadraticCurveTo(22 - pullR * 0.12, 0, -14, bowH / 2 - 8);
+      ctx.stroke();
+
+      // 활 손잡이(그립) 가죽 래핑
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.moveTo(16 - pullR * 0.1, -12);
+      ctx.lineTo(16 - pullR * 0.1, 12);
+      ctx.stroke();
+
+      // 2) 시위 (String)
+      ctx.strokeStyle = '#f8fafc';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(-15, -bowH / 2);
+      if (isArrowShooting) {
+        ctx.lineTo(16, 0); // 발사 직후 복원
+      } else {
+        ctx.lineTo(-pullR, 0); // 당겨진 시위 노크
+      }
+      ctx.lineTo(-15, bowH / 2);
+      ctx.stroke();
+
+      // 3) 장전된 화살 (발사 중이 아닐 때만 표시)
+      if (!isArrowShooting) {
+        const arrowTailX = -pullR;
+        const arrowHeadX = -pullR + 135;
+
+        // 화살대 (알루미늄/카본 샤프트)
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(arrowTailX, 0);
+        ctx.lineTo(arrowHeadX, 0);
+        ctx.stroke();
+
+        // 화살 깃 (Fletching)
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(arrowTailX + 6, 0); ctx.lineTo(arrowTailX, -7); ctx.lineTo(arrowTailX + 16, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(arrowTailX + 6, 0); ctx.lineTo(arrowTailX, 7); ctx.lineTo(arrowTailX + 16, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // 화살촉
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.moveTo(arrowHeadX, -6);
+        ctx.lineTo(arrowHeadX + 14, 0);
+        ctx.lineTo(arrowHeadX, 6);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      ctx.restore();
+
+      // 4. 날아가는 화살 렌더링 (★ 탄도학 궤적 비행)
+      if (isArrowShooting) {
+        ctx.save();
+        ctx.translate(arrowFlightX, arrowFlightY);
+        ctx.rotate(arrowFlightAngle);
+
+        // 잔상 궤적
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(-50, 0);
+        ctx.lineTo(-135, 0);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 화살대
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(-135, 0);
+        ctx.lineTo(0, 0);
+        ctx.stroke();
+
+        // 깃
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(-128, 0); ctx.lineTo(-135, -7); ctx.lineTo(-118, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-128, 0); ctx.lineTo(-135, 7); ctx.lineTo(-118, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // 화살촉
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.moveTo(0, -6);
+        ctx.lineTo(14, 0);
+        ctx.lineTo(0, 6);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // 5. 과녁 명중 및 점수 피드백 배지
+      if (arrowHitTarget) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        const badgeY = targetY - 55;
+
+        // 배지 배경 및 테두리 (안전한 roundRect)
+        ctx.fillStyle = '#0f172a';
+        const hitColor = arrowHitScore.includes('10점') ? '#fbbf24' : (arrowHitScore.includes('명중') ? '#34d399' : '#f87171');
+        ctx.strokeStyle = hitColor;
+        ctx.lineWidth = 2;
+        drawSafeRoundRect(ctx, targetX - 75, badgeY - 14, 150, 28, 8, true, true);
+
+        ctx.fillStyle = hitColor;
+        ctx.font = 'black 13px Pretendard';
+        ctx.fillText(`🎯 ${arrowHitScore}`, targetX, badgeY + 5);
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+
+    // 벡터 화살표 드로잉
+    function drawVectorArrow(ctx, startX, startY, vx, vy, color, label, valText) {
+      ctx.save();
+      const endX = startX + vx;
+      const endY = startY + vy;
+      const len = Math.hypot(vx, vy);
+      if (len < 5) { ctx.restore(); return; }
+
+      const angle = Math.atan2(vy, vx);
+      const headLen = 12;
+
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 4.5;
+      ctx.lineCap = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(endX, endY);
+      ctx.lineTo(endX - headLen * Math.cos(angle - Math.PI / 6), endY - headLen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(endX - headLen * Math.cos(angle + Math.PI / 6), endY - headLen * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.font = 'bold 11px Pretendard';
+      ctx.textAlign = 'center';
+      const textX = endX + Math.cos(angle) * 18;
+      const textY = endY + Math.sin(angle) * 18 + 4;
+      ctx.fillText(`${label} (${valText})`, textX, textY);
+
+      ctx.restore();
+    }
+
+    // ----------------------------------------------------
+    // 포인터 터치 & 드래그 이벤트 (크롬북 최적화)
+    // ----------------------------------------------------
+    expCanvas.addEventListener('pointerdown', (e) => {
+      const rect = expCanvas.getBoundingClientRect();
+
+      if (currentPhenomenon === 'pole') {
+        // 장대높이뛰기: 터치하여 아래로 당겨 장대를 휘거나 도약 준비
+        if (pvState === 'vaulting' || pvState === 'landing') return;
+        if (pvState === 'success' || pvState === 'failed') {
+          poleActionPlant();
+        }
+        isExpDragging = true;
+        pvState = 'bending';
+        expDragStartX = e.clientX - rect.left;
+        expDragStartY = e.clientY - rect.top;
+        expInitDeformY = pvBendAmount;
+        expCanvas.setPointerCapture(e.pointerId);
+        return;
+      }
+
+      if (currentPhenomenon === 'bow') {
+        if (isArrowShooting) {
+          isArrowShooting = false;
+          arrowHitTarget = false;
+        }
+      }
+
+      expDragStartX = e.clientX - rect.left;
+      expDragStartY = e.clientY - rect.top;
+      expInitDeformX = expDeformX;
+      expInitDeformY = expDeformY;
+      isExpDragging = true;
+      isExpOscillating = false;
+
+      // 만약 트램펄린 공이 튀고 있었다면 터치로 잡기
+      if (isTrampBouncing) {
+        isTrampBouncing = false;
+        trampBallY = 0;
+        trampBallVy = 0;
+        trampMatSag = 0;
+      }
+
+      expCanvas.setPointerCapture(e.pointerId);
+    });
+
+    expCanvas.addEventListener('pointermove', (e) => {
+      if (!isExpDragging) return;
+      const rect = expCanvas.getBoundingClientRect();
+      const curX = e.clientX - rect.left;
+      const curY = e.clientY - rect.top;
+
+      if (currentPhenomenon === 'pole') {
+        // 장대높이뛰기: 아래로 드래그하는 만큼 장대가 C자로 휨 (외력 ↓ 축적)
+        const rawDy = curY - expDragStartY;
+        pvBendAmount = Math.max(0, Math.min(90, expInitDeformY + rawDy * 0.9));
+        pvElasticEnergy = Math.min(100, (pvBendAmount / 90) * 100);
+        expDeformX = 0;
+        expDeformY = pvBendAmount;
+        updatePoleVaultButtons();
+        renderExpressSim();
+        return;
+      }
+
+      let rawDx = expInitDeformX + (curX - expDragStartX);
+      let rawDy = expInitDeformY + (curY - expDragStartY);
+
+      // 각 물체별 제약 규칙 적용
+      if (currentPhenomenon === 'pen') {
+        // 볼펜: 수직으로만 누름 가능 (늘리기 불가!)
+        expDeformX = 0;
+        expDeformY = Math.max(0, Math.min(28, rawDy));
+      } else if (currentPhenomenon === 'pencil') {
+        // 샤프: 수직으로만 누름 가능 (늘리기 불가!)
+        expDeformX = 0;
+        expDeformY = Math.max(0, Math.min(26, rawDy));
+
+        // 노크를 깊게 누르면 '찰칵' 소리와 함께 샤프심 배출!
+        if (expDeformY >= 16 && !pencilClickedThisPress) {
+          pencilClickedThisPress = true;
+          pencilLeadLength += 6;
+          if (pencilLeadLength > 36) pencilLeadLength = 6;
+        }
+      } else if (currentPhenomenon === 'trampoline') {
+        // 트램펄린: 아래로만 누름 가능 (늘리기 불가!)
+        expDeformX = 0;
+        expDeformY = Math.max(0, Math.min(85, rawDy));
+      } else if (currentPhenomenon === 'bow') {
+        // 활쏘기: ★ 당기는 각도와 방향대로 조준!
+        // rawDx: 뒤쪽(왼쪽)으로 당기면 음수
+        // rawDy: 위로 당기면 음수(상승 조준), 아래로 당기면 양수(하강 조준)
+        const pullX = Math.min(0, rawDx);
+        const pullY = rawDy;
+        const pullDist = Math.min(130, Math.hypot(pullX, pullY));
+
+        let angle = 0;
+        if (pullDist > 4) {
+          angle = Math.atan2(pullY, Math.max(15, -pullX));
+          const maxAngle = 50 * Math.PI / 180;
+          angle = Math.max(-maxAngle, Math.min(maxAngle, angle));
+        }
+
+        arrowAimAngle = angle;
+        expDeformX = -pullDist * Math.cos(angle);
+        expDeformY = -pullDist * Math.sin(angle);
+      } else if (currentPhenomenon === 'spring' || currentPhenomenon === 'band') {
+        // 용수철 / 고무줄: 화면 네모칸 안으로 제한
+        const maxBox = 135;
+        expDeformX = Math.max(-maxBox, Math.min(maxBox, rawDx));
+        expDeformY = Math.max(-maxBox, Math.min(maxBox, rawDy));
+      } else {
+        expDeformX = rawDx;
+        expDeformY = rawDy;
+      }
+
+      renderExpressSim();
+    });
+
+    expCanvas.addEventListener('pointerup', (e) => {
+      if (!isExpDragging) return;
+      isExpDragging = false;
+      try { expCanvas.releasePointerCapture(e.pointerId); } catch(err) {}
+
+      if (currentPhenomenon === 'pole') {
+        // 장대높이뛰기: 충분히 누른 상태(드래그)에서 손을 놓으면 바로 도약!
+        if (pvBendAmount >= 20) {
+          poleActionVault();
+        } else {
+          // 단순 탭(클릭): 상태에 따라 꽂기 ➔ 누르기 ➔ 도약 순차 진행
+          if (pvState === 'planted') {
+            poleActionPress();
+          } else if (pvState === 'bending') {
+            poleActionVault();
+          } else {
+            poleActionPlant();
+          }
+        }
+        return;
+      }
+
+      // 놓았을 때 물체별 특수 반응
+      if (currentPhenomenon === 'pencil') {
+        // 샤프: 탭하거나 손을 놓을 때 노크 복원 & 1회 배출 처리
+        if (!pencilClickedThisPress && (expDeformY > 5 || Math.hypot(expDeformX, expDeformY) < 5)) {
+          pencilLeadLength += 6;
+          if (pencilLeadLength > 36) pencilLeadLength = 6;
+        }
+        pencilClickedThisPress = false;
+        expDeformY = 0;
+        renderExpressSim();
+      } else if (currentPhenomenon === 'trampoline') {
+        // 트램펄린: 누른 깊이에 비례하여 공이 하늘 높이 튀어 오름! (가벼운 탭도 기본 도약)
+        const depth = expDeformY > 10 ? expDeformY : 48;
+        triggerTrampolineBounce(depth);
+      } else if (currentPhenomenon === 'bow') {
+        // 활쏘기: 시위를 놓으면 당긴 각도와 거리에 맞춰 화살 발사!
+        const pullDist = Math.hypot(expDeformX, expDeformY);
+        if (pullDist >= 15) {
+          triggerBowShot(pullDist, arrowAimAngle || 0);
+        } else {
+          // 단순 탭(클릭) 시에도 기본 탄성력으로 직관적 직선 발사!
+          triggerBowShot(65, 0);
+        }
+      } else {
+        // 일반 복원 진동
+        startExpressOscillation();
+      }
+    });
+
+    // 키보드 조작 이벤트 (장대높이뛰기 3단계: S/1 꽂기, W/2/↓ 누르기, D/3/Space 도약, R 리셋)
+    window.addEventListener('keydown', (e) => {
+      if (currentPhenomenon !== 'pole') return;
+      const key = e.key.toLowerCase();
+      if (key === 's' || key === 'ㄴ' || key === '1') {
+        poleActionPlant();
+      } else if (key === 'w' || key === 'ㅈ' || key === '2' || key === 'arrowdown') {
+        poleActionPress();
+      } else if (key === 'd' || key === 'ㅇ' || key === '3' || key === ' ' || key === 'enter') {
+        poleActionVault();
+      } else if (key === 'r' || key === 'ㄱ') {
+        resetPoleVaultGame();
+      }
+    });
+
+    // 1. 트램펄린 공 튀기기 애니메이션 (현실적 다중 바운스 물리 연출)
+    function triggerTrampolineBounce(depth) {
+      isTrampBouncing = true;
+      trampBallY = depth;
+      // 초기 발사 속도: 깊이에 비례 (에너지 보존: E = 1/2 k x^2 -> v ~ x)
+      trampBallVy = -Math.min(22, depth * 0.26 + 6);
+      trampMatSag = 0;
+      let bounceCount = 0;
+
+      function bounceStep() {
+        if (!isTrampBouncing) return;
+
+        // 중력 가속도 작용
+        trampBallVy += 0.72;
+        trampBallY += trampBallVy;
+        trampBallRot += trampBallVy * 0.015;
+
+        // 공이 공중에 있을 때 매트는 원위치로 탄성 감쇠 진동
+        if (trampBallY < 0) {
+          trampMatSag *= 0.72;
+        }
+
+        // 매트에 충돌! (착지 및 재도약)
+        if (trampBallY >= 0) {
+          trampBallY = 0;
+          bounceCount++;
+          // 반발 계수 e = 0.65 (공이 통- 통- 통- 튀어오름)
+          trampBallVy = -trampBallVy * 0.65;
+          // 충돌 순간 매트가 공의 충격량에 의해 아래로 살짝 밀림
+          trampMatSag = Math.min(30, Math.abs(trampBallVy) * 1.4);
+
+          // 감쇠가 충분히 이루어지면 정지
+          if (Math.abs(trampBallVy) < 1.8 || bounceCount > 6) {
+            trampBallY = 0;
+            trampBallVy = 0;
+            trampMatSag = 0;
+            isTrampBouncing = false;
+            expDeformY = 0;
+            renderExpressSim();
+            return;
+          }
+        }
+
+        renderExpressSim();
+        requestAnimationFrame(bounceStep);
+      }
+      requestAnimationFrame(bounceStep);
+    }
+
+    // 2. 활쏘기 화살 발사 애니메이션 (★ 당긴 각도와 거리에 따른 탄도학 발사)
+    function triggerBowShot(pullDist, aimAngle) {
+      isArrowShooting = true;
+      arrowHitTarget = false;
+      arrowHitScore = "";
+
+      const bowX = Math.max(90, (expCanvas.clientWidth / 2) - 80);
+      const bowY = expCanvas.clientHeight / 2;
+
+      arrowFlightX = bowX;
+      arrowFlightY = bowY;
+
+      // 발사 속도: 당긴 거리(탄성 위치 에너지)에 비례
+      const speed = Math.min(32, pullDist * 0.28 + 12);
+      arrowFlightVx = speed * Math.cos(aimAngle);
+      arrowFlightVy = speed * Math.sin(aimAngle);
+      arrowFlightAngle = aimAngle;
+
+      const targetX = expCanvas.clientWidth - 65;
+      const targetY = bowY;
+
+      expDeformX = 0;
+      expDeformY = 0;
+
+      function step() {
+        if (!isArrowShooting) return;
+
+        arrowFlightX += arrowFlightVx;
+        arrowFlightY += arrowFlightVy;
+        // 자연스러운 탄도학 중력 낙하
+        arrowFlightVy += 0.16;
+        arrowFlightAngle = Math.atan2(arrowFlightVy, arrowFlightVx);
+
+        // 과녁 라인 도달 시 충돌 검사
+        if (arrowFlightX >= targetX - 8) {
+          arrowFlightX = targetX - 5;
+          arrowHitTarget = true;
+
+          const distFromCenter = Math.abs(arrowFlightY - targetY);
+          if (distFromCenter <= 9) {
+            arrowHitScore = "10점 (정중앙 명중!)";
+          } else if (distFromCenter <= 18) {
+            arrowHitScore = "9점 (명중!)";
+          } else if (distFromCenter <= 28) {
+            arrowHitScore = "8점 (명중!)";
+          } else if (distFromCenter <= 40) {
+            arrowHitScore = "7점 (적중)";
+          } else {
+            arrowHitScore = "빗나감 (각도 조절 필요!)";
+          }
+
+          renderExpressSim();
+
+          // 1.5초 후 화살 자동 재장전
+          setTimeout(() => {
+            isArrowShooting = false;
+            arrowHitTarget = false;
+            renderExpressSim();
+          }, 1500);
+          return;
+        }
+
+        // 화면 밖으로 벗어난 경우 처리
+        if (arrowFlightY > expCanvas.clientHeight + 60 || arrowFlightY < -60 || arrowFlightX > expCanvas.clientWidth + 60) {
+          arrowHitTarget = true;
+          arrowHitScore = "빗나감 (화면 이탈)";
+          renderExpressSim();
+          setTimeout(() => {
+            isArrowShooting = false;
+            arrowHitTarget = false;
+            renderExpressSim();
+          }, 1200);
+          return;
+        }
+
+        renderExpressSim();
+        requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // 3. 장대높이뛰기 자동 시연 트리거 (호환용)
+    function triggerPoleVault() {
+      poleActionAutoPlay();
+    }
+
+    // 일반 탄성 복원 진동
+    function startExpressOscillation() {
+      if (Math.hypot(expDeformX, expDeformY) < 3) {
+        expDeformX = 0;
+        expDeformY = 0;
+        renderExpressSim();
+        return;
+      }
+      isExpOscillating = true;
+      expVelX = 0;
+      expVelY = 0;
+
+      function step() {
+        if (!isExpOscillating) return;
+        const k = 0.16;
+        const damping = 0.82;
+
+        const ax = -k * expDeformX;
+        const ay = -k * expDeformY;
+
+        expVelX = (expVelX + ax) * damping;
+        expVelY = (expVelY + ay) * damping;
+
+        expDeformX += expVelX;
+        expDeformY += expVelY;
+
+        if (Math.hypot(expDeformX, expDeformY) < 0.5 && Math.hypot(expVelX, expVelY) < 0.5) {
+          expDeformX = 0;
+          expDeformY = 0;
+          isExpOscillating = false;
+        }
+
+        renderExpressSim();
+
+        if (isExpOscillating) {
+          requestAnimationFrame(step);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+
+    // ====================================================
+    // C. [훅의 법칙 실험] 고무줄 & 용수철 로직 (기존 모드 2, 3)
+    // ====================================================
+    let currentHookeMode = 'spring';
+    let currentSpringType = 'standard';
+
+    const SPRING_CONFIGS = {
+      soft: {
+        name: "부드러운 용수철",
+        k: 0.5,
+        color: "#34d399",
+        highlight: "#a7f3d0",
+        wireThickness: 3.5,
+        coils: 13,
+        desc: "가는 철사 코일 (작은 힘으로도 쉽게 늘어나고 줄어듦)"
+      },
+      standard: {
+        name: "표준 용수철",
+        k: 1.0,
+        color: "#38bdf8",
+        highlight: "#bae6fd",
+        wireThickness: 5.5,
+        coils: 11,
+        desc: "중학교 실험 표준 코일 (보통 탄성)"
+      },
+      stiff: {
+        name: "단단한 용수철",
+        k: 2.0,
+        color: "#c084fc",
+        highlight: "#f3e8ff",
+        wireThickness: 8.0,
+        coils: 8,
+        desc: "굵은 철사 코일 (단단하여 큰 힘이 필요함)"
+      }
+    };
+
+    const RUBBER_CONFIG = {
+      name: "고무줄",
+      k: 1.0,
+      color: "#fbbf24",
+      desc: "당길수록 가늘어지고 팽팽해지는 고무줄"
+    };
+
+    function getCurrentK() {
+      if (currentHookeMode === 'rubber') return RUBBER_CONFIG.k;
+      return SPRING_CONFIGS[currentSpringType].k;
+    }
+
+    const CONSTANTS = {
+      ORIGINAL_LENGTH: 170,
+      MAX_STRETCH_CM: 15,
+      MAX_COMPRESS_CM: -8,
+      PX_PER_CM: 14,
+      DAMPING: 0.88,
+      STIFFNESS: 0.16
+    };
+
+    let currentStretchPx = 0;
+    let isDragging = false;
+    let dragStartX = 0;
+    let initialStretchOnDrag = 0;
+    let velocity = 0;
+    let isOscillating = false;
+    let recordedPoints = [];
+
+    const simCanvas = document.getElementById('simCanvas');
+    const simCtx = simCanvas.getContext('2d');
+    const graphCanvas = document.getElementById('graphCanvas');
+    const graphCtx = graphCanvas.getContext('2d');
+
+    function resizeHookeCanvas() {
+      const rect = simCanvas.getBoundingClientRect();
+      simCanvas.width = rect.width * window.devicePixelRatio;
+      simCanvas.height = rect.height * window.devicePixelRatio;
+      simCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+      const gRect = graphCanvas.getBoundingClientRect();
+      graphCanvas.width = gRect.width * window.devicePixelRatio;
+      graphCanvas.height = gRect.height * window.devicePixelRatio;
+      graphCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+      renderSim();
+      renderGraph();
+    }
+
+    function switchHookeMode(mode) {
+      currentHookeMode = mode;
+      currentStretchPx = 0;
+      isOscillating = false;
+
+      const tabRubber = document.getElementById('tabRubber');
+      const tabSpring = document.getElementById('tabSpring');
+      const springSelectorBar = document.getElementById('springSelectorBar');
+      const slider = document.getElementById('lengthSlider');
+
+      const headerIcon = document.getElementById('headerIcon');
+      const headerTitle = document.getElementById('headerTitle');
+      const headerDesc = document.getElementById('headerDesc');
+
+      if (mode === 'rubber') {
+        tabRubber.className = "px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-active whitespace-nowrap";
+        tabSpring.className = "px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap";
+        springSelectorBar.classList.add('hidden');
+        headerIcon.innerText = "🏹";
+        headerTitle.innerText = "고무줄 탄성력 가상 실험실";
+        headerDesc.innerText = "고무줄을 당겨보며 늘어나는 방향과 반대로 작용하는 탄성력 및 관계 그래프를 관찰해 봅시다.";
+        slider.min = "0";
+      } else {
+        tabSpring.className = "px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-active whitespace-nowrap";
+        tabRubber.className = "px-3.5 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap";
+        springSelectorBar.classList.remove('hidden');
+        headerIcon.innerText = "🌀";
+        headerTitle.innerText = "용수철 탄성력 가상 실험실";
+        headerDesc.innerText = "용수철을 늘리거나 꾹 줄여보며, 양방향으로 작용하는 탄성력과 탄성 계수별 그래프를 탐구해 봅시다.";
+        slider.min = "-8";
+      }
+
+      slider.value = "0";
+      updateUIInfo();
+      resizeHookeCanvas();
+    }
+
+    function selectSpringType(type) {
+      currentSpringType = type;
+      currentStretchPx = 0;
+      isOscillating = false;
+
+      const btnSoft = document.getElementById('btnSpringSoft');
+      const btnStd = document.getElementById('btnSpringStandard');
+      const btnStiff = document.getElementById('btnSpringStiff');
+      const descSpan = document.getElementById('springTypeDesc');
+
+      const defaultClass = "p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200";
+      btnSoft.className = defaultClass;
+      btnStd.className = defaultClass;
+      btnStiff.className = defaultClass;
+
+      if (type === 'soft') {
+        btnSoft.className = "p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 bg-emerald-950/60 border-emerald-500 text-emerald-300 ring-2 ring-emerald-500/30";
+        descSpan.innerText = "가는 철사 코일 (작은 힘으로도 쉽게 늘어나고 줄어듦)";
+      } else if (type === 'standard') {
+        btnStd.className = "p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 bg-sky-950/60 border-sky-500 text-sky-300 ring-2 ring-sky-500/30";
+        descSpan.innerText = "보통 철사 코일 (중학교 실험 표준)";
+      } else if (type === 'stiff') {
+        btnStiff.className = "p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 bg-purple-950/60 border-purple-500 text-purple-300 ring-2 ring-purple-500/30";
+        descSpan.innerText = "굵은 철사 코일 (단단하여 큰 힘이 필요함)";
+      }
+
+      updateUIInfo();
+      renderSim();
+      renderGraph();
+    }
+
+    function renderSim() {
+      const width = simCanvas.clientWidth;
+      const height = simCanvas.clientHeight;
+      simCtx.clearRect(0, 0, width, height);
+
+      const startX = 65;
+      const centerY = height / 2 - 10;
+      const origEnd = startX + CONSTANTS.ORIGINAL_LENGTH;
+      const currentEnd = origEnd + currentStretchPx;
+
+      const k = getCurrentK();
+      const deltaXcm = currentStretchPx / CONSTANTS.PX_PER_CM;
+      const absDeltaCm = Math.abs(deltaXcm);
+      const forceMagnitude = Math.max(0, absDeltaCm * k);
+
+      updateUIInfo(deltaXcm, forceMagnitude, k);
+
+      drawRuler(simCtx, startX, centerY + 70, width - 85, origEnd);
+      drawWall(simCtx, startX, centerY);
+
+      // 기준 점선
+      simCtx.save();
+      simCtx.setLineDash([4, 4]);
+      simCtx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+      simCtx.lineWidth = 1.5;
+      simCtx.beginPath();
+      simCtx.moveTo(origEnd, centerY - 80);
+      simCtx.lineTo(origEnd, centerY + 80);
+      simCtx.stroke();
+      simCtx.fillStyle = 'rgba(148, 163, 184, 0.8)';
+      simCtx.font = 'bold 11px Pretendard';
+      simCtx.textAlign = 'center';
+      simCtx.fillText('처음 위치 (0 cm)', origEnd, centerY - 86);
+      simCtx.restore();
+
+      if (currentHookeMode === 'rubber') {
+        drawRubberBand(simCtx, startX, centerY, currentEnd, centerY, absDeltaCm);
+      } else {
+        const springCfg = SPRING_CONFIGS[currentSpringType];
+        drawSpring(simCtx, startX, centerY, currentEnd, centerY, springCfg);
+      }
+
+      if (Math.abs(currentStretchPx) > 3) {
+        drawStretchIndicator(simCtx, origEnd, currentEnd, centerY - 50, deltaXcm);
+      }
+
+      if (forceMagnitude > 0.08) {
+        const arrowLen = Math.min(160, forceMagnitude * 7.5);
+        if (deltaXcm > 0) {
+          drawForceArrow(simCtx, currentEnd + 26, centerY, arrowLen, '#38bdf8', '외부 힘 (당김 →)', `${forceMagnitude.toFixed(1)} N`);
+          drawForceArrow(simCtx, currentEnd - 22, centerY, -arrowLen, '#f43f5e', '탄성력 (복원 ←)', `${forceMagnitude.toFixed(1)} N`);
+        } else {
+          drawForceArrow(simCtx, currentEnd + 26, centerY, -arrowLen, '#38bdf8', '외부 힘 (압축 ←)', `${forceMagnitude.toFixed(1)} N`);
+          drawForceArrow(simCtx, currentEnd - 22, centerY, arrowLen, '#f43f5e', '탄성력 (복원 →)', `${forceMagnitude.toFixed(1)} N`);
+        }
+      }
+
+      drawHandle(simCtx, currentEnd, centerY, isDragging, deltaXcm);
+    }
+
+    function updateUIInfo(deltaXcm = 0, forceMagnitude = 0, k = getCurrentK()) {
+      const absCm = Math.abs(deltaXcm);
+      const isCompressed = deltaXcm < -0.05;
+      const isStretched = deltaXcm > 0.05;
+
+      let stretchHtml = '';
+      if (isCompressed) {
+        stretchHtml = `<span class="text-rose-400 font-black">-${absCm.toFixed(1)} cm</span> <span class="text-[10px] text-rose-300 bg-rose-950/80 border border-rose-800/60 px-1.5 py-0.5 rounded font-bold">압축</span>`;
+      } else if (isStretched) {
+        stretchHtml = `<span class="text-sky-400 font-black">+${absCm.toFixed(1)} cm</span> <span class="text-[10px] text-sky-300 bg-sky-950/80 border border-sky-800/60 px-1.5 py-0.5 rounded font-bold">늘어남</span>`;
+      } else {
+        stretchHtml = `<span class="text-amber-400 font-black">0.0 cm</span> <span class="text-[10px] text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded font-bold">평형</span>`;
+      }
+      document.getElementById('dispStretch').innerHTML = stretchHtml;
+      document.getElementById('dispAppliedForce').innerText = `${forceMagnitude.toFixed(1)} N`;
+      document.getElementById('dispElasticForce').innerText = `${forceMagnitude.toFixed(1)} N`;
+      document.getElementById('dispKValue').innerText = `${k.toFixed(1)} N/cm`;
+
+      document.getElementById('sliderValDisplay').innerText = `${deltaXcm > 0 ? '+' : ''}${deltaXcm.toFixed(1)} cm`;
+      document.getElementById('lengthSlider').value = deltaXcm.toFixed(1);
+
+      const badge = document.getElementById('forceStateBadge');
+      if (isCompressed) {
+        badge.innerText = "압축 상태: 외력(←)과 탄성력(→)의 방향 반대!";
+        badge.className = "font-black text-rose-400 text-[11px] bg-rose-950/40 border border-rose-800/40 px-2.5 py-0.5 rounded-full";
+        document.getElementById('barLabelApplied').innerText = "외부 힘 (왼쪽으로 압축하는 힘 ←)";
+        document.getElementById('barLabelElastic').innerText = "탄성력 (오른쪽으로 밀어내는 복원력 →)";
+      } else if (isStretched) {
+        badge.innerText = "인장 상태: 외력(→)과 탄성력(←)의 방향 반대!";
+        badge.className = "font-black text-sky-400 text-[11px] bg-sky-950/40 border border-sky-800/40 px-2.5 py-0.5 rounded-full";
+        document.getElementById('barLabelApplied').innerText = "외부 힘 (오른쪽으로 당기는 힘 →)";
+        document.getElementById('barLabelElastic').innerText = "탄성력 (왼쪽으로 끌어당기는 복원력 ←)";
+      } else {
+        badge.innerText = "평형 상태: 힘이 작용하지 않음 (0 N)";
+        badge.className = "font-black text-slate-400 text-[11px] bg-slate-800/40 border border-slate-700 px-2.5 py-0.5 rounded-full";
+        document.getElementById('barLabelApplied').innerText = "외부 힘";
+        document.getElementById('barLabelElastic').innerText = "탄성력";
+      }
+
+      const maxDisplayForce = 30;
+      const percent = Math.min(100, (forceMagnitude / maxDisplayForce) * 100);
+      document.getElementById('barApplied').style.width = `${percent}%`;
+      document.getElementById('barValApplied').innerText = `${forceMagnitude.toFixed(1)} N`;
+      document.getElementById('barElastic').style.width = `${percent}%`;
+      document.getElementById('barValElastic').innerText = `${forceMagnitude.toFixed(1)} N`;
+    }
+
+    function drawWall(ctx, x, y) {
+      ctx.save();
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x - 22, y - 65, 22, 130);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      for (let i = -55; i <= 55; i += 12) {
+        ctx.beginPath();
+        ctx.moveTo(x - 22, y + i);
+        ctx.lineTo(x, y + i - 10);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.arc(x, y, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawRubberBand(ctx, x1, y1, x2, y2, absDeltaCm) {
+      ctx.save();
+      const baseThickness = 17;
+      const thickness = Math.max(5, baseThickness - (absDeltaCm * 0.6));
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = thickness;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawSpring(ctx, x1, y1, x2, y2, springCfg) {
+      ctx.save();
+      const length = x2 - x1;
+      const coils = springCfg.coils;
+      const wireWidth = springCfg.wireThickness;
+      const coilRadius = 24;
+      const startLeader = 14;
+      const endLeader = 14;
+      const activeLength = Math.max(30, length - startLeader - endLeader);
+      const pitch = activeLength / coils;
+
+      ctx.strokeStyle = springCfg.color;
+      ctx.lineWidth = wireWidth;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x1 + startLeader, y1);
+      ctx.stroke();
+
+      for (let i = 0; i < coils; i++) {
+        const cx = x1 + startLeader + (i * pitch);
+        ctx.strokeStyle = springCfg.color;
+        ctx.lineWidth = wireWidth;
+        ctx.beginPath();
+        ctx.moveTo(cx, y1);
+        ctx.bezierCurveTo(cx + pitch * 0.2, y1 - coilRadius, cx + pitch * 0.3, y1 - coilRadius, cx + pitch * 0.5, y1);
+        ctx.bezierCurveTo(cx + pitch * 0.7, y1 + coilRadius, cx + pitch * 0.8, y1 + coilRadius, cx + pitch, y1);
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(x2 - endLeader, y2);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawHandle(ctx, x, y, active, deltaXcm) {
+      ctx.save();
+      ctx.fillStyle = active ? '#38bdf8' : '#cbd5e1';
+      ctx.strokeStyle = active ? '#0284c7' : '#64748b';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.arc(x + 12, y, 17, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawRuler(ctx, startX, y, width, origEnd) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
+      ctx.fillRect(startX, y, width, 26);
+      ctx.strokeStyle = '#475569';
+      ctx.strokeRect(startX, y, width, 26);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px Pretendard';
+      ctx.textAlign = 'center';
+
+      for (let cm = -8; cm <= 16; cm++) {
+        const tickX = origEnd + (cm * CONSTANTS.PX_PER_CM);
+        if (tickX < startX || tickX > startX + width - 10) continue;
+        const isMajor = cm % 5 === 0 || cm === 0;
+        const tickH = (cm === 0) ? 16 : isMajor ? 13 : 7;
+
+        ctx.strokeStyle = (cm === 0) ? '#38bdf8' : isMajor ? '#cbd5e1' : '#64748b';
+        ctx.beginPath();
+        ctx.moveTo(tickX, y);
+        ctx.lineTo(tickX, y + tickH);
+        ctx.stroke();
+
+        if (isMajor) {
+          ctx.fillText(`${cm}`, tickX, y + 22);
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawStretchIndicator(ctx, origEnd, currentEnd, y, deltaXcm) {
+      ctx.save();
+      const isCompressed = deltaXcm < 0;
+      const color = isCompressed ? '#f43f5e' : '#fbbf24';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.8;
+
+      const minX = Math.min(origEnd, currentEnd);
+      const maxX = Math.max(origEnd, currentEnd);
+
+      ctx.beginPath();
+      ctx.moveTo(minX, y - 7); ctx.lineTo(minX, y + 7);
+      ctx.moveTo(maxX, y - 7); ctx.lineTo(maxX, y + 7);
+      ctx.moveTo(minX, y); ctx.lineTo(maxX, y);
+      ctx.stroke();
+
+      ctx.fillStyle = color;
+      ctx.font = 'bold 12px Pretendard';
+      ctx.textAlign = 'center';
+      const label = isCompressed ? `줄어든 길이 Δx = -${Math.abs(deltaXcm).toFixed(1)} cm` : `늘어난 길이 Δx = +${deltaXcm.toFixed(1)} cm`;
+      ctx.fillText(label, (minX + maxX) / 2, y - 9);
+      ctx.restore();
+    }
+
+    function drawForceArrow(ctx, startX, y, length, color, label, valText) {
+      ctx.save();
+      const endX = startX + length;
+      const arrowHead = length > 0 ? 11 : -11;
+
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 4.5;
+      ctx.lineCap = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(startX, y);
+      ctx.lineTo(endX, y);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(endX, y);
+      ctx.lineTo(endX - arrowHead, y - 7);
+      ctx.lineTo(endX - arrowHead, y + 7);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.font = 'bold 11px Pretendard';
+      ctx.textAlign = 'center';
+      const labelX = (startX + endX) / 2;
+      const labelY = length > 0 ? y + 24 : y - 18;
+      ctx.fillText(`${label} (${valText})`, labelX, labelY);
+      ctx.restore();
+    }
+
+    function renderGraph() {
+      const width = graphCanvas.clientWidth;
+      const height = graphCanvas.clientHeight;
+      graphCtx.clearRect(0, 0, width, height);
+
+      const padLeft = 45;
+      const padBottom = 35;
+      const padTop = 20;
+      const padRight = 20;
+      const graphW = width - padLeft - padRight;
+      const graphH = height - padTop - padBottom;
+      const maxCm = 15;
+      const maxF = 30;
+
+      // 축 & 격자
+      graphCtx.strokeStyle = '#1e293b';
+      for (let c = 2.5; c <= maxCm; c += 2.5) {
+        const x = padLeft + (c / maxCm) * graphW;
+        graphCtx.beginPath();
+        graphCtx.moveTo(x, padTop);
+        graphCtx.lineTo(x, height - padBottom);
+        graphCtx.stroke();
+      }
+      for (let f = 5; f <= maxF; f += 5) {
+        const y = height - padBottom - (f / maxF) * graphH;
+        graphCtx.beginPath();
+        graphCtx.moveTo(padLeft, y);
+        graphCtx.lineTo(width - padRight, y);
+        graphCtx.stroke();
+      }
+
+      graphCtx.strokeStyle = '#64748b';
+      graphCtx.lineWidth = 2;
+      graphCtx.beginPath();
+      graphCtx.moveTo(padLeft, padTop);
+      graphCtx.lineTo(padLeft, height - padBottom);
+      graphCtx.lineTo(width - padRight, height - padBottom);
+      graphCtx.stroke();
+
+      graphCtx.fillStyle = '#94a3b8';
+      graphCtx.font = '10px Pretendard';
+      graphCtx.textAlign = 'center';
+      graphCtx.fillText('변형된 길이 |Δx| (cm)', padLeft + graphW / 2, height - 8);
+
+      graphCtx.save();
+      graphCtx.translate(14, padTop + graphH / 2);
+      graphCtx.rotate(-Math.PI / 2);
+      graphCtx.fillText('탄성력의 크기 F (N)', 0, 0);
+      graphCtx.restore();
+
+      for (let c = 0; c <= maxCm; c += 5) {
+        const x = padLeft + (c / maxCm) * graphW;
+        graphCtx.fillText(`${c}`, x, height - padBottom + 16);
+      }
+      for (let f = 0; f <= maxF; f += 5) {
+        const y = height - padBottom - (f / maxF) * graphH;
+        graphCtx.fillText(`${f}`, padLeft - 6, y + 3);
+      }
+
+      // 비례 직선
+      const groups = {};
+      recordedPoints.forEach(pt => {
+        if (!groups[pt.typeName]) {
+          groups[pt.typeName] = { color: pt.color, k: pt.k, points: [] };
+        }
+        groups[pt.typeName].points.push(pt);
+      });
+
+      Object.keys(groups).forEach(type => {
+        const grp = groups[type];
+        const maxRecordedCm = Math.max(...grp.points.map(p => p.cm), 0);
+        const lineEndCm = Math.min(maxCm, Math.max(maxRecordedCm * 1.15, 6));
+        const lineEndF = lineEndCm * grp.k;
+
+        const x0 = padLeft;
+        const y0 = height - padBottom;
+        const x1 = padLeft + (lineEndCm / maxCm) * graphW;
+        const y1 = height - padBottom - (Math.min(maxF, lineEndF) / maxF) * graphH;
+
+        graphCtx.strokeStyle = grp.color;
+        graphCtx.lineWidth = 2.5;
+        graphCtx.beginPath();
+        graphCtx.moveTo(x0, y0);
+        graphCtx.lineTo(x1, y1);
+        graphCtx.stroke();
+
+        graphCtx.fillStyle = grp.color;
+        graphCtx.font = 'bold 11px Pretendard';
+        graphCtx.textAlign = 'left';
+        graphCtx.fillText(`${type} (F=${grp.k}x)`, x1 - 5, y1 - 8);
+      });
+
+      // 점
+      recordedPoints.forEach(pt => {
+        const px = padLeft + (pt.cm / maxCm) * graphW;
+        const py = height - padBottom - (pt.f / maxF) * graphH;
+        graphCtx.fillStyle = pt.color;
+        graphCtx.beginPath();
+        graphCtx.arc(px, py, 6, 0, Math.PI * 2);
+        graphCtx.fill();
+        graphCtx.strokeStyle = '#ffffff';
+        graphCtx.lineWidth = 2;
+        graphCtx.stroke();
+      });
+
+      // 현재 실시간 점
+      const curK = getCurrentK();
+      const curAbsCm = Math.abs(currentStretchPx / CONSTANTS.PX_PER_CM);
+      const curF = curAbsCm * curK;
+      const curPx = padLeft + (Math.min(maxCm, curAbsCm) / maxCm) * graphW;
+      const curPy = height - padBottom - (Math.min(maxF, curF) / maxF) * graphH;
+
+      graphCtx.fillStyle = '#f43f5e';
+      graphCtx.beginPath();
+      graphCtx.arc(curPx, curPy, 7, 0, Math.PI * 2);
+      graphCtx.fill();
+      graphCtx.strokeStyle = '#ffffff';
+      graphCtx.lineWidth = 2.5;
+      graphCtx.stroke();
+    }
+
+    simCanvas.addEventListener('pointerdown', (e) => {
+      const rect = simCanvas.getBoundingClientRect();
+      const clientX = e.clientX - rect.left;
+      const clientY = e.clientY - rect.top;
+      const startX = 65;
+      const origEnd = startX + CONSTANTS.ORIGINAL_LENGTH;
+      const currentEnd = origEnd + currentStretchPx;
+      const centerY = simCanvas.clientHeight / 2 - 10;
+
+      const dist = Math.hypot(clientX - (currentEnd + 12), clientY - centerY);
+      if (dist < 50 || (clientX > currentEnd - 22 && clientX < currentEnd + 55)) {
+        isDragging = true;
+        isOscillating = false;
+        dragStartX = clientX;
+        initialStretchOnDrag = currentStretchPx;
+        simCanvas.setPointerCapture(e.pointerId);
+      }
+    });
+
+    simCanvas.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const rect = simCanvas.getBoundingClientRect();
+      const clientX = e.clientX - rect.left;
+      const deltaX = clientX - dragStartX;
+
+      const maxPx = CONSTANTS.MAX_STRETCH_CM * CONSTANTS.PX_PER_CM;
+      const minPx = (currentHookeMode === 'spring') ? (CONSTANTS.MAX_COMPRESS_CM * CONSTANTS.PX_PER_CM) : 0;
+      currentStretchPx = Math.max(minPx, Math.min(maxPx, initialStretchOnDrag + deltaX));
+
+      renderSim();
+      renderGraph();
+    });
+
+    simCanvas.addEventListener('pointerup', (e) => {
+      if (isDragging) {
+        isDragging = false;
+        simCanvas.releasePointerCapture(e.pointerId);
+        startOscillation();
+      }
+    });
+
+    function handleSliderChange(val) {
+      const cm = parseFloat(val);
+      const minCm = (currentHookeMode === 'spring') ? CONSTANTS.MAX_COMPRESS_CM : 0;
+      const clampedCm = Math.max(minCm, Math.min(CONSTANTS.MAX_STRETCH_CM, cm));
+      currentStretchPx = clampedCm * CONSTANTS.PX_PER_CM;
+      isOscillating = false;
+      renderSim();
+      renderGraph();
+    }
+
+    function startOscillation() {
+      if (Math.abs(currentStretchPx) < 2) {
+        currentStretchPx = 0;
+        renderSim();
+        renderGraph();
+        return;
+      }
+      isOscillating = true;
+      velocity = 0;
+      const k = getCurrentK();
+      const dynamicStiffness = CONSTANTS.STIFFNESS * (k >= 2 ? 1.4 : k <= 0.5 ? 0.75 : 1.0);
+
+      function step() {
+        if (!isOscillating) return;
+        const acceleration = -dynamicStiffness * currentStretchPx;
+        velocity = (velocity + acceleration) * CONSTANTS.DAMPING;
+        currentStretchPx += velocity;
+
+        if (Math.abs(currentStretchPx) < 0.4 && Math.abs(velocity) < 0.4) {
+          currentStretchPx = 0;
+          isOscillating = false;
+        }
+
+        renderSim();
+        renderGraph();
+
+        if (isOscillating) {
+          requestAnimationFrame(step);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function recordDataPoint() {
+      const k = getCurrentK();
+      const deltaXcm = parseFloat((currentStretchPx / CONSTANTS.PX_PER_CM).toFixed(1));
+      const absCm = parseFloat(Math.abs(deltaXcm).toFixed(1));
+      const f = parseFloat((absCm * k).toFixed(1));
+
+      if (absCm < 0.2) {
+        alert("용수철 또는 고무줄을 원하는 길이만큼 당기거나 밀어 변형시킨 후 기록해 보세요!");
+        return;
+      }
+
+      let color = '#fbbf24';
+      let typeName = '고무줄';
+
+      if (currentHookeMode === 'spring') {
+        color = SPRING_CONFIGS[currentSpringType].color;
+        typeName = SPRING_CONFIGS[currentSpringType].name;
+      }
+
+      const isDuplicate = recordedPoints.some(pt => pt.typeName === typeName && Math.abs(pt.cm - absCm) < 0.2);
+      if (!isDuplicate) {
+        recordedPoints.push({
+          cm: absCm,
+          f: f,
+          color: color,
+          typeName: typeName,
+          k: k
+        });
+        renderGraph();
+      }
+    }
+
+    function clearGraphPoints() {
+      recordedPoints = [];
+      renderGraph();
+    }
+
+    function resetData() {
+      currentStretchPx = 0;
+      isOscillating = false;
+      document.getElementById('lengthSlider').value = 0;
+      renderSim();
+      renderGraph();
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // 윈도우 리사이즈 대응
+    window.addEventListener('resize', () => {
+      if (activeMainTab === 'express') {
+        resizeExpressCanvas();
+      } else {
+        resizeHookeCanvas();
+      }
+    });
+
+    // 초기 실행
+    window.onload = () => {
+      switchMainTab('express');
+    };
+  </script>
+</body>
+</html>

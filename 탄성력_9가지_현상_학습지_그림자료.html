@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>탄성력의 9가지 현상 학습지 도해 모음</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Pretendard / Noto Sans KR -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+
+  <style>
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    /* 인쇄(A4 학습지) 최적화 스타일 */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+      .card-box {
+        break-inside: avoid;
+        border: 1.5px solid #000000 !important;
+        box-shadow: none !important;
+      }
+      .print-shadow-none {
+        box-shadow: none !important;
+      }
+      a {
+        text-decoration: none !important;
+        color: inherit !important;
+      }
+    }
+
+    .svg-container {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+    }
+
+    /* 학생용 빈 틀 모드: 외력 및 탄성력 화살표/문구 숨김 */
+    body.student-mode .force-layer {
+      display: none !important;
+    }
+    body.student-mode .card-answer-box {
+      display: none !important;
+    }
+    body.student-mode .card-student-box {
+      display: block !important;
+    }
+    .card-student-box {
+      display: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased py-6 px-4 sm:px-6 lg:px-8 student-mode">
+
+  <!-- ====================================================
+       1. 상단 인쇄 & 네비게이션 헤더 바 (인쇄 시 숨김)
+  ==================================================== -->
+  <header class="max-w-6xl mx-auto mb-6 no-print">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl">📄</span>
+        <div>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">중학교 1학년 과학 5단원</span>
+          <h1 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight">탄성력의 9가지 현상 학습지 도해 모음</h1>
+          <p class="text-xs text-slate-500">배경이 하얗고 인쇄 및 한글(HWP)·PPT 복사에 최적화된 단순 도해 자료입니다.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <a href="고무줄 탄성력 실험실.html" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition-all flex items-center gap-1.5 shadow-sm">
+          <span>🔬</span> 가상 실험실 가기
+        </a>
+        <button onclick="toggleAllAnswersAndArrows()" id="btnTopToggle" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all flex items-center gap-1.5 shadow-sm">
+          <span id="topToggleIcon">💡</span> <span id="topToggleText">정답 및 화살표 보기</span>
+        </button>
+        <button onclick="window.print()" class="px-4 py-2 rounded-xl text-xs font-black bg-indigo-600 hover:bg-indigo-700 text-white transition-all flex items-center gap-1.5 shadow-md active:scale-95">
+          <span>🖨️</span> A4 학습지 인쇄 / PDF 저장
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================
+       2. 학습지 본문 (인쇄 영역)
+  ==================================================== -->
+  <main class="max-w-6xl mx-auto space-y-6">
+
+    <!-- [학습지 표제란] -->
+    <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm card-box">
+      <div class="border-b-2 border-slate-900 pb-4 mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="text-xs font-black text-indigo-600 tracking-wider">중학교 과학 ① | Ⅴ. 여러 가지 힘</p>
+          <h2 class="text-2xl font-black text-slate-950">탄성력(Elastic Force) 개념 정리 및 9가지 현상</h2>
+        </div>
+        <div class="flex items-center gap-3 text-xs font-semibold text-slate-700 border border-slate-300 rounded-lg px-3 py-1.5 bg-slate-50">
+          <span>학년: ______</span>
+          <span>반: ______</span>
+          <span>번호: ______</span>
+          <span>이름: ____________</span>
+        </div>
+      </div>
+
+      <!-- 핵심 개념 요약 박스 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 bg-indigo-50/60 p-4 rounded-xl border border-indigo-100 text-xs">
+        <div class="flex items-start gap-2">
+          <span class="text-base">📌</span>
+          <div>
+            <strong class="text-indigo-950 font-black block">1. 탄성력의 정의</strong>
+            <p class="text-slate-600">모양이 변한 물체가 원래 모양으로 되돌아가려는 힘</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-base">🧭</span>
+          <div>
+            <strong class="text-indigo-950 font-black block">2. 탄성력의 방향</strong>
+            <p class="text-slate-600">물체를 변형시킨 <span class="text-sky-700 font-bold">외력의 반대 방향</span> (원래 모양 방향)</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-base">⚖️</span>
+          <div>
+            <strong class="text-indigo-950 font-black block">3. 탄성력의 크기</strong>
+            <p class="text-slate-600">물체의 <span class="text-rose-700 font-bold">변형 정도가 클수록</span> 탄성력의 크기도 커짐</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 범례 안내 -->
+      <div class="mt-3 flex items-center justify-end gap-4 text-xs font-bold">
+        <div class="flex items-center gap-1.5">
+          <span class="w-3.5 h-3.5 rounded-full bg-sky-500 inline-block"></span>
+          <span class="text-sky-800">🔵 외력 (외부에서 가한 힘)</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-3.5 h-3.5 rounded-full bg-rose-500 inline-block"></span>
+          <span class="text-rose-800">🔴 탄성력 (원래대로 되돌아가려는 복원력)</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-slate-500">
+          <span class="w-3.5 h-0.5 border-b-2 border-dashed border-slate-400 inline-block"></span>
+          <span>--- 점선: 변형 전 원래 모양</span>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ====================================================
+         3. 9가지 탄성력 현상 3x3 그리드
+    ==================================================== -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+      <!-- --------------------------------------------------
+           카드 1: 풍선 (누르기)
+      --------------------------------------------------- -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between card-box">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">1</span>
+              <span>풍선 (누를 때)</span>
+            </h3>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">물질의 탄성</span>
+          </div>
+
+          <!-- SVG 도해 -->
+          <div class="svg-container flex justify-center p-2 mb-3">
+            <svg id="svg-balloon" width="300" height="190" viewBox="0 0 300 190">
+              <defs>
+                <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+                </marker>
+                <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+                </marker>
+              </defs>
+
+              <!-- 배경 흰색 -->
+              <rect width="300" height="190" fill="#ffffff" />
+
+              <!-- 원래 모양 (회색 점선 원) -->
+              <ellipse cx="150" cy="115" rx="55" ry="55" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4,4" />
+              <text x="150" y="52" text-anchor="middle" font-size="10" fill="#64748b" font-weight="bold">원래 모양 (점선)</text>
+
+              <!-- 변형된 풍선 (납작해진 분홍 타원) -->
+              <ellipse cx="150" cy="122" rx="76" ry="38" fill="#ffe4e6" stroke="#e11d48" stroke-width="2.5" />
+              <!-- 풍선 매듭 -->
+              <polygon points="150,160 144,170 156,170" fill="#e11d48" />
+
+              <g class="force-layer">
+                <!-- 외력: 위에서 아래로 누름 -->
+                <line x1="150" y1="20" x2="150" y2="76" stroke="#0284c7" stroke-width="3.5" marker-end="url(#arr-blue)" />
+                <text x="158" y="38" font-size="11" fill="#0369a1" font-weight="black">외력 (누름 ↓)</text>
+
+                <!-- 탄성력: 원래 모양으로 밀어 올림 -->
+                <line x1="150" y1="122" x2="150" y2="82" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arr-red)" />
+                <text x="158" y="104" font-size="11" fill="#b91c1c" font-weight="black">탄성력 (복원 ↑)</text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- 교사용 설명 및 정리 -->
+          <div class="card-answer-box text-xs space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div><strong class="text-slate-800">· 외력의 방향:</strong> 풍선을 <span class="text-sky-700 font-bold">아래로 누르는 방향(↓)</span></div>
+            <div><strong class="text-slate-800">· 탄성력의 방향:</strong> 원래 둥근 모양으로 <span class="text-rose-700 font-bold">펴지려는 위쪽(↑)</span></div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">손을 떼면 즉시 둥근 원래 상태로 되돌아옵니다.</div>
+          </div>
+          <!-- 학생용 활동 과제 박스 -->
+          <div class="card-student-box text-xs space-y-1.5 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200">
+            <div class="font-extrabold text-amber-900">✏️ 학생 활동 과제:</div>
+            <div>1. <span class="text-sky-700 font-bold">외력(파란색 화살표)</span>을 풍선 위에 그리시오.</div>
+            <div>2. <span class="text-rose-700 font-bold">탄성력(빨간색 화살표)</span>의 방향을 표시하시오.</div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-amber-200">외력의 반대 방향으로 탄성력이 작용함을 확인합니다.</div>
+          </div>
+        </div>
+
+        <!-- 이미지 저장 버튼 (인쇄 시 숨김) -->
+        <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1 no-print">
+          <button onclick="copySvgToClipboard('svg-balloon', this)" class="px-2 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1">
+            📋 복사
+          </button>
+          <button onclick="downloadSvgAsPng('svg-balloon', '01_풍선의_탄성력')" class="px-2 py-1 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-all flex items-center gap-1">
+            💾 해설 PNG
+          </button>
+          <a href="templates_no_arrows/01_풍선_틀.png" download="01_풍선_틀.png" class="px-2 py-1 text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg transition-all flex items-center gap-1 shadow-sm" title="화살표가 없는 순수 빈 틀 다운로드">
+            🖼️ 빈 틀 PNG
+          </a>
+        </div>
+      </div>
+
+
+      <!-- --------------------------------------------------
+           카드 2: 고무공 (바닥 충돌)
+      --------------------------------------------------- -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between card-box">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">2</span>
+              <span>고무공 (바닥에 충돌할 때)</span>
+            </h3>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">물질의 탄성</span>
+          </div>
+
+          <!-- SVG 도해 -->
+          <div class="svg-container flex justify-center p-2 mb-3">
+            <svg id="svg-ball" width="300" height="190" viewBox="0 0 300 190">
+              <defs>
+                <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+                </marker>
+                <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+                </marker>
+              </defs>
+              <rect width="300" height="190" fill="#ffffff" />
+              <!-- 바닥 지면 -->
+              <line x1="30" y1="168" x2="270" y2="168" stroke="#334155" stroke-width="3" stroke-linecap="round" />
+              <line x1="60" y1="168" x2="50" y2="178" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="100" y1="168" x2="90" y2="178" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="140" y1="168" x2="130" y2="178" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="180" y1="168" x2="170" y2="178" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="220" y1="168" x2="210" y2="178" stroke="#94a3b8" stroke-width="1.5" />
+              <text x="250" y="182" font-size="10" fill="#64748b" font-weight="bold">지면</text>
+
+              <!-- 원래 모양 (원형 점선) -->
+              <ellipse cx="150" cy="118" rx="48" ry="48" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4,4" />
+
+              <!-- 변형된 고무공 (밑면 납작) -->
+              <ellipse cx="150" cy="126" rx="60" ry="40" fill="#ffedd5" stroke="#ea580c" stroke-width="2.5" />
+
+              <g class="force-layer">
+                <!-- 외력: 충돌로 공을 누르는 힘 -->
+                <line x1="150" y1="25" x2="150" y2="80" stroke="#0284c7" stroke-width="3.5" marker-end="url(#arr-blue)" />
+                <text x="158" y="42" font-size="11" fill="#0369a1" font-weight="black">외력 (충돌 누름 ↓)</text>
+
+                <!-- 탄성력: 바닥을 밀며 위로 튀어 오름 -->
+                <line x1="150" y1="165" x2="150" y2="100" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arr-red)" />
+                <text x="158" y="132" font-size="11" fill="#b91c1c" font-weight="black">탄성력 (도약 ↑)</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="card-answer-box text-xs space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div><strong class="text-slate-800">· 외력의 방향:</strong> 바닥과 충돌하여 <span class="text-sky-700 font-bold">공을 찌그러뜨리는 힘(↓)</span></div>
+            <div><strong class="text-slate-800">· 탄성력의 방향:</strong> 원래 구형으로 펴지며 <span class="text-rose-700 font-bold">바닥을 차고 위로(↑)</span></div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">찌그러졌던 탄성력이 바닥을 밀어 공이 높이 튀어 오릅니다.</div>
+          </div>
+          <div class="card-student-box text-xs space-y-1.5 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200">
+            <div class="font-extrabold text-amber-900">✏️ 학생 활동 과제:</div>
+            <div>1. 지면과 충돌하는 순간의 <span class="text-sky-700 font-bold">외력(↓)</span>을 그리시오.</div>
+            <div>2. 고무공이 튀어 오르게 하는 <span class="text-rose-700 font-bold">탄성력(↑)</span>을 그리시오.</div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-amber-200">바닥을 밀어내는 탄성력에 의해 튀어 오릅니다.</div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1 no-print">
+          <button onclick="copySvgToClipboard('svg-ball', this)" class="px-2 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1">
+            📋 복사
+          </button>
+          <button onclick="downloadSvgAsPng('svg-ball', '02_고무공의_탄성력')" class="px-2 py-1 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-all flex items-center gap-1">
+            💾 해설 PNG
+          </button>
+          <a href="templates_no_arrows/02_고무공_틀.png" download="02_고무공_틀.png" class="px-2 py-1 text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg transition-all flex items-center gap-1 shadow-sm" title="화살표가 없는 순수 빈 틀 다운로드">
+            🖼️ 빈 틀 PNG
+          </a>
+        </div>
+      </div>
+
+
+      <!-- --------------------------------------------------
+           카드 3: 용수철 (잡아당김)
+      --------------------------------------------------- -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between card-box">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">3</span>
+              <span>용수철 (잡아당길 때)</span>
+            </h3>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">현상/도구</span>
+          </div>
+
+          <div class="svg-container flex justify-center p-2 mb-3">
+            <svg id="svg-spring" width="300" height="190" viewBox="0 0 300 190">
+              <defs>
+                <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+                </marker>
+                <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+                </marker>
+              </defs>
+              <rect width="300" height="190" fill="#ffffff" />
+              <!-- 고정 벽면 -->
+              <rect x="25" y="45" width="12" height="110" fill="#cbd5e1" stroke="#475569" stroke-width="2" />
+              <line x1="25" y1="55" x2="15" y2="65" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="25" y1="85" x2="15" y2="95" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="25" y1="115" x2="15" y2="125" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="25" y1="145" x2="15" y2="155" stroke="#94a3b8" stroke-width="1.5" />
+
+              <!-- 원래 길이 점선 기준 -->
+              <line x1="130" y1="40" x2="130" y2="155" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" />
+              <text x="130" y="32" text-anchor="middle" font-size="10" fill="#64748b" font-weight="bold">원래 길이</text>
+
+              <!-- 늘어난 용수철 코일 -->
+              <path d="M 37,100 L 50,82 L 70,118 L 90,82 L 110,118 L 130,82 L 150,118 L 170,82 L 190,118 L 210,100" fill="none" stroke="#6366f1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              <!-- 추/손잡이 블록 -->
+              <rect x="210" y="85" width="24" height="30" rx="3" fill="#e2e8f0" stroke="#475569" stroke-width="2" />
+
+              <g class="force-layer">
+                <!-- 외력: 오른쪽으로 당김 -->
+                <line x1="234" y1="100" x2="288" y2="100" stroke="#0284c7" stroke-width="3.5" marker-end="url(#arr-blue)" />
+                <text x="240" y="82" font-size="11" fill="#0369a1" font-weight="black">외력 (당김 ➔)</text>
+
+                <!-- 탄성력: 왼쪽 벽으로 줄어들려 함 -->
+                <line x1="210" y1="100" x2="152" y2="100" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arr-red)" />
+                <text x="145" y="82" font-size="11" fill="#b91c1c" font-weight="black">탄성력 (수축 ⬅️)</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="card-answer-box text-xs space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div><strong class="text-slate-800">· 외력의 방향:</strong> 용수철을 <span class="text-sky-700 font-bold">오른쪽으로 늘리는 방향(➡️)</span></div>
+            <div><strong class="text-slate-800">· 탄성력의 방향:</strong> 원래 길이로 <span class="text-rose-700 font-bold">줄어들려는 왼쪽(⬅️)</span></div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">늘어난 길이가 2배, 3배가 되면 탄성력도 2배, 3배 커집니다 (훅의 법칙).</div>
+          </div>
+          <div class="card-student-box text-xs space-y-1.5 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200">
+            <div class="font-extrabold text-amber-900">✏️ 학생 활동 과제:</div>
+            <div>1. 용수철을 늘리는 <span class="text-sky-700 font-bold">외력(➡️)</span>을 그리시오.</div>
+            <div>2. 용수철이 되돌아가려는 <span class="text-rose-700 font-bold">탄성력(⬅️)</span>을 그리시오.</div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-amber-200">원래 길이(점선) 쪽으로 탄성력이 향합니다.</div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1 no-print">
+          <button onclick="copySvgToClipboard('svg-spring', this)" class="px-2 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1">
+            📋 복사
+          </button>
+          <button onclick="downloadSvgAsPng('svg-spring', '03_용수철의_탄성력')" class="px-2 py-1 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-all flex items-center gap-1">
+            💾 해설 PNG
+          </button>
+          <a href="templates_no_arrows/03_용수철_틀.png" download="03_용수철_틀.png" class="px-2 py-1 text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg transition-all flex items-center gap-1 shadow-sm" title="화살표가 없는 순수 빈 틀 다운로드">
+            🖼️ 빈 틀 PNG
+          </a>
+        </div>
+      </div>
+
+
+      <!-- --------------------------------------------------
+           카드 4: 고무줄 (양쪽으로 늘림)
+      --------------------------------------------------- -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between card-box">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">4</span>
+              <span>고무줄 (양쪽으로 늘릴 때)</span>
+            </h3>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">물질의 탄성</span>
+          </div>
+
+          <div class="svg-container flex justify-center p-2 mb-3">
+            <svg id="svg-band" width="300" height="190" viewBox="0 0 300 190">
+              <defs>
+                <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+                </marker>
+                <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+                </marker>
+              </defs>
+              <rect width="300" height="190" fill="#ffffff" />
+
+              <!-- 원래 모양 (작은 타원 점선) -->
+              <ellipse cx="150" cy="100" rx="42" ry="22" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4,4" />
+              <text x="150" y="60" text-anchor="middle" font-size="10" fill="#64748b" font-weight="bold">원래 길이 (점선)</text>
+
+              <!-- 늘어난 고무줄 (가로로 긴 밴드) -->
+              <rect x="70" y="93" width="160" height="14" rx="7" fill="#fef08a" stroke="#ca8a04" stroke-width="2.5" />
+
+              <g class="force-layer">
+                <!-- 왼쪽 외력과 탄성력 -->
+                <line x1="70" y1="100" x2="25" y2="100" stroke="#0284c7" stroke-width="3" marker-end="url(#arr-blue)" />
+                <text x="25" y="85" font-size="10" fill="#0369a1" font-weight="black">외력 ⬅️</text>
+                <line x1="70" y1="100" x2="110" y2="100" stroke="#dc2626" stroke-width="3" marker-end="url(#arr-red)" />
+                <text x="75" y="128" font-size="10" fill="#b91c1c" font-weight="black">탄성력 ➔</text>
+
+                <!-- 오른쪽 외력과 탄성력 -->
+                <line x1="230" y1="100" x2="275" y2="100" stroke="#0284c7" stroke-width="3" marker-end="url(#arr-blue)" />
+                <text x="238" y="85" font-size="10" fill="#0369a1" font-weight="black">외력 ➔</text>
+                <line x1="230" y1="100" x2="190" y2="100" stroke="#dc2626" stroke-width="3" marker-end="url(#arr-red)" />
+                <text x="180" y="128" font-size="10" fill="#b91c1c" font-weight="black">탄성력 ⬅️</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="card-answer-box text-xs space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div><strong class="text-slate-800">· 외력의 방향:</strong> 고무줄을 <span class="text-sky-700 font-bold">양쪽 바깥으로 당기는 방향</span></div>
+            <div><strong class="text-slate-800">· 탄성력의 방향:</strong> 원래 길이로 <span class="text-rose-700 font-bold">오그라들려는 안쪽 방향</span></div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">양손을 놓으면 고무줄이 안쪽으로 빠르게 수축하며 원래대로 복원됩니다.</div>
+          </div>
+          <div class="card-student-box text-xs space-y-1.5 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200">
+            <div class="font-extrabold text-amber-900">✏️ 학생 활동 과제:</div>
+            <div>1. 양손으로 당기는 <span class="text-sky-700 font-bold">외력(⬅️ ➔)</span>을 양쪽에 그리시오.</div>
+            <div>2. 고무줄이 수축하려는 <span class="text-rose-700 font-bold">탄성력(➔ ⬅️)</span>을 그리시오.</div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-amber-200">양 끝에서 각각 중앙을 향하는 탄성력이 발생합니다.</div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1 no-print">
+          <button onclick="copySvgToClipboard('svg-band', this)" class="px-2 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1">
+            📋 복사
+          </button>
+          <button onclick="downloadSvgAsPng('svg-band', '04_고무줄의_탄성력')" class="px-2 py-1 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-all flex items-center gap-1">
+            💾 해설 PNG
+          </button>
+          <a href="templates_no_arrows/04_고무줄_틀.png" download="04_고무줄_틀.png" class="px-2 py-1 text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg transition-all flex items-center gap-1 shadow-sm" title="화살표가 없는 순수 빈 틀 다운로드">
+            🖼️ 빈 틀 PNG
+          </a>
+        </div>
+      </div>
+
+
+      <!-- --------------------------------------------------
+           카드 5: 볼펜 (노크 누름)
+      --------------------------------------------------- -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between card-box">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">5</span>
+              <span>볼펜 (노크 버튼을 누를 때)</span>
+            </h3>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">현상/도구</span>
+          </div>
+
+          <div class="svg-container flex justify-center p-2 mb-3">
+            <svg id="svg-pen" width="300" height="190" viewBox="0 0 300 190">
+              <defs>
+                <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+                </marker>
+                <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+                </marker>
+              </defs>
+              <rect width="300" height="190" fill="#ffffff" />
+
+              <!-- 볼펜 배럴 (외형 투명관) -->
+              <rect x="138" y="38" width="24" height="110" rx="3" fill="#f1f5f9" stroke="#475569" stroke-width="2" />
+              <!-- 하단 펜촉 콘 -->
+              <polygon points="138,148 162,148 150,175" fill="#94a3b8" stroke="#475569" stroke-width="1.5" />
+              <line x1="150" y1="175" x2="150" y2="182" stroke="#0f172a" stroke-width="2.5" />
+
+              <!-- 상단 노크 버튼 -->
+              <rect x="141" y="20" width="18" height="18" rx="2" fill="#0284c7" stroke="#0369a1" stroke-width="1.5" />
+
+              <!-- 내부 용수철 스프링 (압축됨) -->
+              <path d="M 150,115 L 143,120 L 157,126 L 143,132 L 157,138 L 150,144" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" />
+
+              <g class="force-layer">
+                <!-- 외력: 위에서 노크를 누름 -->
+                <line x1="150" y1="2" x2="150" y2="18" stroke="#0284c7" stroke-width="3" marker-end="url(#arr-blue)" />
+                <text x="165" y="16" font-size="11" fill="#0369a1" font-weight="black">외력 (노크 누름 ↓)</text>
+
+                <!-- 탄성력: 내부 스프링이 노크를 위로 밈 -->
+                <line x1="150" y1="110" x2="150" y2="70" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arr-red)" />
+                <text x="165" y="95" font-size="11" fill="#b91c1c" font-weight="black">탄성력 (스프링 복원 ↑)</text>
+              </g>
+
+              <!-- 스프링 설명 라벨 -->
+              <rect x="210" y="118" width="80" height="28" rx="4" fill="#fff7ed" stroke="#fdba74" />
+              <text x="250" y="136" text-anchor="middle" font-size="10" fill="#c2410c" font-weight="bold">내부 용수철</text>
+              <line x1="210" y1="132" x2="160" y2="132" stroke="#ea580c" stroke-width="1" stroke-dasharray="2,2" />
+            </svg>
+          </div>
+
+          <div class="card-answer-box text-xs space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div><strong class="text-slate-800">· 외력의 방향:</strong> 노크 버튼을 <span class="text-sky-700 font-bold">아래로 누르는 힘(↓)</span></div>
+            <div><strong class="text-slate-800">· 탄성력의 방향:</strong> 압축된 스프링이 <span class="text-rose-700 font-bold">노크를 위로 미는 힘(↑)</span></div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">내부 용수철의 탄성력 덕분에 노크가 자동으로 원위치로 튕겨 나옵니다.</div>
+          </div>
+          <div class="card-student-box text-xs space-y-1.5 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200">
+            <div class="font-extrabold text-amber-900">✏️ 학생 활동 과제:</div>
+            <div>1. 손가락으로 노크를 누르는 <span class="text-sky-700 font-bold">외력(↓)</span>을 그리시오.</div>
+            <div>2. 압축된 스프링이 노크를 밀어올리는 <span class="text-rose-700 font-bold">탄성력(↑)</span>을 그리시오.</div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-amber-200">스프링의 복원력이 노크를 위로 올려줍니다.</div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1 no-print">
+          <button onclick="copySvgToClipboard('svg-pen', this)" class="px-2 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1">
+            📋 복사
+          </button>
+          <button onclick="downloadSvgAsPng('svg-pen', '05_볼펜의_탄성력')" class="px-2 py-1 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-all flex items-center gap-1">
+            💾 해설 PNG
+          </button>
+          <a href="templates_no_arrows/05_볼펜_틀.png" download="05_볼펜_틀.png" class="px-2 py-1 text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg transition-all flex items-center gap-1 shadow-sm" title="화살표가 없는 순수 빈 틀 다운로드">
+            🖼️ 빈 틀 PNG
+          </a>
+        </div>
+      </div>
+
+
+      <!-- --------------------------------------------------
+           카드 6: 샤프 (노크 누름)
+      --------------------------------------------------- -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between card-box">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">6</span>
+              <span>샤프 (노크를 누를 때)</span>
+            </h3>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">현상/도구</span>
+          </div>
+
+          <div class="svg-container flex justify-center p-2 mb-3">
+            <svg id="svg-pencil" width="300" height="190" viewBox="0 0 300 190">
+              <defs>
+                <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+                </marker>
+                <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+                </marker>
+              </defs>
+              <rect width="300" height="190" fill="#ffffff" />
+
+              <!-- 샤프 바디 -->
+              <rect x="138" y="38" width="24" height="105" rx="3" fill="#faf5ff" stroke="#9333ea" stroke-width="2" />
+              <!-- 하단 메탈 팁 및 샤프심 -->
+              <polygon points="138,143 162,143 150,168" fill="#cbd5e1" stroke="#475569" stroke-width="1.5" />
+              <line x1="150" y1="168" x2="150" y2="182" stroke="#1e293b" stroke-width="2" />
+              <text x="156" y="180" font-size="9" fill="#0f172a" font-weight="bold">샤프심 배출</text>
+
+              <!-- 상단 노크 캡 -->
+              <rect x="142" y="20" width="16" height="18" rx="2" fill="#94a3b8" stroke="#475569" stroke-width="1.5" />
+
+              <!-- 내부 용수철 스프링 -->
+              <path d="M 150,105 L 144,110 L 156,116 L 144,122 L 156,128 L 150,134" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" />
+
+              <g class="force-layer">
+                <!-- 외력: 위에서 노크를 누름 -->
+                <line x1="150" y1="2" x2="150" y2="18" stroke="#0284c7" stroke-width="3" marker-end="url(#arr-blue)" />
+                <text x="165" y="16" font-size="11" fill="#0369a1" font-weight="black">외력 (노크 누름 ↓)</text>
+
+                <!-- 탄성력: 내부 용수철이 노크를 위로 밈 -->
+                <line x1="150" y1="100" x2="150" y2="60" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arr-red)" />
+                <text x="165" y="85" font-size="11" fill="#b91c1c" font-weight="black">탄성력 (노크 복원 ↑)</text>
+              </g>
+
+              <!-- 내부 척 클러치 라벨 -->
+              <rect x="20" y="112" width="95" height="28" rx="4" fill="#fdf4ff" stroke="#f0abfc" />
+              <text x="67" y="130" text-anchor="middle" font-size="10" fill="#a21caf" font-weight="bold">내부 황동 척&스프링</text>
+              <line x1="115" y1="126" x2="142" y2="126" stroke="#c084fc" stroke-width="1" stroke-dasharray="2,2" />
+            </svg>
+          </div>
+
+          <div class="card-answer-box text-xs space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div><strong class="text-slate-800">· 외력의 방향:</strong> 샤프 노크를 <span class="text-sky-700 font-bold">아래로 누르는 힘(↓)</span></div>
+            <div><strong class="text-slate-800">· 탄성력의 방향:</strong> 압축된 스프링이 <span class="text-rose-700 font-bold">노크를 위로 복원(↑)</span></div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">탄성력으로 노크가 되돌아오면서 샤프심이 일정 길이만큼 배출됩니다.</div>
+          </div>
+          <div class="card-student-box text-xs space-y-1.5 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200">
+            <div class="font-extrabold text-amber-900">✏️ 학생 활동 과제:</div>
+            <div>1. 샤프 노크를 누르는 <span class="text-sky-700 font-bold">외력(↓)</span>을 그리시오.</div>
+            <div>2. 노크를 원위치로 튕겨 올리는 <span class="text-rose-700 font-bold">탄성력(↑)</span>을 그리시오.</div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-amber-200">노크가 탄성력으로 튕겨 돌아오며 심이 척에 물립니다.</div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1 no-print">
+          <button onclick="copySvgToClipboard('svg-pencil', this)" class="px-2 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1">
+            📋 복사
+          </button>
+          <button onclick="downloadSvgAsPng('svg-pencil', '06_샤프의_탄성력')" class="px-2 py-1 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-all flex items-center gap-1">
+            💾 해설 PNG
+          </button>
+          <a href="templates_no_arrows/06_샤프_틀.png" download="06_샤프_틀.png" class="px-2 py-1 text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg transition-all flex items-center gap-1 shadow-sm" title="화살표가 없는 순수 빈 틀 다운로드">
+            🖼️ 빈 틀 PNG
+          </a>
+        </div>
+      </div>
+
+
+      <!-- --------------------------------------------------
+           카드 7: 트램펄린 (도약)
+      --------------------------------------------------- -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between card-box">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">7</span>
+              <span>트램펄린 (사람/물체가 뛸 때)</span>
+            </h3>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">현상/도구</span>
+          </div>
+
+          <div class="svg-container flex justify-center p-2 mb-3">
+            <svg id="svg-tramp" width="300" height="190" viewBox="0 0 300 190">
+              <defs>
+                <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+                </marker>
+                <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+                </marker>
+              </defs>
+              <rect width="300" height="190" fill="#ffffff" />
+
+              <!-- 트램펄린 철제 프레임 다리 -->
+              <line x1="50" y1="120" x2="50" y2="175" stroke="#475569" stroke-width="4" stroke-linecap="round" />
+              <line x1="250" y1="120" x2="250" y2="175" stroke="#475569" stroke-width="4" stroke-linecap="round" />
+              <line x1="50" y1="175" x2="70" y2="175" stroke="#334155" stroke-width="3" />
+              <line x1="230" y1="175" x2="250" y2="175" stroke="#334155" stroke-width="3" />
+
+              <!-- 원래 매트 점선 기준선 -->
+              <line x1="50" y1="120" x2="250" y2="120" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4,4" />
+              <text x="210" y="112" font-size="10" fill="#64748b" font-weight="bold">원래 수평 매트</text>
+
+              <!-- 아래로 깊게 쳐진 탄성 매트 -->
+              <path d="M 50,120 Q 150,165 250,120" fill="none" stroke="#2563eb" stroke-width="3.5" />
+              <!-- 가장자리 인장 스프링 -->
+              <line x1="50" y1="120" x2="68" y2="126" stroke="#f59e0b" stroke-width="3" />
+              <line x1="250" y1="120" x2="232" y2="126" stroke="#f59e0b" stroke-width="3" />
+
+              <g class="force-layer">
+                <!-- 외력: 발/물체가 아래로 누름 -->
+                <line x1="150" y1="35" x2="150" y2="115" stroke="#0284c7" stroke-width="3.5" marker-end="url(#arr-blue)" />
+                <text x="158" y="55" font-size="11" fill="#0369a1" font-weight="black">외력 (발로 누름 ↓)</text>
+
+                <!-- 탄성력: 위로 밀어 올림 -->
+                <line x1="150" y1="160" x2="150" y2="95" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arr-red)" />
+                <text x="158" y="140" font-size="11" fill="#b91c1c" font-weight="black">탄성력 (도약 ↑)</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="card-answer-box text-xs space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div><strong class="text-slate-800">· 외력의 방향:</strong> 사람이 매트를 <span class="text-sky-700 font-bold">아래로 밟고 누르는 힘(↓)</span></div>
+            <div><strong class="text-slate-800">· 탄성력의 방향:</strong> 늘어난 매트와 스프링이 <span class="text-rose-700 font-bold">사람을 위로 미는 힘(↑)</span></div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">매트를 깊게 누를수록 탄성력이 커져 더 높은 공중으로 뛰어오릅니다.</div>
+          </div>
+          <div class="card-student-box text-xs space-y-1.5 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200">
+            <div class="font-extrabold text-amber-900">✏️ 학생 활동 과제:</div>
+            <div>1. 매트를 밟아 찌그러뜨리는 <span class="text-sky-700 font-bold">외력(↓)</span>을 그리시오.</div>
+            <div>2. 매트가 튕겨 올려주는 <span class="text-rose-700 font-bold">탄성력(↑)</span>을 그리시오.</div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-amber-200">원래 수평선(점선) 방향으로 펴지려는 힘입니다.</div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1 no-print">
+          <button onclick="copySvgToClipboard('svg-tramp', this)" class="px-2 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1">
+            📋 복사
+          </button>
+          <button onclick="downloadSvgAsPng('svg-tramp', '07_트램펄린의_탄성력')" class="px-2 py-1 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-all flex items-center gap-1">
+            💾 해설 PNG
+          </button>
+          <a href="templates_no_arrows/07_트램펄린_틀.png" download="07_트램펄린_틀.png" class="px-2 py-1 text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg transition-all flex items-center gap-1 shadow-sm" title="화살표가 없는 순수 빈 틀 다운로드">
+            🖼️ 빈 틀 PNG
+          </a>
+        </div>
+      </div>
+
+
+      <!-- --------------------------------------------------
+           카드 8: 장대 높이 뛰기 (장대 휘어짐)
+      --------------------------------------------------- -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between card-box">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">8</span>
+              <span>장대 높이 뛰기 (장대를 휠 때)</span>
+            </h3>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">현상/도구</span>
+          </div>
+
+          <div class="svg-container flex justify-center p-2 mb-3">
+            <svg id="svg-pole" width="300" height="190" viewBox="0 0 300 190">
+              <defs>
+                <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+                </marker>
+                <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+                </marker>
+              </defs>
+              <rect width="300" height="190" fill="#ffffff" />
+
+              <!-- 지면 트랙 -->
+              <line x1="20" y1="168" x2="280" y2="168" stroke="#334155" stroke-width="2.5" />
+              <!-- 지지홈 -->
+              <polygon points="110,168 130,168 126,178 110,178" fill="#0f172a" />
+              <!-- 가로대 기둥과 바 -->
+              <line x1="225" y1="65" x2="225" y2="168" stroke="#64748b" stroke-width="2" />
+              <line x1="210" y1="65" x2="240" y2="65" stroke="#f97316" stroke-width="3" />
+              <text x="245" y="68" font-size="9" fill="#ea580c" font-weight="bold">5.80m 가로대</text>
+
+              <!-- 원래 곧은 장대 점선 -->
+              <line x1="120" y1="168" x2="65" y2="52" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4,4" />
+              <text x="55" y="44" font-size="10" fill="#64748b" font-weight="bold">원래 장대 (곧음)</text>
+
+              <!-- C자로 깊게 휜 장대 -->
+              <path d="M 120,168 Q 170,135 92,72" fill="none" stroke="#0d9488" stroke-width="4.5" stroke-linecap="round" />
+
+              <!-- 하얀색 선수 실루엣 (검은 테두리) -->
+              <circle cx="86" cy="88" r="6" fill="#ffffff" stroke="#0f172a" stroke-width="1.8" />
+              <line x1="88" y1="94" x2="80" y2="120" stroke="#0f172a" stroke-width="3.5" stroke-linecap="round" />
+              <line x1="88" y1="96" x2="98" y2="78" stroke="#0f172a" stroke-width="2" />
+              <line x1="80" y1="120" x2="68" y2="135" stroke="#0f172a" stroke-width="2" stroke-linecap="round" />
+
+              <g class="force-layer">
+                <!-- 외력: 선수가 체중으로 장대를 누름 -->
+                <line x1="125" y1="65" x2="125" y2="115" stroke="#0284c7" stroke-width="3.5" marker-end="url(#arr-blue)" />
+                <text x="132" y="90" font-size="10" fill="#0369a1" font-weight="black">외력 (장대 누름 ↓)</text>
+
+                <!-- 탄성력: 장대가 펴지며 선수를 솟구치게 함 -->
+                <line x1="92" y1="85" x2="92" y2="28" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arr-red)" />
+                <text x="98" y="42" font-size="10" fill="#b91c1c" font-weight="black">탄성력 (도약 ↑)</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="card-answer-box text-xs space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div><strong class="text-slate-800">· 외력의 방향:</strong> 선수의 속도와 체중으로 <span class="text-sky-700 font-bold">장대를 휘게 누르는 힘(↓)</span></div>
+            <div><strong class="text-slate-800">· 탄성력의 방향:</strong> 휜 장대가 펴지며 <span class="text-rose-700 font-bold">선수를 위로 밀어 올리는 힘(↑)</span></div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">장대의 탄성 위치 에너지가 선수의 중력 위치 에너지로 전환됩니다.</div>
+          </div>
+          <div class="card-student-box text-xs space-y-1.5 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200">
+            <div class="font-extrabold text-amber-900">✏️ 학생 활동 과제:</div>
+            <div>1. 선수가 장대를 휘게 만드는 <span class="text-sky-700 font-bold">외력(↓)</span>을 그리시오.</div>
+            <div>2. 휜 장대가 펴지며 밀어올리는 <span class="text-rose-700 font-bold">탄성력(↑)</span>을 그리시오.</div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-amber-200">곧았던 점선 모양으로 복원되려는 힘입니다.</div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1 no-print">
+          <button onclick="copySvgToClipboard('svg-pole', this)" class="px-2 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1">
+            📋 복사
+          </button>
+          <button onclick="downloadSvgAsPng('svg-pole', '08_장대높이뛰기의_탄성력')" class="px-2 py-1 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-all flex items-center gap-1">
+            💾 해설 PNG
+          </button>
+          <a href="templates_no_arrows/08_장대높이뛰기_틀.png" download="08_장대높이뛰기_틀.png" class="px-2 py-1 text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg transition-all flex items-center gap-1 shadow-sm" title="화살표가 없는 순수 빈 틀 다운로드">
+            🖼️ 빈 틀 PNG
+          </a>
+        </div>
+      </div>
+
+
+      <!-- --------------------------------------------------
+           카드 9: 활 쏘기 (활시위 당김)
+      --------------------------------------------------- -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col justify-between card-box">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-black text-slate-900 flex items-center gap-1.5">
+              <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs">9</span>
+              <span>활 쏘기 (시위를 당길 때)</span>
+            </h3>
+            <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">현상/도구</span>
+          </div>
+
+          <div class="svg-container flex justify-center p-2 mb-3">
+            <svg id="svg-bow" width="300" height="190" viewBox="0 0 300 190">
+              <defs>
+                <marker id="arr-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7" />
+                </marker>
+                <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="#dc2626" />
+                </marker>
+              </defs>
+              <rect width="300" height="190" fill="#ffffff" />
+
+              <!-- 활대 (휜 나무) -->
+              <path d="M 105,35 Q 140,95 105,155" fill="none" stroke="#b45309" stroke-width="5" stroke-linecap="round" />
+              <!-- 원래 시위 점선 -->
+              <line x1="105" y1="35" x2="105" y2="155" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4,4" />
+              <text x="135" y="40" font-size="9" fill="#64748b" font-weight="bold">원래 시위</text>
+
+              <!-- 당겨진 시위 -->
+              <polyline points="105,35 55,95 105,155" fill="none" stroke="#334155" stroke-width="2" />
+
+              <!-- 장전된 화살 -->
+              <line x1="55" y1="95" x2="185" y2="95" stroke="#475569" stroke-width="2.5" />
+              <polygon points="185,90 200,95 185,100" fill="#dc2626" />
+              <polygon points="65,95 55,90 60,95" fill="#dc2626" />
+              <polygon points="65,95 55,100 60,95" fill="#dc2626" />
+
+              <!-- 오른쪽 과녁 -->
+              <ellipse cx="270" cy="95" rx="14" ry="42" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" />
+              <ellipse cx="270" cy="95" rx="9" ry="26" fill="#0284c7" />
+              <ellipse cx="270" cy="95" rx="5" ry="14" fill="#ef4444" />
+              <ellipse cx="270" cy="95" rx="2" ry="6" fill="#fbbf24" />
+
+              <g class="force-layer">
+                <!-- 외력: 시위를 뒤로 당김 -->
+                <line x1="55" y1="95" x2="15" y2="95" stroke="#0284c7" stroke-width="3" marker-end="url(#arr-blue)" />
+                <text x="12" y="80" font-size="10" fill="#0369a1" font-weight="black">외력 (시위 당김 ⬅️)</text>
+
+                <!-- 탄성력: 화살을 앞으로 발사 -->
+                <line x1="55" y1="95" x2="115" y2="95" stroke="#dc2626" stroke-width="3" marker-end="url(#arr-red)" />
+                <text x="65" y="80" font-size="10" fill="#b91c1c" font-weight="black">탄성력 (발사 ➡️)</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="card-answer-box text-xs space-y-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div><strong class="text-slate-800">· 외력의 방향:</strong> 활시위를 <span class="text-sky-700 font-bold">뒤쪽으로 당기는 힘(⬅️)</span></div>
+            <div><strong class="text-slate-800">· 탄성력의 방향:</strong> 휜 활대와 시위가 <span class="text-rose-700 font-bold">화살을 앞(과녁)으로 튕겨내는 힘(➡️)</span></div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-slate-200">시위를 뒤로 많이 당길수록 탄성력이 커져 화살이 더 빠르고 멀리 날아갑니다.</div>
+          </div>
+          <div class="card-student-box text-xs space-y-1.5 bg-amber-50/60 p-2.5 rounded-xl border border-amber-200">
+            <div class="font-extrabold text-amber-900">✏️ 학생 활동 과제:</div>
+            <div>1. 손으로 활시위를 당기는 <span class="text-sky-700 font-bold">외력(⬅️)</span>을 그리시오.</div>
+            <div>2. 화살을 과녁으로 날려보내는 <span class="text-rose-700 font-bold">탄성력(➡️)</span>을 그리시오.</div>
+            <div class="text-[11px] text-slate-500 pt-1 border-t border-amber-200">원래 수직 시위(점선)로 복원되며 화살을 발사합니다.</div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between gap-1 no-print">
+          <button onclick="copySvgToClipboard('svg-bow', this)" class="px-2 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1">
+            📋 복사
+          </button>
+          <button onclick="downloadSvgAsPng('svg-bow', '09_활쏘기의_탄성력')" class="px-2 py-1 text-[11px] font-bold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-all flex items-center gap-1">
+            💾 해설 PNG
+          </button>
+          <a href="templates_no_arrows/09_활쏘기_틀.png" download="09_활쏘기_틀.png" class="px-2 py-1 text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg transition-all flex items-center gap-1 shadow-sm" title="화살표가 없는 순수 빈 틀 다운로드">
+            🖼️ 빈 틀 PNG
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ====================================================
+         4. 학생 학습 확인 문제 (빈칸 채우기 퀴즈)
+    ==================================================== -->
+    <section class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm card-box mt-8">
+      <h3 class="text-base font-black text-slate-900 mb-3 flex items-center gap-2">
+        <span>📝</span>
+        <span>스스로 확인하기 (학습 확인 문제)</span>
+      </h3>
+
+      <div class="space-y-4 text-xs sm:text-sm">
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <p class="font-bold text-slate-800">
+            1. 모양이 변한 물체가 원래 모양으로 되돌아가려는 성질을 ( <span class="quiz-blank border-b-2 border-slate-400 px-3 py-0.5 inline-block text-indigo-600 font-black min-w-[70px] text-center" data-answer="탄성">　　　</span> )(이)라 하고, 이때 작용하는 힘을 ( <span class="quiz-blank border-b-2 border-slate-400 px-3 py-0.5 inline-block text-indigo-600 font-black min-w-[70px] text-center" data-answer="탄성력">　　　</span> )(이)라고 한다.
+          </p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <p class="font-bold text-slate-800">
+            2. 탄성력의 방향은 물체를 변형시킨 외력(외부에서 가한 힘)의 방향과 항상 ( <span class="quiz-blank border-b-2 border-slate-400 px-3 py-0.5 inline-block text-indigo-600 font-black min-w-[70px] text-center" data-answer="반대">　　　</span> ) 방향이다.
+          </p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <p class="font-bold text-slate-800">
+            3. 물체의 변형된 길이가 길어질수록 물체에 작용하는 탄성력의 크기는 점점 더 ( <span class="quiz-blank border-b-2 border-slate-400 px-3 py-0.5 inline-block text-indigo-600 font-black min-w-[70px] text-center" data-answer="커진다">　　　</span> ).
+          </p>
+        </div>
+
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <p class="font-bold text-slate-800">
+            4. [서술형] 활시위를 당길 때 작용하는 '외력'과 '탄성력'의 방향을 비교하여 서술하시오.
+          </p>
+          <div class="mt-2 text-xs text-slate-600 p-2 bg-white rounded border border-slate-200 min-h-[45px]">
+            <span class="quiz-answer-text hidden text-indigo-700 font-semibold">
+              정답 예시: 외력은 활시위를 뒤쪽으로 잡아당기는 방향이고, 탄성력은 휘어진 활대와 시위가 화살을 앞쪽(과녁 방향)으로 밀어내며 원래 모양으로 돌아가려는 반대 방향이다.
+            </span>
+            <span class="quiz-answer-placeholder text-slate-400">
+              (작성란): 외력은 ____________________ 방향이고, 탄성력은 ____________________ 방향이다.
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ====================================================
+         5. 전체 정답 및 화살표 확인 섹션 (학생 활동 후 전환 버튼)
+    ==================================================== -->
+    <section class="mt-8 mb-10 no-print">
+      <div class="bg-gradient-to-r from-indigo-500 via-sky-500 to-emerald-500 p-0.5 rounded-2xl shadow-lg">
+        <div class="bg-white rounded-[15px] p-6 sm:p-8 text-center space-y-4">
+          <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 text-2xl shadow-inner mx-auto">
+            🎯
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight" id="revealTitle">
+              활동을 모두 완료했나요? 정답과 화살표를 확인해보세요!
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto" id="revealDesc">
+              아래 버튼을 누르면 위 9가지 그림에 <span class="text-sky-600 font-bold">외력(파란색 화살표)</span>과 <span class="text-rose-600 font-bold">탄성력(빨간색 화살표)</span>이 표시되고, 확인 문제의 정답이 함께 공개됩니다.
+            </p>
+          </div>
+
+          <div class="pt-3 flex flex-wrap justify-center items-center gap-3">
+            <button onclick="toggleAllAnswersAndArrows()" id="btnBottomToggle" class="px-6 py-3.5 rounded-xl text-sm font-black text-white bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg transition-all transform active:scale-95 flex items-center gap-2">
+              <span id="bottomToggleIcon">💡</span>
+              <span id="bottomToggleText">전체 정답 및 화살표 확인하기</span>
+            </button>
+            <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="px-4 py-3.5 rounded-xl text-xs sm:text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-300 transition-all flex items-center gap-1.5 shadow-sm">
+              <span>⬆️</span> 맨 위로 올라가서 확인하기
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ====================================================
+       5. 스크립트: 클립보드 복사, PNG 다운로드, 정답 토글
+  ==================================================== -->
+  <script>
+    // 1. SVG 이미지를 PNG로 변환하여 클립보드에 복사 (한글/PPT에서 바로 Ctrl+V)
+    async function copySvgToClipboard(svgId, btn) {
+      try {
+        const svg = document.getElementById(svgId);
+        const svgData = new XMLSerializer().serializeToString(svg);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+
+        img.onload = async function() {
+          // 선명한 3배 고해상도 렌더링
+          canvas.width = img.width * 3;
+          canvas.height = img.height * 3;
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+
+          canvas.toBlob(async (blob) => {
+            try {
+              if (navigator.clipboard && navigator.clipboard.write) {
+                await navigator.clipboard.write([
+                  new ClipboardItem({ 'image/png': blob })
+                ]);
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '✅ 복사 완료!';
+                btn.className = 'px-2.5 py-1 text-[11px] font-bold bg-emerald-600 text-white rounded-lg transition-all flex items-center gap-1';
+                setTimeout(() => {
+                  btn.innerHTML = originalHtml;
+                  btn.className = 'px-2.5 py-1 text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all flex items-center gap-1';
+                }, 1500);
+              } else {
+                downloadSvgAsPng(svgId, '탄성력_그림');
+              }
+            } catch(e) {
+              downloadSvgAsPng(svgId, '탄성력_그림');
+            }
+          }, 'image/png');
+        };
+        img.src = url;
+      } catch(err) {
+        alert('이미지 복사 중 문제가 발생하여 다운로드로 대체합니다.');
+        downloadSvgAsPng(svgId, '탄성력_그림');
+      }
+    }
+
+    // 2. SVG를 고해상도 PNG 파일로 저장
+    function downloadSvgAsPng(svgId, filename) {
+      const svg = document.getElementById(svgId);
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      img.onload = function() {
+        canvas.width = img.width * 3;
+        canvas.height = img.height * 3;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+
+        const a = document.createElement('a');
+        a.download = (filename || '탄성력_도해') + '.png';
+        a.href = canvas.toDataURL('image/png');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      };
+      img.src = url;
+    }
+
+    // 3. 학생용 빈 틀 ↔ 교사용 정답/화살표 통합 전환 함수
+    let isStudentMode = true; // 처음 로드 시 기본: 학생용 모드 (화살표/정답 숨김)
+
+    function updateModeUI() {
+      document.body.classList.toggle('student-mode', isStudentMode);
+
+      // 확인 퀴즈 빈칸 업데이트
+      const blanks = document.querySelectorAll('.quiz-blank');
+      blanks.forEach(el => {
+        if (!isStudentMode) {
+          el.innerText = el.getAttribute('data-answer');
+          el.classList.add('bg-amber-100', 'px-2');
+        } else {
+          el.innerText = '　　　';
+          el.classList.remove('bg-amber-100', 'px-2');
+        }
+      });
+
+      // 서술형 문제 정답 표시 토글
+      const descAnswer = document.querySelector('.quiz-answer-text');
+      const descPlaceholder = document.querySelector('.quiz-answer-placeholder');
+      if (descAnswer && descPlaceholder) {
+        if (!isStudentMode) {
+          descAnswer.classList.remove('hidden');
+          descPlaceholder.classList.add('hidden');
+        } else {
+          descAnswer.classList.add('hidden');
+          descPlaceholder.classList.remove('hidden');
+        }
+      }
+
+      // 상단 헤더 버튼 업데이트
+      const topBtnText = document.getElementById('topToggleText');
+      const topBtnIcon = document.getElementById('topToggleIcon');
+      if (topBtnText && topBtnIcon) {
+        if (!isStudentMode) {
+          topBtnText.innerText = '학생용 빈 틀로 숨기기';
+          topBtnIcon.innerText = '🧑‍🎓';
+        } else {
+          topBtnText.innerText = '정답 및 화살표 보기';
+          topBtnIcon.innerText = '💡';
+        }
+      }
+
+      // 하단 메인 전환 버튼 및 안내 문구 업데이트
+      const bText = document.getElementById('bottomToggleText');
+      const bIcon = document.getElementById('bottomToggleIcon');
+      const bBtn = document.getElementById('btnBottomToggle');
+      const rTitle = document.getElementById('revealTitle');
+      const rDesc = document.getElementById('revealDesc');
+
+      if (bBtn && bText && bIcon) {
+        if (!isStudentMode) {
+          bText.innerText = '다시 학생용 빈 틀로 가리기';
+          bIcon.innerText = '🧑‍🎓';
+          bBtn.className = 'px-6 py-3.5 rounded-xl text-sm font-black text-white bg-slate-800 hover:bg-slate-900 shadow-md hover:shadow-lg transition-all transform active:scale-95 flex items-center gap-2';
+          if (rTitle) rTitle.innerText = '정답과 화살표가 모두 공개되었습니다!';
+          if (rDesc) rDesc.innerText = '위 그림들을 확인하고 내가 그린 외력과 탄성력 화살표 방향이 맞는지 비교해 보세요.';
+        } else {
+          bText.innerText = '전체 정답 및 화살표 확인하기';
+          bIcon.innerText = '💡';
+          bBtn.className = 'px-6 py-3.5 rounded-xl text-sm font-black text-white bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg transition-all transform active:scale-95 flex items-center gap-2';
+          if (rTitle) rTitle.innerText = '활동을 모두 완료했나요? 정답과 화살표를 확인해보세요!';
+          if (rDesc) rDesc.innerText = '아래 버튼을 누르면 위 9가지 그림에 외력(파란색 화살표)과 탄성력(빨간색 화살표)이 표시되고, 확인 문제의 정답이 함께 공개됩니다.';
+        }
+      }
+    }
+
+    function toggleAllAnswersAndArrows() {
+      isStudentMode = !isStudentMode;
+      updateModeUI();
+    }
+
+    // 페이지 로드 시 초기 학생용 모드 적용
+    window.addEventListener('DOMContentLoaded', () => {
+      updateModeUI();
+    });
+  </script>
+</body>
+</html>

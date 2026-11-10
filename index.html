@@ -22,9 +22,102 @@
       100% { transform: scale(0.95); opacity: 0.8; }
     }
     .live-pulse { animation: pulse-ring 2s infinite ease-in-out; }
+
+    /* 실시간 수업 지시등 (지금 여기) 집중 모드 스타일 */
+    .spotlight-backdrop {
+      background-color: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .spotlight-active-target {
+      position: relative !important;
+      z-index: 50 !important;
+      box-shadow: 0 0 0 4px #facc15, 0 0 50px rgba(250, 204, 21, 0.55), 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+      animation: spotlight-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes spotlight-pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 4px #facc15, 0 0 35px rgba(250, 204, 21, 0.45);
+      }
+      50% {
+        box-shadow: 0 0 0 8px #eab308, 0 0 65px rgba(234, 179, 8, 0.75);
+      }
+    }
+
+    @keyframes focus-pop {
+      0% {
+        opacity: 0;
+        transform: scale(0.92) translateY(12px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    .animate-focus-pop {
+      animation: focus-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
   </style>
 </head>
 <body class="min-h-screen text-slate-800 flex flex-col">
+
+  <!-- ==========================================
+       ★ 실시간 수업 집중 모드 (지금 여기) 어두운 배경 오버레이
+  =========================================== -->
+  <div id="liveSpotlightOverlay" onclick="handleSpotlightBackdropClick()" class="hidden fixed inset-0 spotlight-backdrop z-40 transition-opacity duration-300"></div>
+
+  <!-- 실시간 수업 집중 모드 중앙 카드 (외부 링크/시뮬레이션 전용) -->
+  <div id="liveSpotlightModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+    <div class="pointer-events-auto max-w-lg w-full bg-slate-900 border-2 border-yellow-400 rounded-3xl p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden animate-focus-pop ring-8 ring-yellow-400/20">
+      <!-- 배경 장식 광원 -->
+      <div class="absolute -top-16 -right-16 w-44 h-44 bg-gradient-to-br from-yellow-400 to-amber-600 rounded-full blur-3xl opacity-25 pointer-events-none"></div>
+      <div class="absolute -bottom-16 -left-16 w-44 h-44 bg-gradient-to-tr from-rose-500 to-orange-500 rounded-full blur-3xl opacity-25 pointer-events-none"></div>
+
+      <div class="relative z-10 space-y-5 text-center">
+        <!-- 상단 라이브 뱃지 -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 text-xs font-black tracking-wider uppercase">
+          <span class="flex h-2.5 w-2.5 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-400"></span>
+          </span>
+          <span id="modalSpotlightBadge">🔴 LIVE 수업 집중 모드 (지금 여기로 모여라!)</span>
+        </div>
+
+        <!-- 활동 분류 뱃지 -->
+        <div>
+          <span id="modalSpotlightTypeBadge" class="inline-block px-2.5 py-1 rounded-lg bg-white/10 text-amber-200 text-xs font-bold border border-white/10">
+            🎮 디지털 시뮬레이션 탐구
+          </span>
+        </div>
+
+        <!-- 활동 제목 -->
+        <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug" id="modalSpotlightTitle">
+          활동 안내 중
+        </h3>
+
+        <!-- 선생님 지시 메시지 -->
+        <p class="text-sm text-amber-100/90 leading-relaxed max-w-md mx-auto" id="modalSpotlightMessage">
+          선생님의 안내에 따라 아래 버튼을 클릭하여 이동하세요.
+        </p>
+
+        <!-- 수업 집중 잠금 알림 안내 -->
+        <div class="p-3 rounded-2xl bg-black/40 border border-white/10 text-xs text-slate-300 flex items-center justify-center gap-2">
+          <span>🔒</span>
+          <span>지금은 수업 집중 시간입니다. 지정된 활동에 집중해 주세요!</span>
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="pt-2">
+          <button onclick="handleSpotlightClick()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 hover:from-yellow-300 hover:to-orange-300 text-slate-950 font-black text-base shadow-xl hover:shadow-2xl transition-all transform active:scale-95 flex items-center justify-center gap-2">
+            <span>👉 지금 바로 활동 시작하기 (클릭)</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ==========================================
        학생 내 실명 등록 모달
@@ -97,7 +190,7 @@
   <!-- ==========================================
        ★ 실시간 선생님 지시등 (지금 여기로 모여라!)
   =========================================== -->
-  <aside id="liveSpotlightBanner" class="hidden bg-gradient-to-r from-rose-600 via-amber-600 to-orange-600 text-white shadow-xl sticky top-[60px] z-30 transition-all">
+  <aside id="liveSpotlightBanner" class="hidden bg-gradient-to-r from-rose-600 via-amber-600 to-orange-600 text-white shadow-2xl sticky top-[60px] z-50 transition-all border-b-2 border-yellow-300">
     <div class="max-w-6xl mx-auto px-4 py-3 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div class="flex items-center gap-3">
         <span class="flex h-3 w-3 relative flex-shrink-0">
@@ -106,7 +199,7 @@
         </span>
         <div>
           <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded bg-black/30 text-yellow-300 text-[10px] font-black tracking-wider uppercase">🔴 LIVE 지금 수업 중</span>
+            <span class="px-2 py-0.5 rounded bg-black/40 text-yellow-300 text-[10px] font-black tracking-wider uppercase border border-yellow-400/40">🔴 LIVE 지금 여기 집중 🔒</span>
             <h3 class="text-sm sm:text-base font-black text-white" id="spotlightTitle">활동 안내 중</h3>
           </div>
           <p class="text-xs text-amber-100 font-medium mt-0.5" id="spotlightMessage">선생님의 지시에 따라 아래 버튼을 클릭하여 이동하세요.</p>
@@ -314,19 +407,112 @@
     let currentSelectedClass = myProfile.class || 'class1';
     let currentSelectedRound = 1;
 
-    // 실시간 수업 안내(Live Spotlight) 렌더링
+    try {
+      const localData = localStorage.getItem('SCIENCE_DASHBOARD_DATA');
+      if (localData) {
+        appData = JSON.parse(localData);
+        normalizeData(appData);
+      }
+    } catch (e) {}
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'SCIENCE_DASHBOARD_DATA' && e.newValue) {
+        try {
+          appData = JSON.parse(e.newValue);
+          normalizeData(appData);
+          renderAll();
+        } catch (err) {}
+      }
+    });
+
+    // 이전 스포트라이트 타겟 엘리먼트 보관 변수
+    let lastSpotlightTargetEl = null;
+
+    // 실시간 수업 안내(Live Spotlight / 지금 여기) 렌더링
     function renderLiveSpotlight() {
       const banner = document.getElementById('liveSpotlightBanner');
+      const overlay = document.getElementById('liveSpotlightOverlay');
+      const modal = document.getElementById('liveSpotlightModal');
       const cur = appData.currentActivity;
 
+      // 이전 타겟 카드 스타일 원상복구
+      if (lastSpotlightTargetEl) {
+        lastSpotlightTargetEl.classList.remove('spotlight-active-target');
+        lastSpotlightTargetEl = null;
+      }
+
+      // 비활성화 상태: 모든 오버레이/모달/배너 숨김 (정상 대시보드 화면)
       if (!cur || !cur.active) {
-        banner.classList.add('hidden');
+        if (banner) banner.classList.add('hidden');
+        if (overlay) overlay.classList.add('hidden');
+        if (modal) modal.classList.add('hidden');
         return;
       }
 
-      banner.classList.remove('hidden');
-      document.getElementById('spotlightTitle').innerText = cur.title || '수업 활동 진행 중';
-      document.getElementById('spotlightMessage').innerText = cur.message || '선생님의 안내에 따라 이동하세요!';
+      // 1. 상단 배너 표시 & z-index 높임 (오버레이 위에 밝게 표시)
+      if (banner) {
+        banner.classList.remove('hidden');
+        document.getElementById('spotlightTitle').innerText = cur.title || '수업 활동 진행 중';
+        document.getElementById('spotlightMessage').innerText = cur.message || '선생님의 안내에 따라 이동하세요!';
+      }
+
+      // 2. 전체 화면 어둡게 만들기 (오버레이 활성화하여 다른 곳 클릭 차단)
+      if (overlay) {
+        overlay.classList.remove('hidden');
+      }
+
+      // 3. 활동 대상(targetType)에 따른 집중 처리
+      if (cur.targetType === 'scroll') {
+        // [화면 내부 섹션 이동인 경우] 모달은 닫고, 대상 카드를 밝게 띄워 집중시킴
+        if (modal) modal.classList.add('hidden');
+
+        const el = document.querySelector(cur.targetUrl);
+        if (el) {
+          el.classList.add('spotlight-active-target');
+          lastSpotlightTargetEl = el;
+          // 부드럽게 대상 카드로 스크롤 이동
+          setTimeout(() => {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 150);
+        }
+      } else {
+        // [외부 링크/시뮬레이션/학습지 등인 경우] 중앙에 강력한 집중 카드 모달 띄우기
+        if (modal) {
+          modal.classList.remove('hidden');
+          document.getElementById('modalSpotlightTitle').innerText = cur.title || '수업 활동 진행 중';
+          document.getElementById('modalSpotlightMessage').innerText = cur.message || '선생님의 안내에 따라 지정된 활동을 시작하세요!';
+          
+          // 활동 대상 안내 뱃지
+          const badgeEl = document.getElementById('modalSpotlightTypeBadge');
+          if (badgeEl) {
+            if (cur.targetUrl && cur.targetUrl.endsWith('.html')) {
+              badgeEl.innerText = '🎮 디지털 시뮬레이션 탐구';
+            } else if (cur.targetUrl && cur.targetUrl.endsWith('.pdf')) {
+              badgeEl.innerText = '📄 차시별 탐구 학습지';
+            } else {
+              badgeEl.innerText = '🚀 실시간 탐구 활동';
+            }
+          }
+        }
+      }
+    }
+
+    // 학생이 어두운 화면(배경 오버레이)을 클릭했을 때
+    function handleSpotlightBackdropClick() {
+      const cur = appData.currentActivity;
+      if (!cur || !cur.active) return;
+
+      if (cur.targetType === 'scroll' && lastSpotlightTargetEl) {
+        // 스크롤 대상 카드로 다시 집중 이동
+        lastSpotlightTargetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        // 중앙 모달 박스 튕김(bounce) 효과로 시선 집중 안내
+        const modalBox = document.querySelector('#liveSpotlightModal > div');
+        if (modalBox) {
+          modalBox.classList.add('animate-bounce');
+          setTimeout(() => modalBox.classList.remove('animate-bounce'), 600);
+        }
+      }
     }
 
     // 학생이 '지금 바로 이동하기' 버튼을 눌렀을 때
@@ -335,15 +521,15 @@
       if (!cur || !cur.targetUrl) return;
 
       if (cur.targetType === 'scroll') {
-        // 내부 섹션으로 스크롤 이동
+        // 내부 섹션으로 스크롤 이동 및 반짝임
         const el = document.querySelector(cur.targetUrl);
         if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
           el.classList.add('ring-4', 'ring-yellow-400', 'transition-all');
           setTimeout(() => el.classList.remove('ring-4', 'ring-yellow-400'), 3000);
         }
       } else {
-        // 외부 링크 또는 파일 열기
+        // 외부 링크 또는 시뮬레이션 파일 열기
         window.open(safeUrl(cur.targetUrl), '_blank');
       }
     }
