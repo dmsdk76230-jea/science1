@@ -65,6 +65,10 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
+        <a href="#admin-qa-section" class="px-3.5 py-1.5 rounded-xl bg-indigo-700/90 hover:bg-indigo-600 text-white text-xs font-black shadow transition-all flex items-center gap-1.5 border border-indigo-400/30">
+          <span>💬 실시간 Q&A 관리</span>
+          <span id="adminPendingBadge" class="px-2 py-0.5 bg-rose-500 text-white text-[10px] rounded-full font-black">0</span>
+        </a>
         <button onclick="openMaterialModal()" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 text-white text-xs font-black shadow transition-all flex items-center gap-1">
           <span>+ 자료/링크 등록</span>
         </button>
@@ -134,6 +138,62 @@
       <!-- 원클릭 선택 카드 그리드 (타이핑 없이 클릭 1번에 전송!) -->
       <div id="spotlightItemList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-64 overflow-y-auto p-1 bg-black/20 rounded-2xl">
         <!-- JS로 동적 생성 -->
+      </div>
+    </section>
+
+
+    <!-- ==========================================
+         💬 [실시간 Q&A 관리실] 학생 질문 확인 & 답변 & 수정/삭제
+    =========================================== -->
+    <section id="admin-qa-section" class="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-100 pb-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+              <span>💬 실시간 학생 Q&A 관리실</span>
+              <span id="adminPendingCountBadge" class="px-2.5 py-0.5 rounded-full bg-rose-500 text-white text-xs font-black">미답변 0건</span>
+            </h3>
+            <span class="text-xs text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full font-bold border border-indigo-200">실시간 연동 중 ⚡</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">학생들의 질문을 확인하고 답변을 작성하세요. 부적절하거나 불필요한 질문은 <strong>[수정]</strong>하거나 <strong>[삭제]</strong>할 수 있습니다.</p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" onclick="renderQuestionsAdmin()" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1">
+            <span>🔄 목록 새로고침</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 필터 탭 & 실시간 검색창 -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80">
+        <!-- 필터 버튼군 -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none text-xs font-bold" id="adminQaFilterTabs">
+          <button type="button" onclick="setAdminQaFilter('all')" id="adminQaFilterBtn-all" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white shadow-sm whitespace-nowrap">전체 (<span id="adminCntAll">0</span>)</button>
+          <button type="button" onclick="setAdminQaFilter('pending')" id="adminQaFilterBtn-pending" class="px-3 py-1.5 rounded-xl bg-white text-rose-600 hover:bg-rose-50 border border-rose-300 whitespace-nowrap font-black">🔴 미답변만 (<span id="adminCntPending">0</span>)</button>
+          <button type="button" onclick="setAdminQaFilter('class1')" id="adminQaFilterBtn-class1" class="px-3 py-1.5 rounded-xl bg-white text-slate-600 hover:text-slate-900 border border-slate-200 whitespace-nowrap">1반 (<span id="adminCntC1">0</span>)</button>
+          <button type="button" onclick="setAdminQaFilter('class2')" id="adminQaFilterBtn-class2" class="px-3 py-1.5 rounded-xl bg-white text-slate-600 hover:text-slate-900 border border-slate-200 whitespace-nowrap">2반 (<span id="adminCntC2">0</span>)</button>
+          <button type="button" onclick="setAdminQaFilter('class3')" id="adminQaFilterBtn-class3" class="px-3 py-1.5 rounded-xl bg-white text-slate-600 hover:text-slate-900 border border-slate-200 whitespace-nowrap">3반 (<span id="adminCntC3">0</span>)</button>
+        </div>
+
+        <!-- 질문 검색 입력창 -->
+        <div class="relative w-full sm:w-64">
+          <input 
+            type="text" 
+            id="adminQaSearchInput" 
+            oninput="renderQuestionsAdmin()"
+            placeholder="학생 이름, 질문 검색..." 
+            class="w-full px-3 py-1.5 pl-8 rounded-xl bg-white text-slate-800 placeholder-slate-400 text-xs font-semibold border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+          <svg class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 질문 카드 목록 -->
+      <div id="adminQaListContainer" class="space-y-4">
+        <!-- JS 렌더링 -->
       </div>
     </section>
 
@@ -354,6 +414,64 @@
   </div>
 
 
+  <!-- ==========================================
+       질문 수정 모달 (선생님 전용)
+  =========================================== -->
+  <div id="adminEditQuestionModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+          <span>✏️ 학생 질문 수정</span>
+        </h3>
+        <button type="button" onclick="closeAdminEditModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold flex items-center justify-center text-sm">✕</button>
+      </div>
+
+      <form onsubmit="saveEditedQuestion(event)" class="space-y-3.5 text-xs font-semibold">
+        <input type="hidden" id="editQId">
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-slate-600 mb-1">학급</label>
+            <select id="editQClass" class="w-full p-2.5 rounded-xl border border-slate-300 font-bold">
+              <option value="class1">1학년 1반</option>
+              <option value="class2">1학년 2반</option>
+              <option value="class3">1학년 3반</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1">번호</label>
+            <input type="number" id="editQNum" min="1" max="35" class="w-full p-2.5 rounded-xl border border-slate-300 font-bold">
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1">학생 이름</label>
+            <input type="text" id="editQName" class="w-full p-2.5 rounded-xl border border-slate-300 font-bold">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-600 mb-1">질문 단원</label>
+          <select id="editQTopic" class="w-full p-2.5 rounded-xl border border-slate-300 font-bold bg-white text-slate-800">
+            <option value="열">🔥 열</option>
+            <option value="물질의 상태 변화">🧊 물질의 상태 변화</option>
+            <option value="힘의 작용">🚀 힘의 작용</option>
+            <option value="기체의 성질">🎈 기체의 성질</option>
+            <option value="기타">💡 기타</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-600 mb-1">질문 본문 내용</label>
+          <textarea id="editQContent" rows="4" class="w-full p-3 rounded-2xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-xs text-slate-800 leading-relaxed font-semibold"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeAdminEditModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">취소</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black shadow">수정 완료</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
   <!-- 자바스크립트 관리 로직 -->
   <script>
     function checkAuth(e) {
@@ -394,6 +512,8 @@
           if (u.links && !Array.isArray(u.links)) u.links = Object.values(u.links);
         });
       }
+      if (data.questions && !Array.isArray(data.questions)) data.questions = Object.values(data.questions);
+      if (!data.questions) data.questions = [];
     }
 
     try {
@@ -409,6 +529,7 @@
           renderMaterials();
           renderSpotlightUI();
           renderSpotlightItemList();
+          renderQuestionsAdmin();
         } else {
           firebaseDb.ref('science_dashboard').set(DASHBOARD_DATA);
         }
@@ -946,6 +1067,275 @@
       }
     }
 
+    // ==========================================
+    // 실시간 Q&A 관리 로직 (선생님 전용)
+    // ==========================================
+    let currentAdminQaFilter = 'all';
+
+    function setAdminQaFilter(filter) {
+      currentAdminQaFilter = filter;
+      const filters = ['all', 'pending', 'class1', 'class2', 'class3'];
+      filters.forEach(f => {
+        const btn = document.getElementById(`adminQaFilterBtn-${f}`);
+        if (!btn) return;
+        if (f === filter) {
+          btn.className = 'px-3 py-1.5 rounded-xl bg-indigo-600 text-white shadow-sm whitespace-nowrap font-black';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl bg-white text-slate-600 hover:text-slate-900 border border-slate-200 whitespace-nowrap font-bold';
+        }
+      });
+      renderQuestionsAdmin();
+    }
+
+    function renderQuestionsAdmin() {
+      const container = document.getElementById('adminQaListContainer');
+      if (!container) return;
+
+      const questions = adminData.questions || [];
+      const pendingCount = questions.filter(q => q.status === 'pending' || !q.answer || q.answer.trim().length === 0).length;
+
+      // 상단 배지 업데이트
+      const topBadge = document.getElementById('adminPendingBadge');
+      if (topBadge) topBadge.innerText = `${pendingCount}`;
+
+      const secBadge = document.getElementById('adminPendingCountBadge');
+      if (secBadge) {
+        secBadge.innerText = `미답변 ${pendingCount}건`;
+        secBadge.className = pendingCount > 0 
+          ? 'px-2.5 py-0.5 rounded-full bg-rose-500 text-white text-xs font-black animate-pulse'
+          : 'px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700 text-xs font-black';
+      }
+
+      // 필터 카운트
+      if (document.getElementById('adminCntAll')) document.getElementById('adminCntAll').innerText = questions.length;
+      if (document.getElementById('adminCntPending')) document.getElementById('adminCntPending').innerText = pendingCount;
+      if (document.getElementById('adminCntC1')) document.getElementById('adminCntC1').innerText = questions.filter(q => q.classId === 'class1').length;
+      if (document.getElementById('adminCntC2')) document.getElementById('adminCntC2').innerText = questions.filter(q => q.classId === 'class2').length;
+      if (document.getElementById('adminCntC3')) document.getElementById('adminCntC3').innerText = questions.filter(q => q.classId === 'class3').length;
+
+      // 검색어 필터
+      const searchInput = document.getElementById('adminQaSearchInput');
+      const searchQuery = (searchInput ? searchInput.value.trim().toLowerCase() : '');
+
+      let filtered = [...questions];
+
+      if (currentAdminQaFilter === 'pending') {
+        filtered = filtered.filter(q => q.status === 'pending' || !q.answer || q.answer.trim().length === 0);
+      } else if (currentAdminQaFilter !== 'all') {
+        filtered = filtered.filter(q => q.classId === currentAdminQaFilter);
+      }
+
+      if (searchQuery) {
+        filtered = filtered.filter(q =>
+          (q.question && q.question.toLowerCase().includes(searchQuery)) ||
+          (q.answer && q.answer.toLowerCase().includes(searchQuery)) ||
+          (q.studentName && q.studentName.toLowerCase().includes(searchQuery)) ||
+          (q.topic && q.topic.toLowerCase().includes(searchQuery))
+        );
+      }
+
+      // 정렬 우선순위:
+      // 1순위: 손들기(isHandRaise) & 미답변 (가장 긴급!)
+      // 2순위: 상단 고정(isPinned)
+      // 3순위: 미답변(pending) 상태
+      // 4순위: 최신순
+      filtered.sort((a, b) => {
+        const aHandPending = a.isHandRaise && (!a.answer || a.status === 'pending');
+        const bHandPending = b.isHandRaise && (!b.answer || b.status === 'pending');
+        if (aHandPending && !bHandPending) return -1;
+        if (!aHandPending && bHandPending) return 1;
+
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+
+        const aPending = !a.answer || a.status === 'pending';
+        const bPending = !b.answer || b.status === 'pending';
+        if (aPending && !bPending) return -1;
+        if (!aPending && bPending) return 1;
+
+        return 0;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <span class="text-3xl block mb-2">🎉</span>
+            <p class="text-xs font-bold text-slate-600">해당 조건의 학생 질문이 없습니다.</p>
+            <p class="text-[11px] text-slate-400 mt-1">학생들이 질문을 남기면 실시간으로 여기에 표시됩니다.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(q => {
+        const isAnswered = q.status === 'answered' && q.answer && q.answer.trim().length > 0;
+        const isPinned = !!q.isPinned;
+        const isHand = !!q.isHandRaise;
+
+        const cardBorder = isHand && !isAnswered
+          ? 'border-2 border-rose-500 bg-rose-50/30 shadow-md ring-2 ring-rose-300'
+          : isPinned
+            ? 'border-2 border-amber-400 bg-amber-50/20 shadow-sm'
+            : isAnswered
+              ? 'border border-slate-200 bg-white shadow-sm'
+              : 'border-2 border-indigo-200 bg-indigo-50/10 shadow-sm';
+
+        return `
+          <div class="rounded-2xl p-4 sm:p-5 ${cardBorder} transition-all space-y-3.5">
+            <!-- 질문 카드 상단 -->
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+              <div class="flex items-center gap-2 flex-wrap">
+                ${isHand ? '<span class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black animate-pulse flex items-center gap-1 shadow-sm">✋ 긴급 손들기(자리 요청)</span>' : ''}
+                ${isPinned ? '<span class="px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center gap-1 shadow-sm">⭐ 학생 화면 상단고정</span>' : ''}
+                <span class="px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-700 text-[11px] font-extrabold border border-indigo-200">${q.topic || '과학'}</span>
+                <span class="text-xs font-extrabold text-slate-800">${q.className} ${q.studentNum}번 ${q.studentName}</span>
+                <span class="text-[11px] text-slate-400">${q.createdAt || ''}</span>
+                ${isAnswered 
+                  ? '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black">답변완료 ✅</span>' 
+                  : '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black">미답변 🔴</span>'
+                }
+              </div>
+
+              <!-- 질문 관리 버튼들: 상단고정, 수정, 삭제 -->
+              <div class="flex items-center gap-1.5 text-xs">
+                <button type="button" onclick="togglePinQuestion('${q.id}')" title="학생 화면 맨 위에 추천 질문으로 고정/해제" class="px-2.5 py-1 rounded-lg ${isPinned ? 'bg-amber-100 text-amber-800 border border-amber-300 font-black' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold'}">
+                  ${isPinned ? '⭐ 고정 해제' : '⭐ 상단 고정'}
+                </button>
+                <button type="button" onclick="openAdminEditModal('${q.id}')" class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold">
+                  ✏️ 질문 수정
+                </button>
+                <button type="button" onclick="deleteQuestion('${q.id}')" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold">
+                  🗑️ 삭제
+                </button>
+              </div>
+            </div>
+
+            <!-- 학생 질문 내용 -->
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs font-semibold text-slate-800 leading-relaxed">
+              <span class="text-indigo-600 font-black text-sm mr-1">Q.</span> ${q.question}
+            </div>
+
+            <!-- 선생님 답변 작성 영역 -->
+            <div class="space-y-2 pt-1">
+              <div class="flex flex-wrap items-center justify-between gap-1.5">
+                <span class="text-xs font-bold text-slate-700 flex items-center gap-1">
+                  <span>👩‍🏫</span>
+                  <span>선생님 답변 입력:</span>
+                </span>
+                <!-- 빠른 답변 템플릿 프리셋 -->
+                <div class="flex items-center gap-1 flex-wrap text-[11px]">
+                  <span class="text-slate-400 font-medium mr-0.5">빠른 답변:</span>
+                  <button type="button" onclick="insertAnswerPreset('${q.id}', '📌 시뮬레이션의 관련 탭을 다시 조작해 보세요!')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 text-slate-600">시뮬레이션 확인</button>
+                  <button type="button" onclick="insertAnswerPreset('${q.id}', '📖 교과서 실험 과정을 다시 꼼꼼히 읽어보세요.')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 text-slate-600">교과서 확인</button>
+                  <button type="button" onclick="insertAnswerPreset('${q.id}', '👍 아주 훌륭한 질문입니다! 잠시 후 선생님이 전체 설명 때 다루겠습니다.')" class="px-2 py-0.5 rounded bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 text-slate-600">훌륭한 질문</button>
+                  <button type="button" onclick="insertAnswerPreset('${q.id}', '🏃‍♂️ 선생님이 지금 바로 자리로 갈게요!')" class="px-2 py-0.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold">자리로 갈게요</button>
+                </div>
+              </div>
+
+              <textarea id="adminAns_${q.id}" rows="2" placeholder="답변을 입력하세요. (등록 즉시 학생 화면에 실시간 표시됩니다)" class="w-full p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 text-xs text-slate-800 leading-relaxed">${q.answer || ''}</textarea>
+
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] text-slate-400">
+                  ${q.answeredAt ? '최근 답변 일시: ' + q.answeredAt : '아직 답변이 등록되지 않았습니다.'}
+                </span>
+                <button type="button" onclick="saveAnswer('${q.id}')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs shadow-md transition-all flex items-center gap-1.5">
+                  <span>💾 답변 등록하기</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function insertAnswerPreset(qId, text) {
+      const area = document.getElementById(`adminAns_${qId}`);
+      if (!area) return;
+      if (area.value.trim().length > 0) {
+        area.value += ' ' + text;
+      } else {
+        area.value = text;
+      }
+      area.focus();
+    }
+
+    function saveAnswer(qId) {
+      const area = document.getElementById(`adminAns_${qId}`);
+      if (!area) return;
+      const ansText = area.value.trim();
+      if (!ansText) {
+        alert('답변 내용을 입력해 주세요!');
+        return;
+      }
+
+      if (!adminData.questions) adminData.questions = [];
+      const q = adminData.questions.find(x => x.id === qId);
+      if (q) {
+        q.answer = ansText;
+        q.status = 'answered';
+        q.answeredAt = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+        autoSave();
+        renderQuestionsAdmin();
+        alert('학생에게 답변이 실시간으로 등록되었습니다! ⚡');
+      }
+    }
+
+    function togglePinQuestion(qId) {
+      if (!adminData.questions) return;
+      const q = adminData.questions.find(x => x.id === qId);
+      if (q) {
+        q.isPinned = !q.isPinned;
+        autoSave();
+        renderQuestionsAdmin();
+      }
+    }
+
+    function deleteQuestion(qId) {
+      if (!confirm('이 질문을 삭제하시겠습니까?\n삭제된 질문은 학생 화면에서도 즉시 사라집니다.')) return;
+      if (!adminData.questions) return;
+      adminData.questions = adminData.questions.filter(x => x.id !== qId);
+      autoSave();
+      renderQuestionsAdmin();
+    }
+
+    function openAdminEditModal(qId) {
+      const q = (adminData.questions || []).find(x => x.id === qId);
+      if (!q) return;
+
+      document.getElementById('editQId').value = q.id;
+      document.getElementById('editQClass').value = q.classId || 'class1';
+      document.getElementById('editQNum').value = q.studentNum || 1;
+      document.getElementById('editQName').value = q.studentName || '';
+      document.getElementById('editQTopic').value = q.topic || '과학';
+      document.getElementById('editQContent').value = q.question || '';
+
+      document.getElementById('adminEditQuestionModal').classList.remove('hidden');
+    }
+
+    function closeAdminEditModal() {
+      document.getElementById('adminEditQuestionModal').classList.add('hidden');
+    }
+
+    function saveEditedQuestion(e) {
+      e.preventDefault();
+      const qId = document.getElementById('editQId').value;
+      const q = (adminData.questions || []).find(x => x.id === qId);
+      if (!q) return;
+
+      q.classId = document.getElementById('editQClass').value;
+      const classNameMap = { class1: '1학년 1반', class2: '1학년 2반', class3: '1학년 3반' };
+      q.className = classNameMap[q.classId] || q.classId;
+      q.studentNum = parseInt(document.getElementById('editQNum').value, 10);
+      q.studentName = document.getElementById('editQName').value.trim();
+      q.topic = document.getElementById('editQTopic').value.trim();
+      q.question = document.getElementById('editQContent').value.trim();
+
+      autoSave();
+      closeAdminEditModal();
+      renderQuestionsAdmin();
+      alert('질문이 성공적으로 수정되었습니다!');
+    }
+
     function downloadDataFile() {
       autoSave();
       const content = `// ==============================================================\n`
@@ -969,6 +1359,7 @@
     renderMaterials();
     renderSpotlightUI();
     renderSpotlightItemList();
+    renderQuestionsAdmin();
   </script>
 </body>
 </html>
